@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="20dp">
+
+            <!-- Tiêu đề 1 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Trang chủ"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Khung cuộn ngang 1 (Các ảnh to) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <!-- Giả lập 3 ô ảnh to -->
+                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
+                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
+                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Tiêu đề 2 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Bảng xếp hạng  ➔"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Khung cuộn ngang 2 (Các ảnh nhỏ xếp hạng) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <!-- Giả lập 4 ô ảnh nhỏ hơn -->
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Tiêu đề 3 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Tất cả truyện  ➔"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Khung cuộn ngang 3 (Tất cả truyện) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <!-- Giả lập 3 ô ảnh nhỏ -->
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
