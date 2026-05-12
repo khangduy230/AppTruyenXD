@@ -1,4 +1,4 @@
-package com.example.truyentranhthanhxuan;
+package com.example.truyentranhthanhxuan.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+
+import com.example.truyentranhthanhxuan.R;
 
 public class SettingsActivity extends AppCompatActivity {
     //khai báo các biến cần thiết

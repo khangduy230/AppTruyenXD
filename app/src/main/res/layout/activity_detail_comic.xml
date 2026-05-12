@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
+
+    <!-- PHẦN 1: NỘI DUNG CUỘN -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="80dp"> <!-- Padding dưới để không bị nút nổi che mất chữ -->
+
+            <!-- 1. Header: Ảnh bìa + Tiêu đề (Dùng ConstraintLayout để đè chữ lên ảnh) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="350dp">
+
+                <!-- Ảnh bìa -->
+                <ImageView
+                    android:id="@+id/imgCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/thientay" /> <!-- Màu xám tạm thời -->
+
+                <!-- Lớp gradient mờ ở đáy ảnh để dễ đọc chữ (Tùy chọn) -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:background="#80FFFFFF"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Tên truyện -->
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:text="Lọ"
+                    android:textColor="#000000"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/tvAuthor"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <!-- Tên tác giả -->
+                <TextView
+                    android:id="@+id/tvAuthor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="Futho High"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- 2. Thống kê (Lượt thích, Đánh giá, Bình luận) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp"
+                android:weightSum="3">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.69k" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lượt thích" android:textSize="14sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.7*" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="25 người đánh giá" android:textSize="14sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="150" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bình luận" android:textSize="14sp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 3. Nút Hành động (Lưu, Chia sẻ) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginHorizontal="20dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lưu vào thư viện"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#EEEEEE"
+                    android:textColor="#000000"
+                    app:icon="@android:drawable/ic_menu_save"
+                    app:iconTint="#000" />
+
+                <Button
+                    android:id="@+id/btnShare"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Chia sẻ"
+                    android:textAllCaps="false"
+                    android:textColor="#000000"
+                    app:icon="@android:drawable/ic_menu_share"
+                    app:iconTint="#000"/>
+            </LinearLayout>
+
+            <!-- 4. Giới thiệu -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="24dp"
+                android:text="Giới thiệu"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:text="Tại sao ta không thể tìm được một bộ phim ưng ý... (Nội dung giới thiệu) ... đọc thêm"
+                android:textColor="#333333"
+                android:textSize="15sp" />
+
+            <!-- 5. Thể loại (Tags) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="20dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <!-- Dùng TextView có background bo góc, ở đây làm mẫu vài cái -->
+                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="LGBT+" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
+                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="Đam mỹ" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
+                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="Xuyên không" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- 6. Danh sách chương (Header) -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh sách chương"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@android:drawable/ic_menu_sort_by_size"
+                    app:tint="#000" />
+            </RelativeLayout>
+
+            <!-- CHỖ NÀY TRONG THỰC TẾ SẼ LÀ 1 RECYCLERVIEW. Ở đây làm 2 item khung -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chương 10" android:textColor="#000" android:textSize="16sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="2 ngày trước" android:textSize="13sp" android:layout_marginTop="4dp"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginVertical="12dp"/>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chương 9" android:textColor="#000" android:textSize="16sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="7 ngày trước" android:textSize="13sp" android:layout_marginTop="4dp"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginVertical="12dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- PHẦN 2: NÚT "ĐỌC CHƯƠNG 1" NỔI LÊN TRÊN CÙNG (Góc dưới bên phải) -->
+    <Button
+        android:id="@+id/btnReadFirstChapter"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#D5E8D4"
+        android:text="Đọc chương 1"
+        android:textColor="#2D5A27"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:cornerRadius="12dp"
+        app:icon="@android:drawable/ic_menu_agenda"
+        app:iconTint="#2D5A27"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

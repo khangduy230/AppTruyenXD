@@ -7,6 +7,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -20,28 +21,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:text="Trang chủ"
+                android:text="Youth Comics"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
-            <!-- Khung cuộn ngang 1 (Các ảnh to) -->
-            <HorizontalScrollView
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="Truyên nổi bật  ➔"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- THAY THẾ: Danh sách truyện nổi bật -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_featured"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:clipToPadding="false"
-                android:paddingHorizontal="12dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <!-- Giả lập 3 ô ảnh to -->
-                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
-                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
-                    <View android:layout_width="220dp" android:layout_height="280dp" android:layout_margin="6dp" android:background="#BDBDBD" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                android:paddingHorizontal="12dp"/>
 
             <!-- Tiêu đề 2 -->
             <TextView
@@ -52,25 +52,15 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- Khung cuộn ngang 2 (Các ảnh nhỏ xếp hạng) -->
-            <HorizontalScrollView
+            <!-- THAY THẾ: Danh sách bảng xếp hạng -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_ranking"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:clipToPadding="false"
-                android:paddingHorizontal="12dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <!-- Giả lập 4 ô ảnh nhỏ hơn -->
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                android:paddingHorizontal="12dp"/>
 
             <!-- Tiêu đề 3 -->
             <TextView
@@ -81,24 +71,15 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- Khung cuộn ngang 3 (Tất cả truyện) -->
-            <HorizontalScrollView
+            <!-- THAY THẾ: Danh sách tất cả truyện -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_all_comics"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:clipToPadding="false"
-                android:paddingHorizontal="12dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <!-- Giả lập 3 ô ảnh nhỏ -->
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                    <View android:layout_width="130dp" android:layout_height="180dp" android:layout_margin="6dp" android:background="#9E9E9E" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                android:paddingHorizontal="12dp"/>
 
         </LinearLayout>
     </ScrollView>
