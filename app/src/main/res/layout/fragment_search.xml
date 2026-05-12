@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:layout_height="match_parent">
 
     <!-- ScrollView bao bọc toàn bộ để có thể lướt lên xuống -->
     <ScrollView
@@ -23,9 +22,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tìm kiếm"
-                android:textSize="32sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
-                android:textColor="#000000"
                 android:layout_marginBottom="20dp"/>
 
             <!-- 2. Thanh tìm kiếm -->
@@ -53,14 +51,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tìm kiếm trong thư viện"
-                        android:textColor="#333333"
                         android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tác giả, thể loại,..."
-                        android:textColor="#888888"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -79,8 +75,7 @@
                     android:layout_weight="1"
                     android:text="Xem tất cả thể loại"
                     android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000" />
+                    android:textStyle="bold"/>
 
                 <ImageView
                     android:layout_width="24dp"
@@ -109,7 +104,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hành động"
-                        android:textColor="#000000"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -126,7 +120,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="MMB"
-                        android:textColor="#000000"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -146,7 +139,7 @@
                     android:layout_height="100dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB2" android:textColor="#000000" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB2" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -154,7 +147,7 @@
                     android:layout_height="100dp"
                     android:layout_weight="1"
                     android:layout_marginStart="6dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB3" android:textColor="#000000" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB3" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
 
@@ -170,7 +163,7 @@
                     android:layout_height="100dp"
                     android:layout_weight="1"
                     android:layout_marginEnd="6dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB4" android:textColor="#000000" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB4" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -178,7 +171,7 @@
                     android:layout_height="100dp"
                     android:layout_weight="1"
                     android:layout_marginStart="6dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB5" android:textColor="#000000" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MMB5" android:textSize="16sp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_margin="16dp"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
 

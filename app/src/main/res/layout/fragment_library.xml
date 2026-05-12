@@ -2,8 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:layout_height="match_parent">
 
     <!-- ScrollView bao bọc toàn bộ để có thể lướt lên xuống -->
     <ScrollView
@@ -22,9 +21,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Thư viện"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:textColor="#000000" />
+                android:textSize="28sp"
+                android:textStyle="bold"/>
 
             <!-- 2. Thanh lọc (3 nút) -->
             <LinearLayout
@@ -39,8 +37,7 @@
                     android:layout_height="wrap_content"
                     android:text="Đã đọc"
                     android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
-                    android:textColor="#000000"/>
+                    android:paddingVertical="8dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -48,8 +45,7 @@
                     android:text="Để sau"
                     android:paddingHorizontal="20dp"
                     android:paddingVertical="8dp"
-                    android:layout_marginStart="8dp"
-                    android:textColor="#000000"/>
+                    android:layout_marginStart="8dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -57,8 +53,7 @@
                     android:text="Tải xuống"
                     android:paddingHorizontal="20dp"
                     android:paddingVertical="8dp"
-                    android:layout_marginStart="8dp"
-                    android:textColor="#000000"/>
+                    android:layout_marginStart="8dp"/>
             </LinearLayout>
 
             <!-- 3. KHUNG LƯỚI TRUYỆN (Chia 3 cột) -->
@@ -77,8 +72,17 @@
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:layout_marginEnd="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tên truyện"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tác giả"
+                        android:textSize="12sp"/>
                 </LinearLayout>
 
                 <!-- Cột 2 -->
@@ -88,8 +92,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:layout_marginHorizontal="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp"/>
                 </LinearLayout>
 
                 <!-- Cột 3 -->
@@ -99,8 +103,8 @@
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:layout_marginStart="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -114,20 +118,20 @@
 
                 <!-- Cột 1 -->
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp"/>
                 </LinearLayout>
 
                 <!-- Cột 2 -->
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginHorizontal="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp"/>
                 </LinearLayout>
 
                 <!-- Cột 3 -->
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="6dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:textColor="#000000" android:layout_marginTop="8dp"/>
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp" android:textColor="#555555"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tên truyện" android:textStyle="bold" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Tác giả" android:textSize="12sp"/>
                 </LinearLayout>
             </LinearLayout>
 

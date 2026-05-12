@@ -2,8 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:layout_height="match_parent">
 
 <!--    khung chứa fragment-->
     <androidx.fragment.app.FragmentContainerView
@@ -15,12 +14,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-<!--    thanh điều huong-->
+<!--    thanh điều huớng-->
     <LinearLayout
         android:id="@+id/frame_bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#E0E0E0"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
