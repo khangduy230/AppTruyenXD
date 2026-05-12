@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<!--    khung chứa fragment-->
+    <!--    khung chứa fragment-->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-<!--    thanh điều huớng-->
+    <!--    thanh điều huớng-->
     <LinearLayout
         android:id="@+id/frame_bottom_nav"
         android:layout_width="match_parent"
@@ -22,41 +22,41 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:id="@+id/nav_home"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="Trang chủ"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/nav_home"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Trang chủ"
+            android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/nav_search"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="Tìm kiếm"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/nav_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Tìm kiếm"
+            android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/nav_library"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="Thư viện"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/nav_library"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Thư viện"
+            android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/nav_profile"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="Tôi"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/nav_profile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Tôi"
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
