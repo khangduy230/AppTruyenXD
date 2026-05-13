@@ -1,13 +1,13 @@
 package com.example.truyentranhthanhxuan.activities;
 
+import androidx.fragment.app.Fragment;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.truyentranhthanhxuan.R;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.example.truyentranhthanhxuan.fragments.AccountFragment;
 import com.example.truyentranhthanhxuan.fragments.HomeFragment;
 import com.example.truyentranhthanhxuan.fragments.LibraryFragment;
@@ -19,52 +19,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //hiển thanh điều hướng dưới cùng
         setContentView(R.layout.activity_main);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         //gọi màn hình trang chủ
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    //thay thế khung fragment trống = home fragment
-                    .replace(R.id.fragment_container, new HomeFragment())
-                    .commit();
+            replaceFragment(new HomeFragment());
+            bottomNavigationView.setSelectedItemId(R.id.nav_home);
         }
-        //ánh xạ các textview ở thanh điều hướng vào các biến
-        TextView navHome = findViewById(R.id.nav_home);
-        TextView navSearch = findViewById(R.id.nav_search);
-        TextView navLibrary = findViewById(R.id.nav_library);
-        TextView navProfile = findViewById(R.id.nav_profile);
-        //sự kiện click của các textview
-        navHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
-                        .commit();
-            }
-        });
-        navSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new SearchFragment())
-                        .commit();
-            }
-        });
-        navLibrary.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new LibraryFragment())
-                        .commit();
-            }
-        });
-        navProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new AccountFragment())
-                        .commit();
-            }
-        });
-        //
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
 
+            if (itemId == R.id.nav_home) {
+                replaceFragment(new HomeFragment());
+                return true;
+            } else if (itemId == R.id.nav_search) {
+                replaceFragment(new SearchFragment());
+                return true;
+            } else if (itemId == R.id.nav_library) {
+                replaceFragment(new LibraryFragment());
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                replaceFragment(new AccountFragment());
+                return true;
+            }
+            return false;
+        });
+
+    }
+    private void replaceFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commit();
     }
 }
