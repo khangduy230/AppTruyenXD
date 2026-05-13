@@ -30,7 +30,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
     @NonNull
     @Override
     public ComicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comic_cover, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comic, parent, false);
         return new ComicViewHolder(view);
     }
 
@@ -64,7 +64,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
         public ComicViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgComic = itemView.findViewById(R.id.image_view_item_cover);
+            imgComic = itemView.findViewById(R.id.imgComic);
         }
     }
 }

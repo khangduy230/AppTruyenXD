@@ -2,8 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:layout_height="match_parent">
 
     <!-- PHẦN 1: NỘI DUNG CUỘN -->
     <androidx.core.widget.NestedScrollView
@@ -44,7 +43,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:text="Lọ"
-                    android:textColor="#000000"
                     android:textSize="32sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tvAuthor"
@@ -58,7 +56,6 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginBottom="20dp"
                     android:text="Futho High"
-                    android:textColor="#333333"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -78,7 +75,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.69k" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.69k" android:textSize="20sp" android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lượt thích" android:textSize="14sp"/>
                 </LinearLayout>
 
@@ -88,7 +85,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.7*" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.7*" android:textSize="20sp" android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="25 người đánh giá" android:textSize="14sp"/>
                 </LinearLayout>
 
@@ -98,7 +95,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="150" android:textSize="20sp" android:textStyle="bold" android:textColor="#000"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="150" android:textSize="20sp" android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bình luận" android:textSize="14sp"/>
                 </LinearLayout>
             </LinearLayout>
@@ -118,7 +115,6 @@
                     android:text="Lưu vào thư viện"
                     android:textAllCaps="false"
                     android:backgroundTint="#EEEEEE"
-                    android:textColor="#000000"
                     app:icon="@android:drawable/ic_menu_save"
                     app:iconTint="#000" />
 
@@ -130,7 +126,6 @@
                     android:layout_marginStart="16dp"
                     android:text="Chia sẻ"
                     android:textAllCaps="false"
-                    android:textColor="#000000"
                     app:icon="@android:drawable/ic_menu_share"
                     app:iconTint="#000"/>
             </LinearLayout>
@@ -142,7 +137,6 @@
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="24dp"
                 android:text="Giới thiệu"
-                android:textColor="#000000"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -154,7 +148,6 @@
                 android:layout_marginTop="8dp"
                 android:lineSpacingExtra="4dp"
                 android:text="Tại sao ta không thể tìm được một bộ phim ưng ý... (Nội dung giới thiệu) ... đọc thêm"
-                android:textColor="#333333"
                 android:textSize="15sp" />
 
             <!-- 5. Thể loại (Tags) -->
@@ -163,6 +156,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:clipToPadding="false"
+                android:fitsSystemWindows="true"
                 android:paddingHorizontal="20dp"
                 android:scrollbars="none">
 
@@ -171,9 +165,32 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <!-- Dùng TextView có background bo góc, ở đây làm mẫu vài cái -->
-                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="LGBT+" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
-                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="Đam mỹ" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
-                    <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="35dp" android:text="Xuyên không" android:layout_marginEnd="8dp" android:textColor="#000" android:textSize="12sp"/>
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="LGBT+"
+                        android:textColor="#000"
+                        android:textSize="12sp" />
+
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="Đam mỹ"
+                        android:textColor="#000"
+                        android:textSize="12sp" />
+
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="Xuyên không"
+                        android:textColor="#000"
+                        android:textSize="12sp" />
                 </LinearLayout>
             </HorizontalScrollView>
 

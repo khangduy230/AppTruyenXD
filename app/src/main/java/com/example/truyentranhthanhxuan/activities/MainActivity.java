@@ -1,4 +1,4 @@
-package com.example.truyentranhthanhxuan;
+package com.example.truyentranhthanhxuan.activities;
 
 import android.os.Bundle;
 import android.view.View;
@@ -6,6 +6,12 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.truyentranhthanhxuan.R;
+import com.example.truyentranhthanhxuan.fragments.AccountFragment;
+import com.example.truyentranhthanhxuan.fragments.HomeFragment;
+import com.example.truyentranhthanhxuan.fragments.LibraryFragment;
+import com.example.truyentranhthanhxuan.fragments.SearchFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override

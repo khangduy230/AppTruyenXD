@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!--    khung chứa fragment-->
     <androidx.fragment.app.FragmentContainerView
@@ -29,7 +30,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Trang chủ"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/nav_search"
@@ -38,7 +39,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Tìm kiếm"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/nav_library"
@@ -47,7 +48,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Thư viện"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/nav_profile"
@@ -56,7 +57,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Tôi"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
