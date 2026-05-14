@@ -2,15 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginEnd="12dp"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imgComic"
         android:layout_width="120dp"
         android:layout_height="160dp"
         android:background="#E0E0E0"
-        android:scaleType="centerCrop" /> <!-- Background xám phòng khi ảnh load chậm -->
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/RoundedCornersImage"/> <!-- Background xám phòng khi ảnh load chậm -->
 
 </LinearLayout>

@@ -2,13 +2,12 @@ package com.example.truyentranhthanhxuan.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.Switch;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.truyentranhthanhxuan.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class SettingsActivity extends AppCompatActivity {
     //khai báo các biến cần thiết
@@ -51,16 +50,25 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         //tìm view theo id
-        ImageView btnBack = findViewById(R.id.btnBack);
+//        ImageView btnBack = findViewById(R.id.btnBack);
+//
+//        //bắt sự kiện OnClickListener (khi click vào btnBack)
+//        btnBack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //lệnh finish() sẽ đóng màn hình Settings này lại
+//                //và tự động quay về màn hình trước đó
+//                finish();
+//            }
+//        });
+        // Bỏ chữ "view." ở đằng trước đi
+        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
 
-        //bắt sự kiện OnClickListener (khi click vào btnBack)
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //lệnh finish() sẽ đóng màn hình Settings này lại
-                //và tự động quay về màn hình trước đó
-                finish();
-            }
+        topAppBar.setNavigationOnClickListener(v -> {
+            // Trong Activity, bạn chỉ cần gọi trực tiếp như thế này:
+            getOnBackPressedDispatcher().onBackPressed();
+
+            // Hoặc dùng một lệnh cực kỳ ngắn gọn và phổ biến để đóng Activity hiện tại:
+            // finish();
         });
-    }
-}
+    }}
