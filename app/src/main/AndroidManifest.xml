@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".MyApplication"
+        android:name=".YouthComicApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,13 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TruyenTranhThanhXuan">
         <activity
-            android:name=".activities.SplashActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.ReadingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.AuthActivity"
+            android:name=".activities.DownloadedActivity"
             android:exported="false" />
         <activity
             android:name=".activities.DetailComicActivity"

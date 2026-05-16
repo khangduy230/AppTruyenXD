@@ -1,9 +1,13 @@
 package com.example.truyentranhthanhxuan.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +33,15 @@ public class LoginFragment extends BottomSheetDialogFragment {
 
         TextInputEditText edtEmail = view.findViewById(R.id.edtEmail);
         TextInputEditText edtPassword = view.findViewById(R.id.edtPassword);
+        TextInputEditText edtConfirmPassword = view.findViewById(R.id.edtConfirmPassword);
+
+        edtEmail.setOnClickListener(v -> {
+            edtEmail.requestFocus();
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(edtEmail, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
 
         // Nút chuyển đổi (Text dưới cùng)
         tvSwitchAction.setOnClickListener(v -> {
@@ -50,15 +63,48 @@ public class LoginFragment extends BottomSheetDialogFragment {
 
         // Nút Xác nhận
         btnSubmit.setOnClickListener(v -> {
-            String email = edtEmail.getText().toString();
-            String pass = edtPassword.getText().toString();
-            if(isLoginMode) {
-                Toast.makeText(getContext(), "Đang đăng nhập...", Toast.LENGTH_SHORT).show();
+            String email = edtEmail.getText().toString().trim();
+            String pass = edtPassword.getText().toString().trim();
+            if (email.isEmpty() || pass.isEmpty()) {
+                Toast.makeText(getContext(), "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (isLoginMode) {
+                LuuTrangThaiDangNhap();
+                Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                getParentFragmentManager().setFragmentResult("key_dang_nhap", new Bundle());
+                dismiss();
+
             } else {
-                Toast.makeText(getContext(), "Đang đăng ký...", Toast.LENGTH_SHORT).show();
+                String confirmPass = edtConfirmPassword.getText().toString().trim();
+                if (!pass.equals(confirmPass)) {
+                    Toast.makeText(getContext(), "Mật khẩu xác nhận không khớp!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                LuuTrangThaiDangNhap();
+                Toast.makeText(getContext(), "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                getParentFragmentManager().setFragmentResult("key_dang_nhap", new Bundle());
+                dismiss(); // Đóng popup
             }
         });
 
         return view;
+    }
+
+    private void LuuTrangThaiDangNhap() {
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("my_application", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("DaDangNhap", true);
+        editor.apply();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 }

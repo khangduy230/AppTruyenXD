@@ -9,23 +9,19 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
-    <!-- Thanh gạch ngang nhỏ ở trên cùng (Handle) -->
     <View
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:background="#E0E0E0" />
+        android:layout_marginBottom="16dp" />
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Đăng nhập"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black" />
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/tvSubtitle"
@@ -35,7 +31,6 @@
         android:textSize="14sp"
         android:layout_marginBottom="24dp" />
 
-    <!-- Form Nhập Email -->
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -50,7 +45,6 @@
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Form Nhập Password -->
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -66,7 +60,6 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Form Xác nhận Password (Chỉ hiện khi ở chế độ Đăng ký) -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_ConfirmPassword"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -84,7 +77,6 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Nút Đăng nhập/Đăng ký chính -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSubmit"
         android:layout_width="match_parent"
@@ -92,7 +84,6 @@
         android:text="Đăng nhập"
         app:cornerRadius="12dp" />
 
-    <!-- Chuyển đổi giữa Login và Register -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
