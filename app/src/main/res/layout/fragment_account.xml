@@ -91,6 +91,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/btn_download"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="20dp"

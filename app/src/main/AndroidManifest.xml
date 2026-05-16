@@ -13,6 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TruyenTranhThanhXuan">
         <activity
+            android:name=".activities.SplashActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ReadingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AuthActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.DetailComicActivity"
             android:exported="false" />
         <activity

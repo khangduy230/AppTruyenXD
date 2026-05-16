@@ -19,17 +19,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //hiển thanh điều hướng dưới cùng
         setContentView(R.layout.activity_main);
-
+        //ánh xạ view theo id đã đặt trong layout
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         //gọi màn hình trang chủ
         if (savedInstanceState == null) {
             replaceFragment(new HomeFragment());
             bottomNavigationView.setSelectedItemId(R.id.nav_home);
         }
+        //khi click vào item
         bottomNavigationView.setOnItemSelectedListener(item -> {
+            //lấy id của item
             int itemId = item.getItemId();
-
+            //kiểm tra item được chọn
             if (itemId == R.id.nav_home) {
+                //thay thế fragment
                 replaceFragment(new HomeFragment());
                 return true;
             } else if (itemId == R.id.nav_search) {
