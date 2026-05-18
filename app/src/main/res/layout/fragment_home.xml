@@ -22,7 +22,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 android:layout_width="match_parent"
-                app:title="Youth Comic" />
+                app:title="FTComic" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
