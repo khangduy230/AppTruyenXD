@@ -37,197 +37,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="80dp">
 
-            <!--            <TextView-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:text="Thư viện"-->
-            <!--                android:textSize="28sp"-->
-            <!--                android:textStyle="bold" />-->
-
-            <!-- 2. Thanh lọc (3 nút) -->
-            <LinearLayout
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup_filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="24dp"
-                android:orientation="horizontal">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:singleSelection="true"
+                app:selectionRequired="true">
 
-                <TextView
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_read"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
-                    android:text="Đã đọc" />
+                    android:checked="true"
+                    android:text="Đã đọc" /> <com.google.android.material.chip.Chip
+                android:id="@+id/chip_later"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Để sau" />
 
-                <TextView
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_downloaded"
+                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
-                    android:text="Để sau" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp"
                     android:text="Tải xuống" />
-            </LinearLayout>
 
-            <!-- 3. KHUNG LƯỚI TRUYỆN (Chia 3 cột) -->
-            <!-- Dòng 1 -->
-            <LinearLayout
+            </com.google.android.material.chip.ChipGroup>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_library"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <!-- Cột 1 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Cột 2 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Cột 3 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Dòng 2 (Copy y hệt dòng 1 xuống) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <!-- Cột 1 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Cột 2 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Cột 3 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Tên truyện"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tác giả"
-                        android:textSize="12sp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="3" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

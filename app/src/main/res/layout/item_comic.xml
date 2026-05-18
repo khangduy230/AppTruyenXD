@@ -13,6 +13,7 @@
         android:layout_height="160dp"
         android:background="#E0E0E0"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/RoundedCornersImage"/> <!-- Background xám phòng khi ảnh load chậm -->
+        app:strokeColor="#3C3C3C"
+        app:shapeAppearanceOverlay="@style/RoundedCornersImage"/>
 
 </LinearLayout>
