@@ -27,7 +27,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:background="@drawable/thientay" /> <!-- Màu xám tạm thời -->
+                    android:src="@drawable/thientay" /> <!-- Màu xám tạm thời -->
 
                 <!-- Lớp gradient mờ ở đáy ảnh để dễ đọc chữ (Tùy chọn) -->
                 <View
@@ -75,7 +75,13 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.69k" android:textSize="20sp" android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tvLikeCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3.69k"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lượt thích" android:textSize="14sp"/>
                 </LinearLayout>
 
@@ -85,7 +91,13 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="4.7*" android:textSize="20sp" android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tvRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4.7*"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="25 người đánh giá" android:textSize="14sp"/>
                 </LinearLayout>
 
@@ -95,7 +107,13 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="150" android:textSize="20sp" android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tvCommentCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="150"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bình luận" android:textSize="14sp"/>
                 </LinearLayout>
             </LinearLayout>

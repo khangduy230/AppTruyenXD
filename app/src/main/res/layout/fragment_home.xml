@@ -1,117 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true" >
+    android:fitsSystemWindows="true">
 
+    <!-- Thanh AppBar phía trên -->
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
+
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbar"
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
             android:layout_height="152dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:title="FTComic"
             app:titleCollapseMode="scale"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                android:layout_width="match_parent"
                 app:title="FTComic" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-            <androidx.core.widget.NestedScrollView
+    <!-- Nội dung cuộn -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollHome"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <!-- Truyện nổi bật -->
+            <TextView
+                android:id="@+id/tvFeaturedTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:drawablePadding="16dp"
+                android:text="Truyện nổi bật"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:drawableEndCompat="@drawable/ic_arrow_forward" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_featured"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
 
-<!--            <ScrollView-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="0dp"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent">-->
+            <!-- Bảng xếp hạng -->
+            <TextView
+                android:id="@+id/tvRankingTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:drawablePadding="16dp"
+                android:text="Bảng xếp hạng"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:drawableEndCompat="@drawable/ic_arrow_forward" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="20dp">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_ranking"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
 
-                    <!-- Tiêu đề 1 -->
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_margin="16dp"-->
-<!--                        android:text="Youth Comics"-->
-<!--                        android:textSize="28sp"-->
-<!--                        android:textStyle="bold" />-->
+            <!-- Tất cả truyện -->
+            <TextView
+                android:id="@+id/tvAllComicsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:drawablePadding="16dp"
+                android:text="Tất cả truyện"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:drawableEndCompat="@drawable/ic_arrow_forward" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
-                        android:text="Truyên nổi bật"
-                        android:textSize="20sp"
-                        android:drawablePadding="16dp"
-                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView_all_comics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
 
-                    <!-- THAY THẾ: Danh sách truyện nổi bật -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView_featured"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </LinearLayout>
 
-                    <!-- Tiêu đề 2 -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
-                        android:text="Bảng xếp hạng"
-                        android:textSize="20sp"
-                        android:drawablePadding="16dp"
-                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
-                    <!-- THAY THẾ: Danh sách bảng xếp hạng -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView_ranking"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </androidx.core.widget.NestedScrollView>
 
-                    <!-- Tiêu đề 3 -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="16dp"
-                        android:text="Tất cả truyện"
-                        android:textSize="20sp"
-                        android:drawablePadding="16dp"
-                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
-
-                    <!-- THAY THẾ: Danh sách tất cả truyện -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerView_all_comics"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-                </LinearLayout>
-            <!--            </ScrollView>-->
-            </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
