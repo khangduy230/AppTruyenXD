@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true">
 
-    <!-- ScrollView bao bọc toàn bộ để có thể lướt lên xuống -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
+
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
             android:layout_height="152dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:title="Thư viện"
             app:titleCollapseMode="scale"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                android:layout_width="match_parent"
                 app:title="Thư viện" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -31,6 +35,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -55,12 +60,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Đã đọc" /> <com.google.android.material.chip.Chip
-                android:id="@+id/chip_later"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Để sau" />
+                    android:text="Đã đọc" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_later"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Để sau" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_downloaded"
@@ -71,16 +78,29 @@
 
             </com.google.android.material.chip.ChipGroup>
 
+            <TextView
+                android:id="@+id/tvLibraryEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="Chưa có truyện nào"
+                android:textColor="#777777"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_library"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:paddingHorizontal="12dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3" />
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingHorizontal="12dp" />
 
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -3,8 +3,8 @@ package com.nhom5.ftcomic.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +45,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         }
 
         holder.imgComic.setImageResource(comic.getImage());
-        holder.tvComicTitle.setText(comic.getTitle());
+        holder.tvComicTitle.setText(comic.getName());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

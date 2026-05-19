@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TruyenTranhThanhXuan">
         <activity
+            android:name=".activities.ReaderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.reader"
+            android:exported="false" />
+        <activity
             android:name=".activities.DownloadedActivity"
             android:exported="false" />
         <activity

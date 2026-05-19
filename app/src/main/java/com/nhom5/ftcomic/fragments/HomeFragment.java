@@ -16,18 +16,20 @@ import android.view.ViewGroup;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
+import com.nhom5.ftcomic.database.AppDatabase;
+import com.nhom5.ftcomic.database.LocalDataSeeder;
 import com.nhom5.ftcomic.models.Comic;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerFeatured, recyclerRanking, recyclerAllComics;
     private ComicAdapter featuredAdapter, rankingAdapter, allComicsAdapter;
 
+    private AppDatabase appDatabase;
+
     public HomeFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -44,47 +46,21 @@ public class HomeFragment extends Fragment {
         recyclerRanking = view.findViewById(R.id.recyclerView_ranking);
         recyclerAllComics = view.findViewById(R.id.recyclerView_all_comics);
 
-        setupFeaturedComics();
-        setupRankingComics();
-        setupAllComics();
+        appDatabase = AppDatabase.getInstance(requireContext());
+
+        LocalDataSeeder.seedIfNeeded(requireContext());
+
+        setupRecyclerViews();
+        observeComicsFromRoom();
     }
 
-    private void setupFeaturedComics() {
-        List<Comic> featuredList = new ArrayList<>();
-
-        featuredList.add(new Comic(R.drawable.thientai, "Truyện Nổi Bật 1"));
-        featuredList.add(new Comic(R.drawable.thientai, "Truyện Nổi Bật 2"));
-        featuredList.add(new Comic(R.drawable.thientai, "Truyện Nổi Bật 3"));
-        featuredList.add(new Comic(R.drawable.thientai, "Truyện Nổi Bật 4"));
-
-        featuredAdapter = new ComicAdapter(featuredList, comic -> openDetailComic(comic));
+    private void setupRecyclerViews() {
+        featuredAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
+        rankingAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
+        allComicsAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
 
         setupHorizontalRecyclerView(recyclerFeatured, featuredAdapter);
-    }
-
-    private void setupRankingComics() {
-        List<Comic> rankingList = new ArrayList<>();
-
-        rankingList.add(new Comic(R.drawable.thientai, "Truyện Xếp Hạng 1"));
-        rankingList.add(new Comic(R.drawable.thientai, "Truyện Xếp Hạng 2"));
-        rankingList.add(new Comic(R.drawable.thientai, "Truyện Xếp Hạng 3"));
-
-        rankingAdapter = new ComicAdapter(rankingList, comic -> openDetailComic(comic));
-
         setupHorizontalRecyclerView(recyclerRanking, rankingAdapter);
-    }
-
-    private void setupAllComics() {
-        List<Comic> allComicsList = new ArrayList<>();
-
-        allComicsList.add(new Comic(R.drawable.thientai, "Truyện 1"));
-        allComicsList.add(new Comic(R.drawable.thientai, "Truyện 2"));
-        allComicsList.add(new Comic(R.drawable.thientai, "Truyện 3"));
-        allComicsList.add(new Comic(R.drawable.thientai, "Truyện 4"));
-        allComicsList.add(new Comic(R.drawable.thientai, "Truyện 5"));
-
-        allComicsAdapter = new ComicAdapter(allComicsList, comic -> openDetailComic(comic));
-
         setupHorizontalRecyclerView(recyclerAllComics, allComicsAdapter);
     }
 
@@ -100,12 +76,20 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
+    private void observeComicsFromRoom() {
+        appDatabase.comicDao().getComicsBySection("featured")
+                .observe(getViewLifecycleOwner(), comics -> featuredAdapter.setComicList(comics));
+
+        appDatabase.comicDao().getComicsBySection("ranking")
+                .observe(getViewLifecycleOwner(), comics -> rankingAdapter.setComicList(comics));
+
+        appDatabase.comicDao().getComicsBySection("all")
+                .observe(getViewLifecycleOwner(), comics -> allComicsAdapter.setComicList(comics));
+    }
+
     private void openDetailComic(Comic comic) {
         Intent intent = new Intent(requireContext(), DetailComicActivity.class);
-
-        intent.putExtra("COMIC_NAME", comic.getName());
-        intent.putExtra("COMIC_IMAGE", comic.getImage());
-
+        intent.putExtra("COMIC_ID", comic.getId());
         startActivity(intent);
     }
 }
