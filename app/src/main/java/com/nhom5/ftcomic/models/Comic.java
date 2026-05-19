@@ -11,13 +11,12 @@ public class Comic {
     private int id;
 
     private int image;
+    private String coverUrl;
+
     private String name;
     private String author;
     private String description;
     private String status;
-
-    // Dùng để chia dữ liệu trên Home:
-    // featured, ranking, all
     private String section;
 
     private int likeCount;
@@ -26,30 +25,26 @@ public class Comic {
     private int viewCount;
 
     public Comic() {
-        // Room cần constructor rỗng
     }
 
     @Ignore
     public Comic(int image, String name) {
-        this.id = 0;
         this.image = image;
         this.name = name;
+        this.coverUrl = "";
         this.author = "Đang cập nhật";
         this.description = "Chưa có mô tả.";
         this.status = "Đang ra";
         this.section = "all";
-        this.likeCount = 0;
-        this.rating = 0;
-        this.commentCount = 0;
-        this.viewCount = 0;
     }
 
     @Ignore
-    public Comic(int id, int image, String name, String author, String description,
-                 String status, String section, int likeCount, float rating,
-                 int commentCount, int viewCount) {
+    public Comic(int id, int image, String coverUrl, String name, String author,
+                 String description, String status, String section, int likeCount,
+                 float rating, int commentCount, int viewCount) {
         this.id = id;
         this.image = image;
+        this.coverUrl = coverUrl;
         this.name = name;
         this.author = author;
         this.description = description;
@@ -67,6 +62,10 @@ public class Comic {
 
     public int getImage() {
         return image;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
     }
 
     public String getName() {
@@ -111,6 +110,10 @@ public class Comic {
 
     public void setImage(int image) {
         this.image = image;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 
     public void setName(String name) {

@@ -11,10 +11,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ChapterAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.Favorite;
+import com.nhom5.ftcomic.repository.ComicRepository;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,7 @@ public class DetailComicActivity extends AppCompatActivity {
     private RecyclerView recyclerViewChapters;
 
     private AppDatabase appDatabase;
+    private ComicRepository comicRepository;
     private ChapterAdapter chapterAdapter;
 
     private int comicId = -1;
@@ -41,6 +44,7 @@ public class DetailComicActivity extends AppCompatActivity {
         comicId = getIntent().getIntExtra("COMIC_ID", -1);
 
         appDatabase = AppDatabase.getInstance(this);
+        comicRepository = new ComicRepository(this);
 
         bindViews();
         setupChapterRecyclerView();
@@ -48,6 +52,9 @@ public class DetailComicActivity extends AppCompatActivity {
         observeChapters();
         observeFavoriteStatus();
         setupButtons();
+
+        // Sync chapters từ Supabase về Room
+        comicRepository.syncChaptersByComicId(comicId);
     }
 
     private void bindViews() {
@@ -77,12 +84,21 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void observeComicDetail() {
-        appDatabase.comicDao().getComicByIdLive(comicId).observe(this, comic -> {
+        comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
             if (comic == null) {
                 return;
             }
 
-            imgCover.setImageResource(comic.getImage());
+            if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
+                Glide.with(this)
+                        .load(comic.getCoverUrl())
+                        .placeholder(comic.getImage())
+                        .error(comic.getImage())
+                        .into(imgCover);
+            } else {
+                imgCover.setImageResource(comic.getImage());
+            }
+
             tvTitle.setText(comic.getName());
             tvAuthor.setText(comic.getAuthor());
             tvDescription.setText(comic.getDescription());
@@ -94,7 +110,7 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void observeChapters() {
-        appDatabase.chapterDao().getChaptersByComicId(comicId).observe(this, chapters -> {
+        comicRepository.getChaptersByComicId(comicId).observe(this, chapters -> {
             chapterAdapter.setChapterList(chapters);
 
             if (chapters != null && !chapters.isEmpty()) {

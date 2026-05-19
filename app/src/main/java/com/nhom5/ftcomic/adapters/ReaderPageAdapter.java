@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.models.ChapterPage;
 
@@ -32,7 +33,20 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
     @Override
     public void onBindViewHolder(@NonNull ReaderPageViewHolder holder, int position) {
         ChapterPage page = pageList.get(position);
-        holder.imgPage.setImageResource(page.getImage());
+
+        if (page == null) {
+            return;
+        }
+
+        if (page.getImageUrl() != null && !page.getImageUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(page.getImageUrl())
+                    .placeholder(page.getImage())
+                    .error(page.getImage())
+                    .into(holder.imgPage);
+        } else {
+            holder.imgPage.setImageResource(page.getImage());
+        }
     }
 
     @Override

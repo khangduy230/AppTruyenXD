@@ -10,6 +10,7 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ReaderPageAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.ReadingHistory;
+import com.nhom5.ftcomic.repository.ComicRepository;
 
 import java.util.ArrayList;
 
@@ -19,6 +20,7 @@ public class ReaderActivity extends AppCompatActivity {
     private ReaderPageAdapter readerPageAdapter;
 
     private AppDatabase appDatabase;
+    private ComicRepository comicRepository;
 
     private int comicId = -1;
     private int chapterId = -1;
@@ -32,6 +34,7 @@ public class ReaderActivity extends AppCompatActivity {
         chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
 
         appDatabase = AppDatabase.getInstance(this);
+        comicRepository = new ComicRepository(this);
 
         recyclerViewPages = findViewById(R.id.recyclerViewPages);
 
@@ -41,10 +44,13 @@ public class ReaderActivity extends AppCompatActivity {
 
         observeChapterPages();
         saveReadingHistory();
+
+        // Sync pages từ Supabase về Room
+        comicRepository.syncPagesByChapterId(chapterId);
     }
 
     private void observeChapterPages() {
-        appDatabase.chapterPageDao().getPagesByChapterId(chapterId)
+        comicRepository.getPagesByChapterId(chapterId)
                 .observe(this, pages -> readerPageAdapter.setPageList(pages));
     }
 

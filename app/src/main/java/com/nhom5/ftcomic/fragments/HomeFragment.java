@@ -16,9 +16,8 @@ import android.view.ViewGroup;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
-import com.nhom5.ftcomic.database.AppDatabase;
-import com.nhom5.ftcomic.database.LocalDataSeeder;
 import com.nhom5.ftcomic.models.Comic;
+import com.nhom5.ftcomic.repository.ComicRepository;
 
 import java.util.ArrayList;
 
@@ -27,7 +26,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerFeatured, recyclerRanking, recyclerAllComics;
     private ComicAdapter featuredAdapter, rankingAdapter, allComicsAdapter;
 
-    private AppDatabase appDatabase;
+    private ComicRepository comicRepository;
 
     public HomeFragment() {
     }
@@ -46,12 +45,13 @@ public class HomeFragment extends Fragment {
         recyclerRanking = view.findViewById(R.id.recyclerView_ranking);
         recyclerAllComics = view.findViewById(R.id.recyclerView_all_comics);
 
-        appDatabase = AppDatabase.getInstance(requireContext());
-
-        LocalDataSeeder.seedIfNeeded(requireContext());
+        comicRepository = new ComicRepository(requireContext());
 
         setupRecyclerViews();
         observeComicsFromRoom();
+
+        // Gọi API Supabase rồi lưu vào Room
+        comicRepository.syncAllHomeComics();
     }
 
     private void setupRecyclerViews() {
@@ -77,13 +77,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void observeComicsFromRoom() {
-        appDatabase.comicDao().getComicsBySection("featured")
+        comicRepository.getComicsBySection("featured")
                 .observe(getViewLifecycleOwner(), comics -> featuredAdapter.setComicList(comics));
 
-        appDatabase.comicDao().getComicsBySection("ranking")
+        comicRepository.getComicsBySection("ranking")
                 .observe(getViewLifecycleOwner(), comics -> rankingAdapter.setComicList(comics));
 
-        appDatabase.comicDao().getComicsBySection("all")
+        comicRepository.getComicsBySection("all")
                 .observe(getViewLifecycleOwner(), comics -> allComicsAdapter.setComicList(comics));
     }
 

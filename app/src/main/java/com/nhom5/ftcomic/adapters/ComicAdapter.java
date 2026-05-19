@@ -44,8 +44,17 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
             return;
         }
 
-        holder.imgComic.setImageResource(comic.getImage());
         holder.tvComicTitle.setText(comic.getName());
+
+        if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
+            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(comic.getCoverUrl())
+                    .placeholder(comic.getImage())
+                    .error(comic.getImage())
+                    .into(holder.imgComic);
+        } else {
+            holder.imgComic.setImageResource(comic.getImage());
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

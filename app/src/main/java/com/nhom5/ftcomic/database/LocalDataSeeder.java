@@ -38,6 +38,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 1,
                 R.drawable.thientai,
+                "",
                 "Thiên Tài Bóng Đêm",
                 "Futho High",
                 "Một bộ truyện giả tưởng kể về nhân vật chính trên hành trình khám phá sức mạnh bí ẩn.",
@@ -52,6 +53,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 2,
                 R.drawable.thientai,
+                "",
                 "Học Viện Siêu Năng",
                 "Nhóm 5",
                 "Câu chuyện về những học sinh sở hữu năng lực đặc biệt trong một học viện bí ẩn.",
@@ -66,6 +68,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 3,
                 R.drawable.thientai,
+                "",
                 "Vua Truyện Tranh",
                 "Tác giả A",
                 "Một hành trình hài hước và kịch tính của nhân vật chính trong thế giới truyện tranh.",
@@ -80,6 +83,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 4,
                 R.drawable.thientai,
+                "",
                 "Thanh Xuân Rực Rỡ",
                 "Tác giả B",
                 "Một câu chuyện học đường nhẹ nhàng, tình cảm và gần gũi.",
@@ -94,6 +98,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 5,
                 R.drawable.thientai,
+                "",
                 "Truyện Phiêu Lưu 1",
                 "Tác giả C",
                 "Nhân vật chính bắt đầu chuyến phiêu lưu qua nhiều vùng đất kỳ lạ.",
@@ -108,6 +113,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 6,
                 R.drawable.thientai,
+                "",
                 "Truyện Hành Động 2",
                 "Tác giả D",
                 "Một bộ truyện hành động với nhiều trận chiến gay cấn.",
@@ -122,6 +128,7 @@ public class LocalDataSeeder {
         comics.add(new Comic(
                 7,
                 R.drawable.thientai,
+                "",
                 "Truyện Hài Hước 3",
                 "Tác giả E",
                 "Bộ truyện giải trí nhẹ nhàng, phù hợp đọc thư giãn.",

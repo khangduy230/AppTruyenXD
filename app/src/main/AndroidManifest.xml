@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".YouthComicApp"
         android:allowBackup="true"
@@ -14,9 +15,6 @@
         android:theme="@style/Theme.TruyenTranhThanhXuan">
         <activity
             android:name=".activities.ReaderActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.reader"
             android:exported="false" />
         <activity
             android:name=".activities.DownloadedActivity"
