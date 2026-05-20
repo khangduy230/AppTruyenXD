@@ -22,7 +22,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 android:layout_width="match_parent"
-                app:title="Youth Comic" />
+                app:title="FTComic" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -57,9 +57,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="16dp"
-                        android:text="Truyên nổi bật  ➔"
+                        android:text="Truyên nổi bật"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:drawablePadding="16dp"
+                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
 
                     <!-- THAY THẾ: Danh sách truyện nổi bật -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -76,10 +77,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="16dp"
-                        android:text="Bảng xếp hạng  ➔"
+                        android:text="Bảng xếp hạng"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
-
+                        android:drawablePadding="16dp"
+                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
                     <!-- THAY THẾ: Danh sách bảng xếp hạng -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerView_ranking"
@@ -95,9 +96,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="16dp"
-                        android:text="Tất cả truyện  ➔"
+                        android:text="Tất cả truyện"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:drawablePadding="16dp"
+                        app:drawableEndCompat="@drawable/ic_arrow_forward" />
 
                     <!-- THAY THẾ: Danh sách tất cả truyện -->
                     <androidx.recyclerview.widget.RecyclerView

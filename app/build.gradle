@@ -3,14 +3,14 @@ plugins {
 }
 
 android {
-    namespace 'com.example.truyentranhthanhxuan'
+    namespace 'com.nhom5.ftcomic'
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId "com.example.truyentranhthanhxuan"
-        minSdk 24
+        applicationId "com.nhom5.ftcomic"
+        minSdk 28
         targetSdk 36
         versionCode 1
         versionName "1.0"
