@@ -62,8 +62,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView1"
+                    android:layout_width="20dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -71,7 +71,7 @@
 
                 <TextView
                     android:id="@+id/textView6"
-                    android:layout_width="292dp"
+                    android:layout_width="250dp"
                     android:layout_height="57dp"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
@@ -97,18 +97,22 @@
                 android:textSize="18dp" />
 
             <LinearLayout
+                android:id="@+id/layouttansuat"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="22dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_list"
+                android:clickable="true"
+                android:focusable="auto"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="horizontal"
                 tools:layout_marginRight="10dp">
 
                 <ImageView
                     android:id="@+id/imageView2"
-                    android:layout_width="32dp"
+                    android:layout_width="70dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -130,7 +134,7 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/edttanxuat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Mỗi 2 ngày"
@@ -151,8 +155,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView3"
+                    android:layout_width="70dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -174,7 +178,7 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/edtmangcapnhat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Chỉ cập nhật qua Wi-Fi"
@@ -204,8 +208,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="32dp"
+                    android:id="@+id/imageView4"
+                    android:layout_width="70dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -227,7 +231,7 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/edtvitriluutru"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="/YouthComic/Downloads"
@@ -247,8 +251,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView5"
+                    android:layout_width="70dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -270,7 +274,7 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/edttudongxoachuong"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Sau 1 tuần"
@@ -291,8 +295,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView6"
+                    android:layout_width="20dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -300,7 +304,7 @@
 
                 <TextView
                     android:id="@+id/textView6"
-                    android:layout_width="292dp"
+                    android:layout_width="250dp"
                     android:layout_height="57dp"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
@@ -336,8 +340,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView7"
+                    android:layout_width="20dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -345,7 +349,7 @@
 
                 <TextView
                     android:id="@+id/textView6"
-                    android:layout_width="292dp"
+                    android:layout_width="250dp"
                     android:layout_height="57dp"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
@@ -371,8 +375,8 @@
                 tools:layout_marginRight="10dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="26dp"
+                    android:id="@+id/imageView8"
+                    android:layout_width="70dp"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
@@ -394,7 +398,7 @@
                         android:textSize="20sp" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/edttudongkhoa"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Sau 5 phút"

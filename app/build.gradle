@@ -4,14 +4,12 @@ plugins {
 
 android {
     namespace 'com.nhom5.ftcomic'
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.nhom5.ftcomic"
         minSdk 28
-        targetSdk 36
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -36,13 +34,7 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
     implementation libs.recyclerview
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso.core
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-
+    
     // Navigation Component
     def nav_version = "2.7.7"
     implementation "androidx.navigation:navigation-fragment:$nav_version"
@@ -53,10 +45,15 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
 
-    // Glide (để tải ảnh từ URL)
+    // Glide
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
+    // Room
     def room_version = "2.5.1"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
 }

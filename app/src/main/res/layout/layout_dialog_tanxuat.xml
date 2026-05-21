@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
@@ -16,6 +17,7 @@
         android:textSize="25sp" />
 
     <RadioGroup
+        android:id="@+id/grouptansuat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layoutDirection="rtl"
@@ -26,35 +28,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Thủ công"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:textColorHighlight="#FDFDFD" />
 
         <RadioButton
             android:id="@+id/radioButton2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mỗi ngày"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:textColorHighlight="#FDFDFD" />
 
         <RadioButton
             android:id="@+id/radioButton3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mỗi 2 ngày"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:textColorHighlight="#FDFDFD" />
 
         <RadioButton
             android:id="@+id/radioButton4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mỗi 3 ngày"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:textColorHighlight="#FDFDFD" />
 
         <RadioButton
             android:id="@+id/radioButton5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mỗi tuần"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:textColorHighlight="#FDFDFD" />
     </RadioGroup>
 
     <LinearLayout
@@ -66,19 +73,25 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/btnback"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Quay lại" />
+            android:background="#00F2EDED"
+            android:text="Quay lại"
+            android:textColor="#416834"
+            tools:textSize="18sp" />
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/btnconfirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:text="Xác nhận" />
+            android:background="#00F2EDED"
+            android:text="Xác nhận"
+            android:textColor="#416834"
+            tools:textSize="18sp" />
     </LinearLayout>
 
 </LinearLayout>
