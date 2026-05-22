@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.TruyenTranhThanhXuan" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorSurface">#E0E0E0</item>
+    <style name="Base.Theme.FTComic" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:textColor">#000000</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:fontFamily">@font/ggsansflex_variable</item>
@@ -15,5 +14,12 @@
         <item name="android:textSize">36sp</item>
         <item name="fontFamily">@font/ggsansflex_medium</item>
     </style>
-    <style name="Theme.TruyenTranhThanhXuan" parent="Base.Theme.TruyenTranhThanhXuan" />
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <item name="postSplashScreenTheme">@style/Base.Theme.FTComic</item>
+    </style>
+    <style name="Theme.FTComic" parent="Base.Theme.FTComic" />
 </resources>

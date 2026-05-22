@@ -1,5 +1,6 @@
 package com.nhom5.ftcomic.activities;
 
+import androidx.core.splashscreen.SplashScreen;
 import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.nhom5.ftcomic.fragments.SearchFragment;
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
         //hiển thanh điều hướng dưới cùng
         setContentView(R.layout.activity_main);

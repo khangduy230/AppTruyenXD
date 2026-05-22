@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="152dp"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:titleCollapseMode="scale">
-            >
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
@@ -30,394 +29,383 @@
                 app:navigationIconTint="?attr/colorOnSurface"
                 app:title="Cài đặt" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- DÒNG 1: HEADER (Nút Back + Tiêu đề Cài đặt) -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="none"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="80dp"> <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="8dp"
+            android:text="Giao diện"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" /> <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:minHeight="72dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_dark_mode"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
             <TextView
-                android:id="@+id/textView7"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:text="Giao diện "
-                android:textSize="18dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_list"
-                android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
-
-                <ImageView
-                    android:id="@+id/imageView1"
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_dark_mode"
-                    app:tint="?attr/colorOnSurface" />
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="250dp"
-                    android:layout_height="57dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_weight="1"
-                    android:text="Chế độ tối"
-                    android:textAllCaps="false"
-                    android:textSize="20sp"
-                    />
-
-                <Switch
-                    android:id="@+id/switchDarkMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="70dp"
-                    android:layout_weight="1" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="20dp"
-                android:text="Thư viện và đồng bộ"
-                android:textSize="18dp" />
-
-            <LinearLayout
-                android:id="@+id/layouttansuat"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_list"
+                android:text="Chế độ tối"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchDarkMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                app:dividerColor="?attr/colorSurfaceVariant" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
+                android:text="Thư viện và đồng bộ"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary" />
+
+            <LinearLayout
+                android:id="@+id/layout_tan_suat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
-                android:focusable="auto"
-                android:foreground="?attr/selectableItemBackground"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:tint="?attr/colorOnSurface"
-                    app:srcCompat="@drawable/ic_reload" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_reload"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout
-                    android:layout_width="352dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:text="Tần suất cập nhật chương mới"
-                        android:textSize="20sp" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/edttanxuat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Mỗi 2 ngày"
-                        android:textColor="#7E7B7B"
-                        android:textSize="16sp" />
+                        android:text="Thủ công"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
-
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/layout_mang_update"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="5dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_list"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView3"
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_internet"
-                    app:tint="?attr/colorOnSurface" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_internet"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout
-                    android:layout_width="352dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:text="Mạng cập nhật"
-                        android:textSize="20sp" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/edtmangcapnhat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chỉ cập nhật qua Wi-Fi"
-                        android:textColor="#7E7B7B"
-                        android:textSize="16sp" />
+                        android:text="Wifi và Mạng di động"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
-
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textView13"
+            <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="20dp"
-                android:layout_weight="1"
+                android:layout_marginVertical="8dp"
+                app:dividerColor="?attr/colorSurfaceVariant" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
                 android:text="Tải xuống"
-                android:textSize="18dp" />
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary" />
 
             <LinearLayout
+                android:id="@+id/layout_storage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_list"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView4"
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_donwload"
-                    app:tint="?attr/colorOnSurface" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_donwload"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout
-                    android:layout_width="352dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:text="Vị trí lưu trữ"
-                        android:textSize="20sp" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/edtvitriluutru"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="/YouthComic/Downloads"
-                        android:textColor="#7E7B7B"
-                        android:textSize="16sp" />
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
+            </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layout_auto_delete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_trash"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tự động xoá chương"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <TextView
+                        android:id="@+id/edtautodelete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Không tự động xoá"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/bg_list"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView5"
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_trash"
-                    app:tint="?attr/colorOnSurface" />
-
-                <LinearLayout
-                    android:layout_width="352dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
-
-                    <TextView
-                        android:id="@+id/textView9"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:text="Tự động xoá chương"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/edttudongxoachuong"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Sau 1 tuần"
-                        android:textColor="#7E7B7B"
-                        android:textSize="16sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/bg_list"
-                android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
-
-                <ImageView
-                    android:id="@+id/imageView6"
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_wifi"
-                    app:tint="?attr/colorOnSurface"/>
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_wifi"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="250dp"
-                    android:layout_height="57dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Chỉ tải thông qua Wi-Fi"
-                    android:textAllCaps="false"
-                    android:textSize="20sp" />
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
 
-                <Switch
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchWifi"
                     android:layout_width="wrap_content"
-                    android:layout_height="70dp"
-                    android:layout_weight="1" />
-
+                    android:layout_height="wrap_content" />
             </LinearLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                app:dividerColor="?attr/colorSurfaceVariant" />
+
 
             <TextView
-                android:id="@+id/textView13"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="20dp"
-                android:layout_weight="1"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
                 android:text="Bảo mật"
-                android:textSize="18dp" />
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/bg_list"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView7"
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_shield"
-                    app:tint="?attr/colorOnSurface" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_shield"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="250dp"
-                    android:layout_height="57dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
                     android:text="Khoá ứng dụng"
-                    android:textAllCaps="false"
-                    android:textSize="20sp" />
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:textColor="?attr/colorOnSurface" />
 
-                <Switch
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchKhoaUngDung"
                     android:layout_width="wrap_content"
-                    android:layout_height="70dp"
-                    android:layout_weight="1" />
-
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/layout_tu_dong_khoa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="22dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/bg_list"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="72dp"
                 android:orientation="horizontal"
-                tools:layout_marginRight="10dp">
+                android:paddingHorizontal="24dp">
 
                 <ImageView
-                    android:id="@+id/imageView8"
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_lock"
-                    app:tint="?attr/colorOnSurface"/>
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_lock"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout
-                    android:layout_width="352dp"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:padding="8dp">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView9"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:text="Tự động khoá"
-                        android:textSize="20sp" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/edttudongkhoa"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Sau 5 phút"
-                        android:textColor="#7E7B7B"
-                        android:textSize="16sp" />
-
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
-
             </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-    <!-- Bạn có thể copy "DÒNG 2" dán xuống dưới để làm thêm các cài đặt khác (Đổi mật khẩu, Ngôn ngữ, v.v.) -->
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

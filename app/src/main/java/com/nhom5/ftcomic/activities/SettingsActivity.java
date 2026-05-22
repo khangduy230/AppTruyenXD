@@ -1,22 +1,12 @@
 package com.nhom5.ftcomic.activities;
 
-import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Switch;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -26,20 +16,46 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 public class SettingsActivity extends AppCompatActivity {
     //khai báo các biến
-    private Switch switchDarkMode;
+    private MaterialSwitch switchDarkMode;
     private SharedPreferences sharedPreferences;
-    private LinearLayout layouttansuat;
+    private LinearLayout layout_tan_suat;
+    private LinearLayout layout_mang_update;
+    private LinearLayout layout_auto_delete;
     private TextView edttanxuat;
+    private TextView edtmangcapnhat;
+    private TextView edtautodelete;
+
+    // Hàm dùng chung cho Dialog
+    private void showSelectionDialog(java.lang.String title, java.lang.String[] options, android.widget.TextView targetTextView, java.lang.String prefsKey) {
+        int checkedItem = sharedPreferences.getInt(prefsKey, 0);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(title)
+                .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                    targetTextView.setText(options[which]);
+                    sharedPreferences.edit().putInt(prefsKey, which).apply();
+                    dialog.dismiss();
+                })
+                .setNegativeButton("Quay lại", null)
+                .show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+
+
+
         // Ánh xạ các biến
         switchDarkMode = findViewById(R.id.switchDarkMode);
-        layouttansuat = findViewById(R.id.layouttansuat);
+        layout_tan_suat = findViewById(R.id.layout_tan_suat);
+        layout_mang_update = findViewById(R.id.layout_mang_update);
+        layout_auto_delete = findViewById(R.id.layout_auto_delete);
         edttanxuat = findViewById(R.id.edttanxuat);
+        edtmangcapnhat = findViewById(R.id.edtmangcapnhat);
+        edtautodelete = findViewById(R.id.edtautodelete);
         //khởi tạo SharedPreferences để lưu cấu hình
         sharedPreferences = getSharedPreferences("AppSettingPrefs", MODE_PRIVATE);
 
@@ -47,12 +63,24 @@ public class SettingsActivity extends AppCompatActivity {
         boolean isNightMode = sharedPreferences.getBoolean("NightMode", false);
         switchDarkMode.setChecked(isNightMode);
 
-        layouttansuat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openFeedbackDialog(Gravity.CENTER);
-            }
+
+        // Dialog các thứ
+        layout_tan_suat.setOnClickListener(v -> {
+            String[] options = {"Thủ công", "Mỗi ngày", "Mỗi 2 ngày", "Mỗi 3 ngày", "Mỗi tuần"};
+            showSelectionDialog("Tần suất cập nhật", options, edttanxuat, "frequency_pos");
         });
+
+        layout_mang_update.setOnClickListener(v -> {
+            String[] options = {"Wifi và Mạng di động", "Chỉ Wifi"};
+            showSelectionDialog("Mạng cập nhật", options, edtmangcapnhat, "network_pos");
+        });
+
+        layout_auto_delete.setOnClickListener( v -> {
+            String[] options = {"Không tự động xoá", "Sau khi đọc", "Sau 3 ngày","Sau 1 tuần", "Sau 2 tuần"};
+            showSelectionDialog("Tự động xoá chương", options, edtautodelete, "auto_delete_pos");
+        });
+
+
 
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -79,68 +107,15 @@ public class SettingsActivity extends AppCompatActivity {
 //                finish();
 //            }
 //        });
-        // Bỏ chữ "view." ở đằng trước đi
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
 
         topAppBar.setNavigationOnClickListener(v -> {
-            // Trong Activity, bạn chỉ cần gọi trực tiếp như thế này:
             getOnBackPressedDispatcher().onBackPressed();
 
-            // Hoặc dùng một lệnh cực kỳ ngắn gọn và phổ biến để đóng Activity hiện tại:
-            // finish();
+
         });
+
+
     }
-    //Hàm khởi tạo và hiển thị dialog
-    private void openFeedbackDialog(int gravity) {
-        final Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_dialog_tanxuat);
-        //tạo cấu hình cho dialog
-        Window window = dialog.getWindow();
-        if (window == null) return;
 
-        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-        windowAttributes.gravity = gravity;
-        window.setAttributes(windowAttributes);
-
-        if (Gravity.CENTER == gravity) {
-            //Khi click ra bên ngoài thì tắt
-            dialog.setCancelable(true);
-        }else
-        {
-            dialog.setCancelable(false);
-        }
-        //ánh xạ id các thành phần trong dialog
-        RadioGroup grouptansuat = dialog.findViewById(R.id.grouptansuat);
-        Button btnback = dialog.findViewById(R.id.btnback);
-        Button btnconfirm = dialog.findViewById(R.id.btnconfirm);
-        //xử lý sự kiện khi click vào btnback
-        btnback.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();//Đóng hộp thoại
-            }
-        });
-        //Xử lí sự kiện khi click vào btnconfirm
-        btnconfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Tìm ID của radiobutton
-                int selectedId = grouptansuat.getCheckedRadioButtonId();
-                RadioButton radioButton = dialog.findViewById(selectedId);
-                String selectedText = radioButton.getText().toString();
-                //Cập nhật văn bản
-                if (edttanxuat != null) {
-                    edttanxuat.setText(selectedText);
-                }
-                dialog.dismiss();
-
-            }
-        });
-
-        dialog.show();
-    }
 }

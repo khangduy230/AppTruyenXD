@@ -1,10 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.TruyenTranhThanhXuan" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.FTComic" parent="Theme.Material3.DayNight.NoActionBar">
 
 <!--        <item name="colorSurface">#1E1E1E</item>-->
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="colorOnSurface">#E6E1E5</item>
+    </style>
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <item name="postSplashScreenTheme">@style/Base.Theme.FTComic</item>
     </style>
 </resources>
