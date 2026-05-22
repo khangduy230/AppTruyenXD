@@ -67,8 +67,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_dark_mode" />
-
+                    app:srcCompat="@drawable/ic_dark_mode"
+                    app:tint="?attr/colorOnSurface" />
                 <TextView
                     android:id="@+id/textView6"
                     android:layout_width="250dp"
@@ -77,7 +77,8 @@
                     android:layout_weight="1"
                     android:text="Chế độ tối"
                     android:textAllCaps="false"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    />
 
                 <Switch
                     android:id="@+id/switchDarkMode"
@@ -116,6 +117,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
+                    app:tint="?attr/colorOnSurface"
                     app:srcCompat="@drawable/ic_reload" />
 
                 <LinearLayout
@@ -160,7 +162,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_internet" />
+                    app:srcCompat="@drawable/ic_internet"
+                    app:tint="?attr/colorOnSurface" />
 
                 <LinearLayout
                     android:layout_width="352dp"
@@ -213,7 +216,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_donwload" />
+                    app:srcCompat="@drawable/ic_donwload"
+                    app:tint="?attr/colorOnSurface" />
 
                 <LinearLayout
                     android:layout_width="352dp"
@@ -256,7 +260,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_trash" />
+                    app:srcCompat="@drawable/ic_trash"
+                    app:tint="?attr/colorOnSurface" />
 
                 <LinearLayout
                     android:layout_width="352dp"
@@ -300,7 +305,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_wifi" />
+                    app:srcCompat="@drawable/ic_wifi"
+                    app:tint="?attr/colorOnSurface"/>
 
                 <TextView
                     android:id="@+id/textView6"
@@ -313,7 +319,7 @@
                     android:textSize="20sp" />
 
                 <Switch
-                    android:id="@+id/switchDarkMode"
+                    android:id="@+id/switchWifi"
                     android:layout_width="wrap_content"
                     android:layout_height="70dp"
                     android:layout_weight="1" />
@@ -345,7 +351,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_shield" />
+                    app:srcCompat="@drawable/ic_shield"
+                    app:tint="?attr/colorOnSurface" />
 
                 <TextView
                     android:id="@+id/textView6"
@@ -358,7 +365,7 @@
                     android:textSize="20sp" />
 
                 <Switch
-                    android:id="@+id/switchDarkMode"
+                    android:id="@+id/switchKhoaUngDung"
                     android:layout_width="wrap_content"
                     android:layout_height="70dp"
                     android:layout_weight="1" />
@@ -380,7 +387,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_lock" />
+                    app:srcCompat="@drawable/ic_lock"
+                    app:tint="?attr/colorOnSurface"/>
 
                 <LinearLayout
                     android:layout_width="352dp"

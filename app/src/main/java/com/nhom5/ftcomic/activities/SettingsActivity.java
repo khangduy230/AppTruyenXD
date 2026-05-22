@@ -63,6 +63,7 @@ public class SettingsActivity extends AppCompatActivity {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 editor.putBoolean("NightMode", false);
             }
+
             editor.apply();
         });
 
@@ -89,12 +90,12 @@ public class SettingsActivity extends AppCompatActivity {
             // finish();
         });
     }
-
+    //Hàm khởi tạo và hiển thị dialog
     private void openFeedbackDialog(int gravity) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.layout_dialog_tanxuat);
-
+        //tạo cấu hình cho dialog
         Window window = dialog.getWindow();
         if (window == null) return;
 
@@ -120,16 +121,18 @@ public class SettingsActivity extends AppCompatActivity {
         btnback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.dismiss();
+                dialog.dismiss();//Đóng hộp thoại
             }
         });
         //Xử lí sự kiện khi click vào btnconfirm
         btnconfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Tìm ID của radiobutton
                 int selectedId = grouptansuat.getCheckedRadioButtonId();
                 RadioButton radioButton = dialog.findViewById(selectedId);
                 String selectedText = radioButton.getText().toString();
+                //Cập nhật văn bản
                 if (edttanxuat != null) {
                     edttanxuat.setText(selectedText);
                 }
