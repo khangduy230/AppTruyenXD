@@ -5,5 +5,6 @@
 <!--        <item name="colorSurface">#1E1E1E</item>-->
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColor">#FFFFFF</item>
+        <item name="colorOnSurface">#E6E1E5</item>
     </style>
 </resources>
