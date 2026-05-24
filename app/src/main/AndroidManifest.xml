@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".YouthComicApp"
         android:allowBackup="true"
@@ -16,6 +17,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TruyenTranhThanhXuan">
+        <activity
+            android:name=".activities.ReadingHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ManageComicActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.NotificationsActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ReaderActivity"
             android:exported="false" />

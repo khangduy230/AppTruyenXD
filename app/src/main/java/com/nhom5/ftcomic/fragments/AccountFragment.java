@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DownloadedActivity;
+import com.nhom5.ftcomic.activities.ManageComicActivity;
+import com.nhom5.ftcomic.activities.NotificationsActivity;
+import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
 import com.nhom5.ftcomic.utils.AuthHelper;
 import com.nhom5.ftcomic.utils.SessionManager;
@@ -25,6 +28,9 @@ public class AccountFragment extends Fragment {
     private TextView btnLogout;
     private TextView btnDownload;
     private View btnSettings;
+    private TextView btnNotifications;
+    private TextView btnManage;
+    private TextView btnHistory;
 
     private SessionManager sessionManager;
 
@@ -57,6 +63,27 @@ public class AccountFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), DownloadedActivity.class);
                 startActivity(intent);
             });
+        });
+        //nút thông báo
+        btnNotifications.setOnClickListener(v -> {
+            AuthHelper.KiemTraVaThucHien(getContext(), getParentFragmentManager(), () -> {
+                Intent intent = new Intent(getActivity(), NotificationsActivity.class);
+                startActivity(intent);
+            });
+        });
+
+        //nút Quản lý truyện
+        btnManage.setOnClickListener(v -> {
+            AuthHelper.KiemTraVaThucHien(getContext(), getParentFragmentManager(), () -> {
+                Intent intent = new Intent(getActivity(), ManageComicActivity.class);
+                startActivity(intent);
+            });
+        });
+
+        //nút Lịch sử đọc
+        btnHistory.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ReadingHistoryActivity.class);
+            startActivity(intent);
         });
 
         btnLogin.setOnClickListener(v -> {
