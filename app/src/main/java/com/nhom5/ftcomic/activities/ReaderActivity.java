@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ReaderPageAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
@@ -48,6 +49,14 @@ public class ReaderActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reader);
+
+        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+
+
+        });
 
         comicId = getIntent().getIntExtra("COMIC_ID", -1);
         chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
