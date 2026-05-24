@@ -13,6 +13,7 @@ import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.models.ComicCategoryCrossRef;
 import com.nhom5.ftcomic.models.DownloadedChapter;
 import com.nhom5.ftcomic.models.Favorite;
+import com.nhom5.ftcomic.models.Rating;
 import com.nhom5.ftcomic.models.ReadingHistory;
 
 import java.util.concurrent.ExecutorService;
@@ -27,9 +28,10 @@ import java.util.concurrent.Executors;
                 ChapterPage.class,
                 Favorite.class,
                 ReadingHistory.class,
-                DownloadedChapter.class
+                DownloadedChapter.class,
+                Rating.class
         },
-        version = 5,
+        version = 6,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -49,6 +51,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ReadingHistoryDao readingHistoryDao();
 
     public abstract DownloadedChapterDao downloadedChapterDao();
+
+    public abstract RatingDao ratingDao();
 
     public static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(4);

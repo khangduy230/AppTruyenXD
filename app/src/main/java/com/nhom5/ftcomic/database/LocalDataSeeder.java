@@ -35,109 +35,47 @@ public class LocalDataSeeder {
     private static void insertComics(AppDatabase db) {
         List<Comic> comics = new ArrayList<>();
 
+        // Cấu trúc tham số: id, image, coverUrl, name, author, description, status, section, likeCount, rating, ratingCount, commentCount, viewCount
         comics.add(new Comic(
-                1,
-                R.drawable.thientai,
-                "",
-                "Thiên Tài Bóng Đêm",
-                "Futho High",
+                1, R.drawable.thientai, "", "Thiên Tài Bóng Đêm", "Futho High",
                 "Một bộ truyện giả tưởng kể về nhân vật chính trên hành trình khám phá sức mạnh bí ẩn.",
-                "Đang ra",
-                "featured",
-                3690,
-                4.7f,
-                150,
-                12000
+                "Đang ra", "featured", 3690, 4.7f, 150, 150, 12000
         ));
 
         comics.add(new Comic(
-                2,
-                R.drawable.thientai,
-                "",
-                "Học Viện Siêu Năng",
-                "Nhóm 5",
+                2, R.drawable.thientai, "", "Học Viện Siêu Năng", "Nhóm 5",
                 "Câu chuyện về những học sinh sở hữu năng lực đặc biệt trong một học viện bí ẩn.",
-                "Đang ra",
-                "featured",
-                2800,
-                4.5f,
-                90,
-                9800
+                "Đang ra", "featured", 2800, 4.5f, 90, 90, 9800
         ));
 
         comics.add(new Comic(
-                3,
-                R.drawable.thientai,
-                "",
-                "Vua Truyện Tranh",
-                "Tác giả A",
+                3, R.drawable.thientai, "", "Vua Truyện Tranh", "Tác giả A",
                 "Một hành trình hài hước và kịch tính của nhân vật chính trong thế giới truyện tranh.",
-                "Hoàn thành",
-                "ranking",
-                5100,
-                4.9f,
-                230,
-                25000
+                "Hoàn thành", "ranking", 5100, 4.9f, 230, 230, 25000
         ));
 
         comics.add(new Comic(
-                4,
-                R.drawable.thientai,
-                "",
-                "Thanh Xuân Rực Rỡ",
-                "Tác giả B",
+                4, R.drawable.thientai, "", "Thanh Xuân Rực Rỡ", "Tác giả B",
                 "Một câu chuyện học đường nhẹ nhàng, tình cảm và gần gũi.",
-                "Đang ra",
-                "ranking",
-                4100,
-                4.6f,
-                180,
-                17000
+                "Đang ra", "ranking", 4100, 4.6f, 180, 180, 17000
         ));
 
         comics.add(new Comic(
-                5,
-                R.drawable.thientai,
-                "",
-                "Truyện Phiêu Lưu 1",
-                "Tác giả C",
+                5, R.drawable.thientai, "", "Truyện Phiêu Lưu 1", "Tác giả C",
                 "Nhân vật chính bắt đầu chuyến phiêu lưu qua nhiều vùng đất kỳ lạ.",
-                "Đang ra",
-                "all",
-                1200,
-                4.2f,
-                40,
-                5000
+                "Đang ra", "all", 1200, 4.2f, 40, 40, 5000
         ));
 
         comics.add(new Comic(
-                6,
-                R.drawable.thientai,
-                "",
-                "Truyện Hành Động 2",
-                "Tác giả D",
+                6, R.drawable.thientai, "", "Truyện Hành Động 2", "Tác giả D",
                 "Một bộ truyện hành động với nhiều trận chiến gay cấn.",
-                "Đang ra",
-                "all",
-                1800,
-                4.4f,
-                60,
-                6500
+                "Đang ra", "all", 1800, 4.4f, 60, 60, 6500
         ));
 
         comics.add(new Comic(
-                7,
-                R.drawable.thientai,
-                "",
-                "Truyện Hài Hước 3",
-                "Tác giả E",
+                7, R.drawable.thientai, "", "Truyện Hài Hước 3", "Tác giả E",
                 "Bộ truyện giải trí nhẹ nhàng, phù hợp đọc thư giãn.",
-                "Hoàn thành",
-                "all",
-                900,
-                4.1f,
-                25,
-                3000
+                "Hoàn thành", "all", 900, 4.1f, 25, 25, 3000
         ));
 
         db.comicDao().insertComics(comics);

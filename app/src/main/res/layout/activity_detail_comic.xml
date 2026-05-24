@@ -105,9 +105,13 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/layoutRating"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -119,6 +123,7 @@
                         android:textAppearance="?attr/textAppearanceTitleLarge" />
 
                     <TextView
+                        android:id="@+id/tvRatingCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="25 đánh giá"

@@ -21,12 +21,14 @@ public class Comic {
 
     private int likeCount;
     private float rating;
+    private int ratingCount;
     private int commentCount;
     private int viewCount;
 
     public Comic() {
     }
-
+    public int getRatingCount() { return ratingCount; }
+    public void setRatingCount(int ratingCount) { this.ratingCount = ratingCount; }
     @Ignore
     public Comic(int image, String name) {
         this.image = image;
@@ -41,7 +43,7 @@ public class Comic {
     @Ignore
     public Comic(int id, int image, String coverUrl, String name, String author,
                  String description, String status, String section, int likeCount,
-                 float rating, int commentCount, int viewCount) {
+                 float rating, int ratingCount, int commentCount, int viewCount) {
         this.id = id;
         this.image = image;
         this.coverUrl = coverUrl;
@@ -52,6 +54,7 @@ public class Comic {
         this.section = section;
         this.likeCount = likeCount;
         this.rating = rating;
+        this.ratingCount = ratingCount;
         this.commentCount = commentCount;
         this.viewCount = viewCount;
     }

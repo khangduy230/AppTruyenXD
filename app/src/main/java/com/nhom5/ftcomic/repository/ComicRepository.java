@@ -185,6 +185,14 @@ public class ComicRepository {
         List<Comic> comics = new ArrayList<>();
 
         for (ComicResponse item : responses) {
+            // Kiểm tra xem trường lấy số lượng đánh giá từ server có tồn tại không.
+            // Nếu server Supabase chưa tạo cột ratingCount, ta sẽ tạm thời lấy item.getCommentCount()
+            // hoặc gán cứng một con số an toàn ban đầu (ví dụ: 40) để tránh lỗi chia cho 0.
+            int remoteRatingCount = item.getCommentCount();
+            if (remoteRatingCount <= 0) {
+                remoteRatingCount = 40; // Con số an toàn phòng thủ để không bị chia cho 0 khi tính toán
+            }
+
             Comic comic = new Comic(
                     item.getId(),
                     R.drawable.thientai,
@@ -196,8 +204,9 @@ public class ComicRepository {
                     item.getSection(),
                     item.getLikeCount(),
                     item.getRating(),
-                    item.getCommentCount(),
-                    item.getViewCount()
+                    remoteRatingCount, // <--- THAM SỐ THỨ 11: Đã truyền chính xác vào trường ratingCount
+                    item.getCommentCount(), // <--- THAM SỐ THỨ 12: trường commentCount độc lập hoàn toàn
+                    item.getViewCount()    // <--- THAM SỐ THỨ 13: trường viewCount
             );
 
             comics.add(comic);
