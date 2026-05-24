@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.models.ChapterPage;
 
+import java.io.File;
 import java.util.List;
 
 public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.ReaderPageViewHolder> {
@@ -38,14 +39,33 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
             return;
         }
 
-        if (page.getImageUrl() != null && !page.getImageUrl().isEmpty()) {
+        String localFilePath = page.getLocalFilePath();
+
+        if (localFilePath != null && !localFilePath.trim().isEmpty()) {
+            File localFile = new File(localFilePath);
+
+            if (localFile.exists() && localFile.length() > 0) {
+                Glide.with(holder.itemView.getContext())
+                        .load(localFile)
+                        .placeholder(R.drawable.thientai)
+                        .error(R.drawable.thientai)
+                        .fitCenter()
+                        .into(holder.imgPage);
+                return;
+            }
+        }
+
+        String imageUrl = page.getImageUrl();
+
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(holder.itemView.getContext())
-                    .load(page.getImageUrl())
-                    .placeholder(page.getImage())
-                    .error(page.getImage())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.thientai)
+                    .error(R.drawable.thientai)
+                    .fitCenter()
                     .into(holder.imgPage);
         } else {
-            holder.imgPage.setImageResource(page.getImage());
+            holder.imgPage.setImageResource(R.drawable.thientai);
         }
     }
 

@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
                 ReadingHistory.class,
                 DownloadedChapter.class
         },
-        version = 3,
+        version = 5,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

@@ -12,14 +12,8 @@ public class ChapterPage {
 
     private int chapterId;
     private int pageNumber;
-
-    // Tạm thời dùng ảnh drawable local
     private int image;
-
-    // Sau này dùng web API thì dùng imageUrl
     private String imageUrl;
-
-    // Sau này tải offline thì lưu đường dẫn file
     private String localFilePath;
 
     public ChapterPage() {

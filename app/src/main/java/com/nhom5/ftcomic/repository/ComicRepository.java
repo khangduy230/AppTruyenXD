@@ -16,7 +16,9 @@ import com.nhom5.ftcomic.network.response.ChapterResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,10 +33,6 @@ public class ComicRepository {
     public ComicRepository(Context context) {
         appDatabase = AppDatabase.getInstance(context);
     }
-
-    // =========================
-    // 1. Lấy dữ liệu từ Room
-    // =========================
 
     public LiveData<List<Comic>> getComicsBySection(String section) {
         return appDatabase.comicDao().getComicsBySection(section);
@@ -52,9 +50,11 @@ public class ComicRepository {
         return appDatabase.chapterPageDao().getPagesByChapterId(chapterId);
     }
 
-    // =========================
-    // 2. Sync Comics Supabase → Room
-    // =========================
+    public void syncAllHomeComics() {
+        syncComicsBySection("featured");
+        syncComicsBySection("ranking");
+        syncComicsBySection("all");
+    }
 
     public void syncComicsBySection(String section) {
         SupabaseClient.getApi()
@@ -63,15 +63,18 @@ public class ComicRepository {
                     @Override
                     public void onResponse(Call<List<ComicResponse>> call,
                                            Response<List<ComicResponse>> response) {
+                        Log.d(TAG, "Comics URL: " + call.request().url());
+                        Log.d(TAG, "Comics code: " + response.code());
+
                         if (response.isSuccessful() && response.body() != null) {
                             List<Comic> comics = mapComicResponsesToEntities(response.body());
 
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.comicDao().insertComics(comics);
-                                Log.d(TAG, "Đã sync " + section + ": " + comics.size());
+                                Log.d(TAG, "Đã lưu section " + section + ", size=" + comics.size());
                             });
                         } else {
-                            Log.e(TAG, "syncComicsBySection lỗi response: " + response.code());
+                            logErrorBody(response, "syncComicsBySection");
                         }
                     }
 
@@ -82,32 +85,30 @@ public class ComicRepository {
                 });
     }
 
-    public void syncAllHomeComics() {
-        syncComicsBySection("featured");
-        syncComicsBySection("ranking");
-        syncComicsBySection("all");
-    }
-
-    // =========================
-    // 3. Sync Chapters Supabase → Room
-    // =========================
-
     public void syncChaptersByComicId(int comicId) {
+        if (comicId <= 0) {
+            Log.e(TAG, "comicId không hợp lệ: " + comicId);
+            return;
+        }
+
         SupabaseClient.getApi()
                 .getChaptersByComicId("eq." + comicId, "chapter_number.asc")
                 .enqueue(new Callback<List<ChapterResponse>>() {
                     @Override
                     public void onResponse(Call<List<ChapterResponse>> call,
                                            Response<List<ChapterResponse>> response) {
+                        Log.d(TAG, "Chapters URL: " + call.request().url());
+                        Log.d(TAG, "Chapters code: " + response.code());
+
                         if (response.isSuccessful() && response.body() != null) {
                             List<Chapter> chapters = mapChapterResponsesToEntities(response.body());
 
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.chapterDao().insertChapters(chapters);
-                                Log.d(TAG, "Đã sync chapters comicId=" + comicId);
+                                Log.d(TAG, "Đã lưu chapters comicId=" + comicId + ", size=" + chapters.size());
                             });
                         } else {
-                            Log.e(TAG, "syncChapters lỗi response: " + response.code());
+                            logErrorBody(response, "syncChapters");
                         }
                     }
 
@@ -118,26 +119,58 @@ public class ComicRepository {
                 });
     }
 
-    // =========================
-    // 4. Sync Pages Supabase → Room
-    // =========================
-
     public void syncPagesByChapterId(int chapterId) {
+        if (chapterId <= 0) {
+            Log.e(TAG, "chapterId không hợp lệ: " + chapterId);
+            return;
+        }
+
         SupabaseClient.getApi()
                 .getPagesByChapterId("eq." + chapterId, "page_number.asc")
                 .enqueue(new Callback<List<ChapterPageResponse>>() {
                     @Override
                     public void onResponse(Call<List<ChapterPageResponse>> call,
                                            Response<List<ChapterPageResponse>> response) {
+                        Log.d(TAG, "Pages URL: " + call.request().url());
+                        Log.d(TAG, "Pages code: " + response.code());
+
                         if (response.isSuccessful() && response.body() != null) {
-                            List<ChapterPage> pages = mapPageResponsesToEntities(response.body());
+                            List<ChapterPage> remotePages = mapPageResponsesToEntities(response.body());
 
                             AppDatabase.databaseWriteExecutor.execute(() -> {
-                                appDatabase.chapterPageDao().insertPages(pages);
-                                Log.d(TAG, "Đã sync pages chapterId=" + chapterId);
+                                List<ChapterPage> oldPages = appDatabase.chapterPageDao()
+                                        .getPagesByChapterIdSync(chapterId);
+
+                                Map<Integer, String> localPathMap = new HashMap<>();
+
+                                if (oldPages != null) {
+                                    for (ChapterPage oldPage : oldPages) {
+                                        if (oldPage.getLocalFilePath() != null
+                                                && !oldPage.getLocalFilePath().trim().isEmpty()) {
+                                            localPathMap.put(
+                                                    oldPage.getPageNumber(),
+                                                    oldPage.getLocalFilePath()
+                                            );
+                                        }
+                                    }
+                                }
+
+                                for (ChapterPage newPage : remotePages) {
+                                    String oldLocalPath = localPathMap.get(newPage.getPageNumber());
+
+                                    if (oldLocalPath != null && !oldLocalPath.trim().isEmpty()) {
+                                        newPage.setLocalFilePath(oldLocalPath);
+                                    }
+                                }
+
+                                appDatabase.chapterPageDao().deletePagesByChapterId(chapterId);
+                                appDatabase.chapterPageDao().insertPages(remotePages);
+
+                                Log.d(TAG, "Đã lưu pages chapterId=" + chapterId
+                                        + ", size=" + remotePages.size());
                             });
                         } else {
-                            Log.e(TAG, "syncPages lỗi response: " + response.code());
+                            logErrorBody(response, "syncPages");
                         }
                     }
 
@@ -147,10 +180,6 @@ public class ComicRepository {
                     }
                 });
     }
-
-    // =========================
-    // 5. Mapper API Response → Room Entity
-    // =========================
 
     private List<Comic> mapComicResponsesToEntities(List<ComicResponse> responses) {
         List<Comic> comics = new ArrayList<>();
@@ -212,5 +241,17 @@ public class ComicRepository {
         }
 
         return pages;
+    }
+
+    private void logErrorBody(Response<?> response, String tag) {
+        try {
+            if (response.errorBody() != null) {
+                Log.e(TAG, tag + " error: " + response.errorBody().string());
+            } else {
+                Log.e(TAG, tag + " error code: " + response.code());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Không đọc được error body", e);
+        }
     }
 }

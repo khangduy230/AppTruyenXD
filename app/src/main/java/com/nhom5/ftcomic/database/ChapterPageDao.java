@@ -19,6 +19,18 @@ public interface ChapterPageDao {
     @Query("SELECT * FROM chapter_pages WHERE chapterId = :chapterId ORDER BY pageNumber ASC")
     LiveData<List<ChapterPage>> getPagesByChapterId(int chapterId);
 
+    @Query("SELECT * FROM chapter_pages WHERE chapterId = :chapterId ORDER BY pageNumber ASC")
+    List<ChapterPage> getPagesByChapterIdSync(int chapterId);
+
     @Query("SELECT COUNT(*) FROM chapter_pages WHERE chapterId = :chapterId")
     int countPagesByChapterId(int chapterId);
+
+    @Query("UPDATE chapter_pages SET localFilePath = :localFilePath WHERE id = :pageId")
+    void updateLocalFilePath(int pageId, String localFilePath);
+
+    @Query("UPDATE chapter_pages SET localFilePath = '' WHERE chapterId = :chapterId")
+    void clearLocalFilePathsByChapterId(int chapterId);
+
+    @Query("DELETE FROM chapter_pages WHERE chapterId = :chapterId")
+    void deletePagesByChapterId(int chapterId);
 }

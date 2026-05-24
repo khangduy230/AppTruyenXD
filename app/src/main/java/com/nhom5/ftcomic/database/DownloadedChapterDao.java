@@ -20,15 +20,22 @@ public interface DownloadedChapterDao {
     @Query("SELECT * FROM downloaded_chapters WHERE chapterId = :chapterId LIMIT 1")
     LiveData<DownloadedChapter> getDownloadedChapter(int chapterId);
 
+    @Query("SELECT COUNT(*) FROM downloaded_chapters WHERE chapterId = :chapterId")
+    int isChapterDownloaded(int chapterId);
+
     @Query("SELECT * FROM downloaded_chapters ORDER BY downloadedAt DESC")
     LiveData<List<DownloadedChapter>> getAllDownloadedChapters();
 
-    @Query("SELECT DISTINCT comics.* FROM comics " +
+    @Query("SELECT comics.* FROM comics " +
             "INNER JOIN downloaded_chapters " +
             "ON comics.id = downloaded_chapters.comicId " +
-            "ORDER BY downloaded_chapters.downloadedAt DESC")
+            "GROUP BY comics.id " +
+            "ORDER BY MAX(downloaded_chapters.downloadedAt) DESC")
     LiveData<List<Comic>> getDownloadedComics();
 
     @Query("DELETE FROM downloaded_chapters WHERE chapterId = :chapterId")
     void deleteDownloadedChapter(int chapterId);
+
+    @Query("DELETE FROM downloaded_chapters")
+    void deleteAllDownloadedChapters();
 }

@@ -37,7 +37,6 @@ public interface SupabaseApi {
             @Query("order") String order
     );
 
-    // Supabase hiện tại của bạn dùng cột name, không dùng title
     @GET("comics")
     Call<List<ComicResponse>> searchComics(
             @Query("name") String nameFilter,
