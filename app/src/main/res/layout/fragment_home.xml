@@ -60,7 +60,7 @@
                 android:layout_marginBottom="12dp"
                 android:drawablePadding="16dp"
                 android:text="Truyện nổi bật"
-                android:textColor="#000000"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:drawableEndCompat="@drawable/ic_arrow_forward" />
@@ -86,7 +86,7 @@
                 android:layout_marginBottom="12dp"
                 android:drawablePadding="16dp"
                 android:text="Bảng xếp hạng"
-                android:textColor="#000000"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:drawableEndCompat="@drawable/ic_arrow_forward" />
@@ -112,7 +112,7 @@
                 android:layout_marginBottom="12dp"
                 android:drawablePadding="16dp"
                 android:text="Tất cả truyện"
-                android:textColor="#000000"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:drawableEndCompat="@drawable/ic_arrow_forward" />
