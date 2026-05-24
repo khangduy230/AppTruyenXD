@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DownloadedActivity;
+import com.nhom5.ftcomic.activities.ManageComicActivity;
+import com.nhom5.ftcomic.activities.NotificationsActivity;
+import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
 import com.nhom5.ftcomic.utils.AuthHelper;
 

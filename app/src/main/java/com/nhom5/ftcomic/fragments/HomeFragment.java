@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.R;
-import com.nhom5.ftcomic.apdaters.ComicAdapter;
+import com.nhom5.ftcomic.adapters.ComicAdapter;
 
 
 import java.util.ArrayList;
