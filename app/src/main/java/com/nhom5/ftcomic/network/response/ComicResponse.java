@@ -7,6 +7,7 @@ public class ComicResponse {
     @SerializedName("id")
     private int id;
 
+    // Bảng comics của bạn đang dùng name
     @SerializedName("name")
     private String name;
 
@@ -16,14 +17,14 @@ public class ComicResponse {
     @SerializedName("description")
     private String description;
 
+    @SerializedName("cover_url")
+    private String coverUrl;
+
     @SerializedName("status")
     private String status;
 
     @SerializedName("section")
     private String section;
-
-    @SerializedName("cover_url")
-    private String coverUrl;
 
     @SerializedName("like_count")
     private int likeCount;
@@ -53,16 +54,19 @@ public class ComicResponse {
         return description;
     }
 
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
     public String getStatus() {
         return status;
     }
 
     public String getSection() {
+        if (section == null || section.isEmpty()) {
+            return "all";
+        }
         return section;
-    }
-
-    public String getCoverUrl() {
-        return coverUrl;
     }
 
     public int getLikeCount() {

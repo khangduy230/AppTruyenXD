@@ -13,6 +13,7 @@ public class ChapterResponse {
     @SerializedName("chapter_number")
     private int chapterNumber;
 
+    // Bảng chapters của bạn dùng chapter_name
     @SerializedName("chapter_name")
     private String chapterName;
 

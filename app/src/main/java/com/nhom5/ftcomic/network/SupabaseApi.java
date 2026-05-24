@@ -1,7 +1,9 @@
 package com.nhom5.ftcomic.network;
 
+import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
+import com.nhom5.ftcomic.network.response.ComicCategoryResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
 
 import java.util.List;
@@ -35,9 +37,26 @@ public interface SupabaseApi {
             @Query("order") String order
     );
 
+    // Supabase hiện tại của bạn dùng cột name, không dùng title
     @GET("comics")
     Call<List<ComicResponse>> searchComics(
             @Query("name") String nameFilter,
+            @Query("order") String order
+    );
+
+    @GET("categories")
+    Call<List<CategoryResponse>> getAllCategories(
+            @Query("order") String order
+    );
+
+    @GET("comic_categories")
+    Call<List<ComicCategoryResponse>> getComicCategoryRefs(
+            @Query("category_id") String categoryFilter
+    );
+
+    @GET("comics")
+    Call<List<ComicResponse>> getComicsByIds(
+            @Query("id") String idFilter,
             @Query("order") String order
     );
 }
