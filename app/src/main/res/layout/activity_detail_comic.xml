@@ -90,6 +90,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvLikeCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="3.69k"
@@ -111,6 +112,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="4.7*"
@@ -132,6 +134,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvCommentCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="150"
@@ -249,74 +252,14 @@
                     app:tint="?attr/colorOnSurfaceVariant" />
             </RelativeLayout>
 
-            <LinearLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewChapters"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chương 10"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="2 ngày trước"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerColor="?attr/colorSurfaceVariant" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chương 9"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="7 ngày trước"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
-
-                <com.google.android.material.divider.MaterialDivider
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:dividerColor="?attr/colorSurfaceVariant" />
-            </LinearLayout>
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
