@@ -214,7 +214,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_donwload"
+                    android:src="@drawable/ic_download"
                     app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout

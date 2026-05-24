@@ -1,9 +1,11 @@
-package com.nhom5.ftcomic.apdaters;
+package com.nhom5.ftcomic.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +19,6 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
     private List<Comic> comicList;
     private OnComicClickListener listener;
 
-    // Interface để xử lý sự kiện click
     public interface OnComicClickListener {
         void onComicClick(Comic comic);
     }
@@ -30,22 +31,33 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
     @NonNull
     @Override
     public ComicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comic, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_comic, parent, false);
         return new ComicViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
         Comic comic = comicList.get(position);
-        if (comic == null) return;
 
-        // Gán ảnh từ drawable
-        holder.imgComic.setImageResource(comic.getImage());
+        if (comic == null) {
+            return;
+        }
 
-        // Bắt sự kiện click vào item
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        holder.tvComicTitle.setText(comic.getName());
+
+        if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
+            com.bumptech.glide.Glide.with(holder.itemView.getContext())
+                    .load(comic.getCoverUrl())
+                    .placeholder(comic.getImage())
+                    .error(comic.getImage())
+                    .into(holder.imgComic);
+        } else {
+            holder.imgComic.setImageResource(comic.getImage());
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
                 listener.onComicClick(comic);
             }
         });
@@ -53,18 +65,25 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
     @Override
     public int getItemCount() {
-        if (comicList != null) {
-            return comicList.size();
+        if (comicList == null) {
+            return 0;
         }
-        return 0;
+        return comicList.size();
+    }
+
+    public void setComicList(List<Comic> comicList) {
+        this.comicList = comicList;
+        notifyDataSetChanged();
     }
 
     public static class ComicViewHolder extends RecyclerView.ViewHolder {
         ImageView imgComic;
+        TextView tvComicTitle;
 
         public ComicViewHolder(@NonNull View itemView) {
             super(itemView);
             imgComic = itemView.findViewById(R.id.imgComic);
+            tvComicTitle = itemView.findViewById(R.id.tvComicTitle);
         }
     }
 }

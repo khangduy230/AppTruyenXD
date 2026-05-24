@@ -1,0 +1,46 @@
+package com.nhom5.ftcomic.database;
+
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
+
+import com.nhom5.ftcomic.models.Comic;
+
+import java.util.List;
+
+@Dao
+public interface ComicDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertComic(Comic comic);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertComics(List<Comic> comics);
+
+    @Update
+    void updateComic(Comic comic);
+
+    @Query("SELECT * FROM comics ORDER BY id ASC")
+    LiveData<List<Comic>> getAllComics();
+
+    @Query("SELECT * FROM comics WHERE section = :section ORDER BY id ASC")
+    LiveData<List<Comic>> getComicsBySection(String section);
+
+    @Query("SELECT * FROM comics WHERE id = :comicId LIMIT 1")
+    LiveData<Comic> getComicByIdLive(int comicId);
+
+    @Query("SELECT * FROM comics WHERE id = :comicId LIMIT 1")
+    Comic getComicById(int comicId);
+
+    @Query("SELECT * FROM comics WHERE name LIKE '%' || :keyword || '%' ORDER BY id ASC")
+    LiveData<List<Comic>> searchComics(String keyword);
+
+    @Query("SELECT COUNT(*) FROM comics")
+    int countComics();
+
+    @Query("DELETE FROM comics")
+    void deleteAllComics();
+}
