@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DownloadedActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
+import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
 import com.nhom5.ftcomic.utils.AuthHelper;
 import com.nhom5.ftcomic.utils.SessionManager;
 
@@ -25,7 +26,7 @@ public class AccountFragment extends Fragment {
     private TextView btnLogout;
     private TextView btnDownload;
     private View btnSettings;
-
+    private TextView btnHistory;
     private SessionManager sessionManager;
 
     public AccountFragment() {
@@ -46,6 +47,7 @@ public class AccountFragment extends Fragment {
         btnLogout = view.findViewById(R.id.btn_logout);
         btnDownload = view.findViewById(R.id.btn_download);
         btnSettings = view.findViewById(R.id.btn_settings);
+        btnHistory = view.findViewById(R.id.btn_history);
 
         btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SettingsActivity.class);
@@ -58,6 +60,13 @@ public class AccountFragment extends Fragment {
                 startActivity(intent);
             });
         });
+
+        if (btnHistory != null) {
+            btnHistory.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), ReadingHistoryActivity.class);
+                startActivity(intent);
+            });
+        }
 
         btnLogin.setOnClickListener(v -> {
             LoginFragment loginFragment = new LoginFragment();
