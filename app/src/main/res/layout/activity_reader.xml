@@ -100,14 +100,6 @@
             app:iconTint="?attr/colorOnSurface" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFavorite"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/ic_favourite"
-            app:iconTint="?attr/colorOnSurface" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDownloadChapter"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
@@ -121,11 +113,22 @@
             android:layout_weight="1" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreviousChapter"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="Chương trước"
+            android:visibility="gone"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNextChapter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Chương 2"
+            android:text="Chương sau"
             app:icon="@drawable/ic_arrow_forward"
             app:iconGravity="textStart" />
 
