@@ -104,12 +104,17 @@
                             android:id="@+id/tvLikeCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3.69k"
+                            android:text="369"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="?attr/colorOnSurface"
+                            android:drawablePadding="6dp"
+                            app:drawableEndCompat="@drawable/ic_favourite"
+                            app:drawableTint="?attr/colorOnSurface" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="Lượt thích"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
@@ -138,13 +143,18 @@
                             android:id="@+id/tvRating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4.7*"
+                            android:text="4.7"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="?attr/colorOnSurface"
+                            android:drawablePadding="6dp"
+                            app:drawableEndCompat="@drawable/ic_star"
+                            app:drawableTint="?attr/colorOnSurface" />
+
                         <TextView
                             android:id="@+id/tvRatingCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="25 đánh giá"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
@@ -152,6 +162,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardComments"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="4dp"
@@ -174,10 +185,15 @@
                             android:layout_height="wrap_content"
                             android:text="150"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="?attr/colorOnSurface"
+                            android:drawablePadding="6dp"
+                            app:drawableEndCompat="@drawable/ic_comment"
+                            app:drawableTint="?attr/colorOnSurface" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
                             android:text="Bình luận"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />

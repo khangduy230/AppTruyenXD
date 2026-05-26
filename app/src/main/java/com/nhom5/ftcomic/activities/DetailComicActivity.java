@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ChapterAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
@@ -47,6 +48,13 @@ public class DetailComicActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_comic);
         MaterialButton btnBack = findViewById(R.id.btnBack);
+
+        MaterialCardView cardComments = findViewById(R.id.cardComments);
+        cardComments.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CommentsActivity.class);
+
+            startActivity(intent);
+        });
 
         btnBack.setOnClickListener(v -> {
             getOnBackPressedDispatcher().onBackPressed();
