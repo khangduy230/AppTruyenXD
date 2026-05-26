@@ -14,6 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
             android:orientation="vertical"
             android:paddingBottom="88dp">
 
@@ -27,12 +28,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="?attr/colorSurfaceVariant"
+                    android:fitsSystemWindows="false"
                     android:scaleType="centerCrop" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#80000000"
+                    android:layout_height="160dp"
+                    android:background="@drawable/bg_cover_fade"
                     app:layout_constraintBottom_toBottomOf="parent" />
 
                 <com.google.android.material.button.MaterialButton
@@ -42,11 +44,12 @@
                     android:layout_height="48dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
+                    android:fitsSystemWindows="false"
                     app:icon="@drawable/ic_arrow_back"
                     app:iconTint="?attr/colorOnSurfaceVariant"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
                 <TextView
                     android:id="@+id/tvTitle"
@@ -55,7 +58,7 @@
                     android:layout_marginHorizontal="20dp"
                     android:text="Lọ"
                     android:textAppearance="?attr/textAppearanceDisplaySmall"
-                    android:textColor="@android:color/white"
+                    android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tvAuthor"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -69,7 +72,7 @@
                     android:layout_marginBottom="24dp"
                     android:text="Futho High"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="#E0E0E0"
+                    android:textColor="?attr/colorOnSurface"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
@@ -104,10 +107,10 @@
                             android:id="@+id/tvLikeCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:drawablePadding="6dp"
                             android:text="369"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="?attr/colorOnSurface"
-                            android:drawablePadding="6dp"
                             app:drawableEndCompat="@drawable/ic_favourite"
                             app:drawableTint="?attr/colorOnSurface" />
 
@@ -143,10 +146,10 @@
                             android:id="@+id/tvRating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:drawablePadding="6dp"
                             android:text="4.7"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="?attr/colorOnSurface"
-                            android:drawablePadding="6dp"
                             app:drawableEndCompat="@drawable/ic_star"
                             app:drawableTint="?attr/colorOnSurface" />
 
@@ -183,10 +186,10 @@
                             android:id="@+id/tvCommentCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:drawablePadding="6dp"
                             android:text="150"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="?attr/colorOnSurface"
-                            android:drawablePadding="6dp"
                             app:drawableEndCompat="@drawable/ic_comment"
                             app:drawableTint="?attr/colorOnSurface" />
 
@@ -201,6 +204,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
