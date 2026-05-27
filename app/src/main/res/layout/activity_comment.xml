@@ -45,43 +45,79 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="?attr/colorSurfaceContainerLow"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/layoutReplyHeader"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:layout_weight="1"
-            app:cardBackgroundColor="?attr/colorSurfaceVariant"
-            app:cardCornerRadius="100dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
-            <EditText
-                android:id="@+id/edtComment"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvReplyStatus"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="Nhập bình luận..."
-                android:paddingHorizontal="20dp"
-                android:paddingVertical="14dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textColorHint="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp" />
-        </com.google.android.material.card.MaterialCardView>
+                android:layout_weight="1"
+                android:text="Đang trả lời..."
+                android:textStyle="italic"
+                android:textSize="13sp"
+                android:textColor="?attr/colorPrimary"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSend"
-            style="@style/Widget.Material3.Button.IconButton.Filled"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:backgroundTint="?attr/colorPrimary"
-            app:icon="@drawable/ic_send"
-            app:iconTint="?attr/colorOnPrimary"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
+            <TextView
+                android:id="@+id/tvCancelReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hủy"
+                android:paddingHorizontal="8dp"
+                android:textColor="@android:color/holo_red_dark"
+                android:textStyle="bold"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                app:cardCornerRadius="100dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <EditText
+                    android:id="@+id/edtComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:hint="Nhập bình luận..."
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="14dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant"
+                    android:textSize="15sp" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSend"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:backgroundTint="?attr/colorPrimary"
+                app:icon="@drawable/ic_send"
+                app:iconTint="?attr/colorOnPrimary"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

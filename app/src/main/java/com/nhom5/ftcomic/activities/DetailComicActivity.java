@@ -54,6 +54,9 @@ public class DetailComicActivity extends AppCompatActivity {
         cardComments.setOnClickListener(v -> {
             Intent intent = new Intent(this, CommentsActivity.class);
 
+            // Đính kèm ID của bộ truyện hiện tại sang màn hình bình luận
+            intent.putExtra("COMIC_ID", comicId);
+
             startActivity(intent);
         });
 

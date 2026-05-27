@@ -85,6 +85,12 @@ public class ReaderActivity extends AppCompatActivity {
         saveReadingHistory();
 
         comicRepository.syncPagesByChapterId(chapterId);
+        //Lấy tên truyện gắn lên thanh toolbar trong chap
+        comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
+            if (comic != null) {
+                topAppBar.setTitle(comic.getName());
+            }
+        });
 
         // Lấy và quan sát toàn bộ chương của bộ truyện này từ SQLite (Room)
         comicRepository.getChaptersByComicId(comicId).observe(this, chapters -> {
@@ -114,7 +120,7 @@ public class ReaderActivity extends AppCompatActivity {
                 } else {
                     btnNextChapter.setVisibility(View.VISIBLE);
                     // Hiển thị text động theo số chương tiếp theo
-                    btnNextChapter.setText("Chương " + (currentChapterNumber + 1));
+                    //btnNextChapter.setText("Chương " + (currentChapterNumber + 1));
                 }
             }
         });
@@ -167,6 +173,7 @@ public class ReaderActivity extends AppCompatActivity {
         for (Chapter ch : allChaptersInComic) {
             if (ch.getChapterNumber() == targetChapterNumber) {
                 getIntent().putExtra("CHAPTER_ID", ch.getId());
+                getIntent().putExtra("COMIC_ID", comicId);
                 recreate(); // Khởi động lại màn hình đọc với ID chương mới
                 break;
             }
@@ -305,6 +312,7 @@ public class ReaderActivity extends AppCompatActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Chapter selectedChapter = allChaptersInComic.get(position);
             getIntent().putExtra("CHAPTER_ID", selectedChapter.getId());
+            getIntent().putExtra("COMIC_ID", comicId);
             bottomSheetDialog.dismiss();
             recreate(); // Reload lại trang truyện theo chương vừa click
         });
