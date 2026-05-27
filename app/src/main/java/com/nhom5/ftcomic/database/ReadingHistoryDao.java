@@ -27,4 +27,7 @@ public interface ReadingHistoryDao {
 
     @Query("DELETE FROM reading_history WHERE comicId = :comicId")
     void deleteHistoryByComicId(int comicId);
+
+    @Query("SELECT * FROM reading_history WHERE comicId = :comicId LIMIT 1")
+    com.nhom5.ftcomic.models.ReadingHistory getHistoryByComicIdSync(int comicId);
 }

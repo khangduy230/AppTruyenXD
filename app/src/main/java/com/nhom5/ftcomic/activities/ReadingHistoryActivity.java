@@ -72,9 +72,28 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         rcvHistory.setLayoutManager(new GridLayoutManager(this, 3));
 
         comicAdapter = new ComicAdapter(new ArrayList<Comic>(), comic -> {
-            Intent intent = new Intent(ReadingHistoryActivity.this, ReaderActivity.class);
-            intent.putExtra("COMIC_ID", comic.getId());
-            startActivity(intent);
+            // Sử dụng Executor chạy ngầm để truy vấn nhanh chapterId đọc dở từ Room Database
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                com.nhom5.ftcomic.models.ReadingHistory historyRecord =
+                        appDatabase.readingHistoryDao().getHistoryByComicIdSync(comic.getId());
+
+                runOnUiThread(() -> {
+                    if (historyRecord != null && historyRecord.getChapterId() > 0) {
+                        Intent intent = new Intent(ReadingHistoryActivity.this, ReaderActivity.class);
+                        intent.putExtra("COMIC_ID", comic.getId());
+                        intent.putExtra("CHAPTER_ID", historyRecord.getChapterId()); // Nạp ID chương chuẩn xác
+                        startActivity(intent);
+                    } else {
+                        // Nếu dính lỗi mất liên kết chương, ta đẩy sang trang Chi tiết truyện
+                        Toast.makeText(ReadingHistoryActivity.this,
+                                "Không tìm thấy chương đọc dở, đang mở trang chi tiết!", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(ReadingHistoryActivity.this, DetailComicActivity.class);
+                        intent.putExtra("COMIC_ID", comic.getId());
+                        startActivity(intent);
+                    }
+                });
+            });
         });
 
         rcvHistory.setAdapter(comicAdapter);
