@@ -7,12 +7,16 @@ import androidx.lifecycle.LiveData;
 
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.database.AppDatabase;
+import com.nhom5.ftcomic.models.Category;
 import com.nhom5.ftcomic.models.Chapter;
 import com.nhom5.ftcomic.models.ChapterPage;
 import com.nhom5.ftcomic.models.Comic;
+import com.nhom5.ftcomic.models.ComicCategoryCrossRef;
 import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
+import com.nhom5.ftcomic.network.response.ComicCategoryResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
 
 import java.util.ArrayList;
@@ -34,6 +38,10 @@ public class ComicRepository {
         appDatabase = AppDatabase.getInstance(context);
     }
 
+    // =========================
+    // Lấy dữ liệu từ Room
+    // =========================
+
     public LiveData<List<Comic>> getComicsBySection(String section) {
         return appDatabase.comicDao().getComicsBySection(section);
     }
@@ -49,6 +57,14 @@ public class ComicRepository {
     public LiveData<List<ChapterPage>> getPagesByChapterId(int chapterId) {
         return appDatabase.chapterPageDao().getPagesByChapterId(chapterId);
     }
+
+    public LiveData<List<Category>> getCategoriesByComicId(int comicId) {
+        return appDatabase.categoryDao().getCategoriesByComicId(comicId);
+    }
+
+    // =========================
+    // Sync truyện
+    // =========================
 
     public void syncAllHomeComics() {
         syncComicsBySection("featured");
@@ -85,6 +101,10 @@ public class ComicRepository {
                 });
     }
 
+    // =========================
+    // Sync chương
+    // =========================
+
     public void syncChaptersByComicId(int comicId) {
         if (comicId <= 0) {
             Log.e(TAG, "comicId không hợp lệ: " + comicId);
@@ -118,6 +138,10 @@ public class ComicRepository {
                     }
                 });
     }
+
+    // =========================
+    // Sync trang truyện
+    // =========================
 
     public void syncPagesByChapterId(int chapterId) {
         if (chapterId <= 0) {
@@ -181,16 +205,92 @@ public class ComicRepository {
                 });
     }
 
+    // =========================
+    // Sync thể loại
+    // =========================
+
+    public void syncCategoriesByComicId(int comicId) {
+        if (comicId <= 0) {
+            Log.e(TAG, "comicId không hợp lệ khi sync category: " + comicId);
+            return;
+        }
+
+        syncAllCategories();
+        syncComicCategoryRefsByComicId(comicId);
+    }
+
+    private void syncAllCategories() {
+        SupabaseClient.getApi()
+                .getAllCategories("name.asc")
+                .enqueue(new Callback<List<CategoryResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<CategoryResponse>> call,
+                                           Response<List<CategoryResponse>> response) {
+                        Log.d(TAG, "Categories URL: " + call.request().url());
+                        Log.d(TAG, "Categories code: " + response.code());
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Category> categories = mapCategoryResponsesToEntities(response.body());
+
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.categoryDao().insertCategories(categories);
+                                Log.d(TAG, "Đã lưu categories size=" + categories.size());
+                            });
+                        } else {
+                            logErrorBody(response, "syncAllCategories");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<CategoryResponse>> call, Throwable t) {
+                        Log.e(TAG, "syncAllCategories lỗi API", t);
+                    }
+                });
+    }
+
+    private void syncComicCategoryRefsByComicId(int comicId) {
+        SupabaseClient.getApi()
+                .getComicCategoryRefsByComicId("eq." + comicId)
+                .enqueue(new Callback<List<ComicCategoryResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<ComicCategoryResponse>> call,
+                                           Response<List<ComicCategoryResponse>> response) {
+                        Log.d(TAG, "Comic category refs URL: " + call.request().url());
+                        Log.d(TAG, "Comic category refs code: " + response.code());
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<ComicCategoryCrossRef> refs =
+                                    mapComicCategoryResponsesToEntities(response.body());
+
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.categoryDao().insertComicCategoryRefs(refs);
+                                Log.d(TAG, "Đã lưu category refs comicId="
+                                        + comicId + ", size=" + refs.size());
+                            });
+                        } else {
+                            logErrorBody(response, "syncComicCategoryRefsByComicId");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ComicCategoryResponse>> call, Throwable t) {
+                        Log.e(TAG, "syncComicCategoryRefsByComicId lỗi API", t);
+                    }
+                });
+    }
+
+    // =========================
+    // Mapper
+    // =========================
+
     private List<Comic> mapComicResponsesToEntities(List<ComicResponse> responses) {
         List<Comic> comics = new ArrayList<>();
 
         for (ComicResponse item : responses) {
-            // Kiểm tra xem trường lấy số lượng đánh giá từ server có tồn tại không.
-            // Nếu server Supabase chưa tạo cột ratingCount, ta sẽ tạm thời lấy item.getCommentCount()
-            // hoặc gán cứng một con số an toàn ban đầu (ví dụ: 40) để tránh lỗi chia cho 0.
             int remoteRatingCount = item.getCommentCount();
+
             if (remoteRatingCount <= 0) {
-                remoteRatingCount = 40; // Con số an toàn phòng thủ để không bị chia cho 0 khi tính toán
+                remoteRatingCount = 40;
             }
 
             Comic comic = new Comic(
@@ -204,9 +304,9 @@ public class ComicRepository {
                     item.getSection(),
                     item.getLikeCount(),
                     item.getRating(),
-                    remoteRatingCount, // <--- THAM SỐ THỨ 11: Đã truyền chính xác vào trường ratingCount
-                    item.getCommentCount(), // <--- THAM SỐ THỨ 12: trường commentCount độc lập hoàn toàn
-                    item.getViewCount()    // <--- THAM SỐ THỨ 13: trường viewCount
+                    remoteRatingCount,
+                    item.getCommentCount(),
+                    item.getViewCount()
             );
 
             comics.add(comic);
@@ -250,6 +350,38 @@ public class ComicRepository {
         }
 
         return pages;
+    }
+
+    private List<Category> mapCategoryResponsesToEntities(List<CategoryResponse> responses) {
+        List<Category> categories = new ArrayList<>();
+
+        for (CategoryResponse item : responses) {
+            Category category = new Category(
+                    item.getId(),
+                    item.getName()
+            );
+
+            categories.add(category);
+        }
+
+        return categories;
+    }
+
+    private List<ComicCategoryCrossRef> mapComicCategoryResponsesToEntities(
+            List<ComicCategoryResponse> responses
+    ) {
+        List<ComicCategoryCrossRef> refs = new ArrayList<>();
+
+        for (ComicCategoryResponse item : responses) {
+            ComicCategoryCrossRef ref = new ComicCategoryCrossRef(
+                    item.getComicId(),
+                    item.getCategoryId()
+            );
+
+            refs.add(ref);
+        }
+
+        return refs;
     }
 
     private void logErrorBody(Response<?> response, String tag) {

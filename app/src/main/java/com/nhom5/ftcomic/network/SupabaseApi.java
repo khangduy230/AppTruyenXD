@@ -53,6 +53,10 @@ public interface SupabaseApi {
             @Query("category_id") String categoryFilter
     );
 
+    @GET("comic_categories")
+    Call<List<ComicCategoryResponse>> getComicCategoryRefsByComicId(
+            @Query("comic_id") String comicIdFilter
+    );
     @GET("comics")
     Call<List<ComicResponse>> getComicsByIds(
             @Query("id") String idFilter,
