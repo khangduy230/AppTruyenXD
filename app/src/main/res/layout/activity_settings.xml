@@ -256,7 +256,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_trash"
+                    android:src="@drawable/ic_trash_time"
                     app:tint="?attr/colorOnSurfaceVariant" />
 
                 <LinearLayout

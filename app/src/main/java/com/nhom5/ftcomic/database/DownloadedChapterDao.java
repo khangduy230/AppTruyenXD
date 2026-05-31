@@ -36,6 +36,9 @@ public interface DownloadedChapterDao {
     @Query("DELETE FROM downloaded_chapters WHERE chapterId = :chapterId")
     void deleteDownloadedChapter(int chapterId);
 
+    @Query("DELETE FROM downloaded_chapters WHERE comicId = :comicId")
+    void deleteChaptersByComicId(int comicId);
+
     @Query("DELETE FROM downloaded_chapters")
     void deleteAllDownloadedChapters();
 }
