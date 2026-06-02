@@ -54,6 +54,15 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
     </style>
+    <style name="BottomNavActiveText" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="BottomNavInactiveText" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+    </style>
     <style name="ExpandedTitleStyle" parent="TextAppearance.Material3.DisplaySmall">
         <item name="android:textSize">36sp</item>
         <item name="fontFamily">@font/ggsansflex_medium</item>
