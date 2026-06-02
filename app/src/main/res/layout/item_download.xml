@@ -3,66 +3,68 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imgComic2"
-        android:layout_width="20dp"
-        android:layout_height="80dp"
-        android:layout_weight="1"
-        android:background="#E0E0E0"
+        android:layout_width="60dp"
+        android:layout_height="84dp"
+        android:background="#F0F0F0"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/RoundedCornersImage"
-        app:strokeColor="#3C3C3C" />
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
 
     <LinearLayout
-        android:layout_width="168dp"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/tvComic"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.7"
-            android:text="Lọ"
-            android:textSize="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Tên truyện"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="FuTho High"
-            android:textSize="20sp" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Tác giả"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:gravity="end"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView5"
-            android:layout_width="49dp"
+            android:id="@+id/tvdungluong"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="500 MB"
-            android:textSize="20sp"
+            android:text="0.0 MB"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
             android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/checkBox"
-            android:layout_width="31dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_marginTop="4dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp" />
     </LinearLayout>
 
 </LinearLayout>

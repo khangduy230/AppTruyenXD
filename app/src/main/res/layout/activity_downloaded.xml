@@ -57,25 +57,13 @@
                     android:id="@+id/tvStorageUsedValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="25"
-                    android:textSize="32sp"
+                    android:text="25GB"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvStorageUsedLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="GB đã dùng"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvStorageUsedValue"
-                    app:layout_constraintStart_toEndOf="@+id/tvStorageUsedValue" />
 
                 <TextView
                     android:id="@+id/tvStorageTotal"
