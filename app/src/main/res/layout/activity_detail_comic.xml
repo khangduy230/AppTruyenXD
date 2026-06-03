@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="false">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/NestedView1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -14,69 +16,102 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:fitsSystemWindows="false"
             android:orientation="vertical"
             android:paddingBottom="88dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="350dp">
+                android:layout_height="wrap_content">
 
                 <ImageView
-
-                    android:id="@+id/imgCover"
+                    android:id="@+id/imgBlurredBackground"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="?attr/colorSurfaceVariant"
-                    android:fitsSystemWindows="false"
-                    android:scaleType="centerCrop" />
+                    android:layout_height="250dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="0dp" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="160dp"
+                    android:layout_height="0dp"
+                    android:alpha="0.4"
+                    android:background="?attr/colorSurface"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgBlurredBackground"
+                    app:layout_constraintTop_toTopOf="@+id/imgBlurredBackground" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
                     android:background="@drawable/bg_cover_fade"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+                    app:layout_constraintBottom_toBottomOf="@+id/imgBlurredBackground" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBack"
-                    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginStart="16dp"
+                    style="@style/Widget.Material3.Button.IconButton"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="16dp"
-                    android:fitsSystemWindows="false"
                     app:icon="@drawable/ic_arrow_back"
-                    app:iconTint="?attr/colorOnSurfaceVariant"
+                    app:iconSize="28dp"
+                    app:iconTint="?attr/colorOnSurface"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardCover"
+                    android:layout_width="120dp"
+                    android:layout_height="160dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="30dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnBack"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:id="@+id/imgCover"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/colorSurfaceVariant"
+                        android:scaleType="centerCrop" />
+                </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:id="@+id/tvTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="20dp"
                     android:text="Lọ"
-                    android:textAppearance="?attr/textAppearanceDisplaySmall"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
                     android:textColor="?attr/colorOnSurface"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tvAuthor"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toEndOf="@+id/cardCover" />
 
                 <TextView
                     android:id="@+id/tvAuthor"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="8dp"
                     android:text="Futho High"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    app:layout_constraintBottom_toBottomOf="@+id/cardCover"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toEndOf="@+id/cardCover" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"

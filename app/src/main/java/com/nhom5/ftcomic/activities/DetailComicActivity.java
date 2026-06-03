@@ -2,6 +2,7 @@ package com.nhom5.ftcomic.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +27,9 @@ import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.models.Favorite;
 import com.nhom5.ftcomic.models.Rating;
 import com.nhom5.ftcomic.repository.ComicRepository;
+import androidx.activity.EdgeToEdge;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayList;
 
@@ -38,6 +42,7 @@ public class DetailComicActivity extends AppCompatActivity {
     private TextView tvTitle, tvAuthor, tvDescription;
 
     private ImageView imgCover;
+    private ImageView imgBlurredBackground;
     private Button btnSave, btnReadFirstChapter;
     private RecyclerView recyclerViewChapters;
     private ChipGroup chipGroupCategories;
@@ -56,6 +61,8 @@ public class DetailComicActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_comic);
+
+
 
         comicId = getIntent().getIntExtra("COMIC_ID", -1);
 
@@ -86,6 +93,7 @@ public class DetailComicActivity extends AppCompatActivity {
 
     private void bindViews() {
         imgCover = findViewById(R.id.imgCover);
+        imgBlurredBackground = findViewById(R.id.imgBlurredBackground);
 
         layoutRating = findViewById(R.id.layoutRating);
 
@@ -103,8 +111,65 @@ public class DetailComicActivity extends AppCompatActivity {
 
         recyclerViewChapters = findViewById(R.id.recyclerViewChapters);
 
-        // Quan trọng: thiếu dòng này là nguyên nhân crash
         chipGroupCategories = findViewById(R.id.chipGroupCategories);
+
+        // Hiệu ứng các thứ giữa Home và Detail
+        com.google.android.material.card.MaterialCardView cardCover = findViewById(R.id.cardCover);
+        String transitionName = getIntent().getStringExtra("TRANSITION_NAME");
+
+        if (transitionName != null) {
+            androidx.core.view.ViewCompat.setTransitionName(cardCover, transitionName);        }
+        // Chờ ảnh load xong mới transition để tránh bị bựa
+        supportPostponeEnterTransition();
+        String comicCoverUrl = getIntent().getStringExtra("COMIC_COVER_URL");
+        if (comicCoverUrl != null && !comicCoverUrl.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(comicCoverUrl)
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+
+                    .dontAnimate()
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+
+                            supportStartPostponedEnterTransition();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            supportStartPostponedEnterTransition();
+                            return false;
+                        }
+                    })
+                    .into(imgCover);
+        } else {
+            supportStartPostponedEnterTransition();
+        }
+
+        // Android 12 trở lên thì blur cover, dưới thì dẹp :v
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            ImageView imgBackground = findViewById(R.id.imgBlurredBackground);
+            imgBackground.setRenderEffect(android.graphics.RenderEffect.createBlurEffect(35f, 35f, android.graphics.Shader.TileMode.CLAMP));
+        }
+        // Thêm padding để tránh bị đè
+        View main = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(main, (v, windowInsets) -> {
+            var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            var backParams = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) findViewById(R.id.btnBack).getLayoutParams();
+            backParams.topMargin = insets.top + (int)(10 * getResources().getDisplayMetrics().density);
+            findViewById(R.id.btnBack).setLayoutParams(backParams);
+
+            var readParams = (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) btnReadFirstChapter.getLayoutParams();
+            readParams.bottomMargin = insets.bottom + (int)(16 * getResources().getDisplayMetrics().density);
+            btnReadFirstChapter.setLayoutParams(readParams);
+
+            var scrollView = findViewById(R.id.NestedView1);
+            scrollView.setPadding(0, 0, 0, insets.bottom);
+
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     private void setupBackButton() {
@@ -162,13 +227,15 @@ public class DetailComicActivity extends AppCompatActivity {
             currentComic = comic;
 
             if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
+
                 Glide.with(this)
                         .load(comic.getCoverUrl())
                         .placeholder(comic.getImage())
                         .error(comic.getImage())
-                        .into(imgCover);
+                        .into(imgBlurredBackground);
             } else {
-                imgCover.setImageResource(comic.getImage());
+                imgBlurredBackground.setImageResource(comic.getImage());
+
             }
 
             tvTitle.setText(comic.getName());

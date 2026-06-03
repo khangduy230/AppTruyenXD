@@ -78,30 +78,25 @@ public class SearchFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        categoryAdapter = new CategoryAdapter(new ArrayList<>(), category -> {
-            isSelectingCategory = true;
+        int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
+        float density = getResources().getDisplayMetrics().density;
+        int itemWidthPx = (int) (115 * density); // Giảm xuống 115dp để dễ nhảy lên 3 cột
+        int spanCount = Math.max(2, screenWidthPx / itemWidthPx);
 
-            if (searchRunnable != null) {
-                searchHandler.removeCallbacks(searchRunnable);
-            }
-
-            if (edtSearch.getText() != null) {
-                edtSearch.getText().clear();
-            }
-
-            searchComicsByCategory(category);
-        });
-
-        recyclerViewCategories.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-        recyclerViewCategories.setNestedScrollingEnabled(false);
-        recyclerViewCategories.setAdapter(categoryAdapter);
-
-        searchComicAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
-
-        recyclerViewSearchResults.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        searchComicAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
+        recyclerViewSearchResults.setLayoutManager(new GridLayoutManager(requireContext(), spanCount));
         recyclerViewSearchResults.setNestedScrollingEnabled(false);
         recyclerViewSearchResults.setAdapter(searchComicAdapter);
+
+        categoryAdapter = new CategoryAdapter(new ArrayList<>(), category -> {
+            isSelectingCategory = true;
+            if (edtSearch.getText() != null) edtSearch.getText().clear();
+            searchComicsByCategory(category);
+        });
+        recyclerViewCategories.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        recyclerViewCategories.setAdapter(categoryAdapter);
     }
+
 
     private void setupSearchInput() {
         edtSearch.setOnEditorActionListener((v, actionId, event) -> {

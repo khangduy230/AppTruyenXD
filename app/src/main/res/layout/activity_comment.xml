@@ -17,7 +17,7 @@
             android:layout_height="140dp"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:titleCollapseMode="scale">
+            app:titleCollapseMode="fade">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
