@@ -18,7 +18,7 @@
             android:layout_height="152dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:title="Thư viện"
-            app:titleCollapseMode="scale"
+            app:titleCollapseMode="fade"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle">
 
             <com.google.android.material.appbar.MaterialToolbar

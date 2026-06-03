@@ -69,7 +69,13 @@ public class LibraryFragment extends Fragment {
     private void setupRecyclerView() {
         comicAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
 
-        recyclerViewLibrary.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
+        float density = getResources().getDisplayMetrics().density;
+        int itemWidthPx = (int) (115 * density);
+        int spanCount = Math.max(2, screenWidthPx / itemWidthPx);
+
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
+        recyclerViewLibrary.setLayoutManager(layoutManager);
         recyclerViewLibrary.setNestedScrollingEnabled(false);
         recyclerViewLibrary.setAdapter(comicAdapter);
     }
