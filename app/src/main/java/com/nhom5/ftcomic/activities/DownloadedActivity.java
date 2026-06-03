@@ -284,6 +284,7 @@ public class DownloadedActivity extends AppCompatActivity {
     private void openDetailComic(Comic comic) {
         Intent intent = new Intent(this, DetailComicActivity.class);
         intent.putExtra("COMIC_ID", comic.getId());
+        intent.putExtra("COMIC_COVER_URL", comic.getCoverUrl()); // Thêm dòng này
         startActivity(intent);
     }
 }
