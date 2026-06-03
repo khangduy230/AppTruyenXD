@@ -47,26 +47,23 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         appDatabase = AppDatabase.getInstance(this);
 
         initViews();
-        setupToolbar();
         setupRecyclerView();
         observeReadingHistory();
+
+        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+
+
+        });
     }
 
     private void initViews() {
-        toolbarHistory = findViewById(R.id.toolbarHistory);
         rcvHistory = findViewById(R.id.rcv_history);
         tvEmptyHistory = findViewById(R.id.tvEmptyHistory); // Ánh xạ TextView báo trống
     }
 
-    private void setupToolbar() {
-        // Thiết lập Toolbar làm ActionBar cho màn hình
-        setSupportActionBar(toolbarHistory);
-
-        // Kích hoạt nút quay lại hoạt động thực tế
-        toolbarHistory.setNavigationOnClickListener(v -> {
-            finish(); // Đóng màn hình lịch sử hiện tại và quay trở về trang Tài khoản
-        });
-    }
 
     private void setupRecyclerView() {
         rcvHistory.setLayoutManager(new GridLayoutManager(this, 3));
