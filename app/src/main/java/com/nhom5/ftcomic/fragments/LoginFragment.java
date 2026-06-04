@@ -267,7 +267,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
     }
 
     private void notifyLoginSuccess() {
-        getParentFragmentManager().setFragmentResult("key_dang_nhap", new Bundle());
+        Bundle result = new Bundle();
+        result.putBoolean("logged_in", true);
+        getParentFragmentManager().setFragmentResult("key_dang_nhap", result);
         dismiss();
     }
 

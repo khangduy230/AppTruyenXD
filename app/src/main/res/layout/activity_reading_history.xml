@@ -9,14 +9,9 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.ReadingHistoryActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/colorSurface"
-    android:fitsSystemWindows="true">
-
     <com.google.android.material.appbar.CollapsingToolbarLayout
         style="?attr/collapsingToolbarLayoutLargeStyle"
+        android:id="@+id/appBarLayout2"
         android:layout_width="match_parent"
         android:layout_height="152dp"
         app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
@@ -24,30 +19,21 @@
         app:titleCollapseMode="fade">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/topAppBar"
+            android:id="@+id/toolbarHistory"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_collapseMode="pin"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="?attr/colorOnSurface"
             app:title="Lịch sử đọc" />
-    </com.google.android.material.appbar.CollapsingToolbarLayout>
-</com.google.android.material.appbar.AppBarLayout>
 
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rcv_history"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingHorizontal="12dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="24dp" />
 
         <TextView
             android:id="@+id/tvEmptyHistory"
@@ -61,5 +47,16 @@
             android:visibility="gone" />
 
     </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp"
+        app:layout_anchor="@+id/frameLayout"
+        app:layout_anchorGravity="center" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

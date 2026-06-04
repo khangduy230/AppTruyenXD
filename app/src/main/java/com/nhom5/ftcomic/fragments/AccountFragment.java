@@ -15,6 +15,7 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DownloadedActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
 import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
+import com.nhom5.ftcomic.activities.UserProfileActivity;
 import com.nhom5.ftcomic.utils.AuthHelper;
 import com.nhom5.ftcomic.utils.SessionManager;
 
@@ -79,6 +80,11 @@ public class AccountFragment extends Fragment {
             KiemTraVaCapNhatUI();
         });
 
+        layoutUserInfo.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), UserProfileActivity.class);
+            startActivity(intent);
+        });
+
         getParentFragmentManager().setFragmentResultListener("key_dang_nhap", getViewLifecycleOwner(), (requestKey, result) -> {
             KiemTraVaCapNhatUI();
         });
@@ -94,6 +100,19 @@ public class AccountFragment extends Fragment {
 
         if (sessionManager != null) {
             KiemTraVaCapNhatUI();
+        }
+        if (tvUserName != null) {
+            String savedUsername = sessionManager.getUsername();
+            if (savedUsername != null && !savedUsername.isEmpty()) {
+                tvUserName.setText(savedUsername);
+            } else {
+                String email = sessionManager.getEmail();
+                if (email != null && email.contains("@")) {
+                    tvUserName.setText(email.substring(0, email.indexOf("@")));
+                } else {
+                    tvUserName.setText("Người dùng");
+                }
+            }
         }
     }
 
@@ -118,12 +137,16 @@ public class AccountFragment extends Fragment {
             }
 
             if (tvUserName != null) {
-                String email = sessionManager.getEmail();
-
-                if (email != null && email.contains("@")) {
-                    tvUserName.setText(email.substring(0, email.indexOf("@")));
+                String savedUsername = sessionManager.getUsername();
+                if (savedUsername != null && !savedUsername.isEmpty()) {
+                    tvUserName.setText(savedUsername);
                 } else {
-                    tvUserName.setText("Người dùng");
+                    String email = sessionManager.getEmail();
+                    if (email != null && email.contains("@")) {
+                        tvUserName.setText(email.substring(0, email.indexOf("@")));
+                    } else {
+                        tvUserName.setText("Người dùng");
+                    }
                 }
             }
 

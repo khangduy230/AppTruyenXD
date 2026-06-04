@@ -12,6 +12,7 @@ public class SessionManager {
     private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_EMAIL = "email";
+    private static final String KEY_USERNAME = "username";
 
     private final SharedPreferences sharedPreferences;
 
@@ -51,9 +52,24 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_EMAIL, "");
     }
 
+    public void saveUsername(String username) {
+        String email = getEmail();
+        sharedPreferences.edit()
+                .putString("username_" + email, username)
+                .apply();
+    }
+
+    public String getUsername() {
+        String email = getEmail();
+        return sharedPreferences.getString("username_" + email, null);
+    }
+
     public void logout() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
+        String savedUsername = getUsername();
+        String email = getEmail();
+        sharedPreferences.edit().clear().apply();
+        sharedPreferences.edit()
+                .putString("username_" + email, savedUsername)
+                .apply();
     }
 }
