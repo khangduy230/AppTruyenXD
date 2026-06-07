@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nhom5.ftcomic.R;
@@ -49,22 +48,25 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
         observeReadingHistory();
-
-        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
-
-        topAppBar.setNavigationOnClickListener(v -> {
-            getOnBackPressedDispatcher().onBackPressed();
+        setupToolbar();
 
 
-        });
     }
 
     private void initViews() {
         rcvHistory = findViewById(R.id.rcv_history);
         tvEmptyHistory = findViewById(R.id.tvEmptyHistory); // Ánh xạ TextView báo trống
+        toolbarHistory = findViewById(R.id.toolbarHistory); // Ánh xạ vào biến thành viên
     }
 
-
+    private void setupToolbar() {
+        if (toolbarHistory != null) {
+            setSupportActionBar(toolbarHistory); // Nếu bạn muốn dùng menu
+            toolbarHistory.setNavigationOnClickListener(v -> {
+                getOnBackPressedDispatcher().onBackPressed();
+            });
+        }
+    }
     private void setupRecyclerView() {
         rcvHistory.setLayoutManager(new GridLayoutManager(this, 3));
 

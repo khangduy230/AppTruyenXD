@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    tools:context=".activities.AllStoryActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -16,17 +17,18 @@
             style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
             android:layout_height="152dp"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:title="Thư viện"
-            app:titleCollapseMode="fade"
-            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle">
+            app:title="Tất cả truyện"
+            app:titleCollapseMode="fade">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/topAppBar"
+                android:id="@+id/toolbarAllStory"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:title="Thư viện" />
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="?attr/colorOnSurface" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -46,7 +48,7 @@
             android:paddingBottom="80dp">
 
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroup_filter"
+                android:id="@+id/chipGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
@@ -55,43 +57,28 @@
                 app:singleSelection="true">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_read"
+                    android:id="@+id/chip_new_update"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Đã đọc" />
+                    android:text="Mới cập nhật"
+                    app:checkedIconVisible="false" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_later"
+                    android:id="@+id/chip_filter"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Để sau" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_downloaded"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tải xuống" />
+                    android:text="Bộ lọc"
+                    app:checkedIconVisible="false"
+                    app:chipIcon="@drawable/ic_three_dots"
+                    app:chipIconVisible="true" />
 
             </com.google.android.material.chip.ChipGroup>
 
-            <TextView
-                android:id="@+id/tvLibraryEmpty"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:text="Chưa có truyện nào"
-                android:textColor="#777777"
-                android:textSize="16sp"
-                android:visibility="gone" />
-
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView_library"
+                android:id="@+id/recyclerView_all_story"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
@@ -102,5 +89,4 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

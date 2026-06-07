@@ -12,8 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.nhom5.ftcomic.R;
+import com.nhom5.ftcomic.activities.AllStoryActivity;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
 import com.nhom5.ftcomic.models.Comic;
@@ -25,6 +27,7 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView recyclerFeatured, recyclerRanking, recyclerAllComics;
     private ComicAdapter featuredAdapter, rankingAdapter, allComicsAdapter;
+    private TextView tvAllComicsTitle;
 
     private ComicRepository comicRepository;
 
@@ -44,11 +47,20 @@ public class HomeFragment extends Fragment {
         recyclerFeatured = view.findViewById(R.id.recyclerView_featured);
         recyclerRanking = view.findViewById(R.id.recyclerView_ranking);
         recyclerAllComics = view.findViewById(R.id.recyclerView_all_comics);
+        tvAllComicsTitle = view.findViewById(R.id.tvAllComicsTitle);
 
         comicRepository = new ComicRepository(requireContext());
 
         setupRecyclerViews();
         observeComicsFromRoom();
+
+        // Thiết lập sự kiện click để chuyển sang AllStoryActivity
+        if (tvAllComicsTitle != null) {
+            tvAllComicsTitle.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), AllStoryActivity.class);
+                startActivity(intent);
+            });
+        }
 
         // Gọi API Supabase rồi lưu vào Room
         comicRepository.syncAllHomeComics();

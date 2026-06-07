@@ -10,8 +10,8 @@
     tools:context=".activities.ReadingHistoryActivity">
 
     <com.google.android.material.appbar.CollapsingToolbarLayout
-        style="?attr/collapsingToolbarLayoutLargeStyle"
         android:id="@+id/appBarLayout2"
+        style="?attr/collapsingToolbarLayoutLargeStyle"
         android:layout_width="match_parent"
         android:layout_height="152dp"
         app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
