@@ -52,12 +52,14 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_EMAIL, "");
     }
 
+
     public void saveUsername(String username) {
         String email = getEmail();
         sharedPreferences.edit()
                 .putString("username_" + email, username)
                 .apply();
     }
+
 
     public String getUsername() {
         String email = getEmail();
@@ -72,4 +74,17 @@ public class SessionManager {
                 .putString("username_" + email, savedUsername)
                 .apply();
     }
+    public void saveAvatarUri(String uri) {
+        String email = getEmail();
+        sharedPreferences.edit()
+                .putString("avatar_" + email, uri)
+                .apply();
+    }
+
+    public String getAvatarUri() {
+        String email = getEmail();
+        return sharedPreferences.getString("avatar_" + email, null);
+    }
+
+
 }

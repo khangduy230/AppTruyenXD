@@ -20,9 +20,15 @@ import com.nhom5.ftcomic.network.SupabaseAuthClient;
 import com.nhom5.ftcomic.network.request.AuthRequest;
 import com.nhom5.ftcomic.network.response.AuthResponse;
 import com.nhom5.ftcomic.utils.SessionManager;
+import com.nhom5.ftcomic.network.SupabaseConfig;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -150,6 +156,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
                                     authResponse.getUser().getEmail()
                             );
 
+                            // SỬA LỖI 4: Gọi fetchUserProfile để lấy thông tin (Username, Avatar) khi Đăng nhập
+                            fetchUserProfile(authResponse.getUser().getId(), authResponse.getAccessToken());
+
                             Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                             notifyLoginSuccess();
                         } else {
@@ -204,7 +213,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
                                         authResponse.getRefreshToken(),
                                         authResponse.getUser().getId(),
                                         authResponse.getUser().getEmail()
-                                );
+                                ); // SỬA LỖI 1: Thiếu dấu chấm phẩy ở đây
+
+                                fetchUserProfile(authResponse.getUser().getId(), authResponse.getAccessToken());
 
                                 Toast.makeText(getContext(), "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                                 notifyLoginSuccess();
@@ -271,6 +282,47 @@ public class LoginFragment extends BottomSheetDialogFragment {
         result.putBoolean("logged_in", true);
         getParentFragmentManager().setFragmentResult("key_dang_nhap", result);
         dismiss();
+    }
+
+    private void fetchUserProfile(String userId, String accessToken) {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
+                .get()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .addHeader("apikey", SupabaseConfig.API_KEY)
+                .build();
+
+        // SỬA LỖI 2: Chỉ định rõ okhttp3.Call, okhttp3.Callback, okhttp3.Response để không bị nhầm với Retrofit
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) { }
+
+            @Override
+            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String json = response.body().string();
+                        JSONArray array = new JSONArray(json);
+
+                        if (array.length() > 0) {
+                            JSONObject profile = array.getJSONObject(0);
+
+                            // ✅ Lưu vào SharedPreferences để dùng offline
+                            if (!profile.isNull("username")) {
+                                sessionManager.saveUsername(profile.getString("username"));
+                            }
+                            if (!profile.isNull("avatar_url")) {
+                                sessionManager.saveAvatarUri(profile.getString("avatar_url"));
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private String getErrorMessage(Response<?> response) {
