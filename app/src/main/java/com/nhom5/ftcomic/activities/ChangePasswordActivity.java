@@ -11,6 +11,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.nhom5.ftcomic.R;
+import com.nhom5.ftcomic.network.SupabaseConfig;
 import com.nhom5.ftcomic.utils.SessionManager;
 
 import org.json.JSONObject;
@@ -26,10 +27,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ChangePasswordActivity extends AppCompatActivity {
-
-    // ⚠️ Thay bằng Supabase URL của project bạn
-    private static final String SUPABASE_URL = "https://enkliqnftrprfyszkyov.supabase.co/";
-    private static final String SUPABASE_ANON_KEY = "sb_publishable_AmtjAUXr15c4VmXZfl-UEg_Njdqm6Zq";
 
     private SessionManager sessionManager;
     private TextInputLayout tilNewPassword, tilConfirmPassword;
@@ -64,7 +61,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String confirmPassword = etConfirmPassword.getText() != null
                 ? etConfirmPassword.getText().toString().trim() : "";
 
-        // Validate
         tilNewPassword.setError(null);
         tilConfirmPassword.setError(null);
 
@@ -81,7 +77,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
             return;
         }
 
-        // Gọi API
         setLoading(true);
 
         try {
@@ -96,11 +91,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     MediaType.parse("application/json")
             );
 
+            // ✅ Dùng SupabaseConfig, không có dấu / thừa
             Request request = new Request.Builder()
-                    .url(SUPABASE_URL + "/auth/v1/user")
+                    .url(SupabaseConfig.AUTH_BASE_URL + "user")
                     .put(requestBody)
                     .addHeader("Authorization", "Bearer " + accessToken)
-                    .addHeader("apikey", SUPABASE_ANON_KEY)
+                    .addHeader("apikey", SupabaseConfig.API_KEY)
                     .addHeader("Content-Type", "application/json")
                     .build();
 
@@ -117,6 +113,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body() != null
+                            ? response.body().string() : "";
+
                     runOnUiThread(() -> {
                         setLoading(false);
                         if (response.isSuccessful()) {
@@ -125,9 +124,18 @@ public class ChangePasswordActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
+                            // ✅ Hiện lỗi cụ thể từ Supabase
+                            String errorMsg = "Đổi mật khẩu thất bại!";
+                            try {
+                                JSONObject json = new JSONObject(responseBody);
+                                if (json.has("message")) {
+                                    errorMsg = json.getString("message");
+                                }
+                            } catch (Exception ignored) {}
+
                             Toast.makeText(ChangePasswordActivity.this,
-                                    "Đổi mật khẩu thất bại! Vui lòng đăng nhập lại.",
-                                    Toast.LENGTH_SHORT).show();
+                                    errorMsg,
+                                    Toast.LENGTH_LONG).show();
                         }
                     });
                 }

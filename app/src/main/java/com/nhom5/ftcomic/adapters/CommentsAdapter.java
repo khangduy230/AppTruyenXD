@@ -1,15 +1,23 @@
 package com.nhom5.ftcomic.adapters;
 
+import android.content.Context;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.models.Comment;
+import com.nhom5.ftcomic.utils.SessionManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +26,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     private List<Comment> commentList = new ArrayList<>();
     private final OnReplyClickListener replyClickListener;
 
-    // Giao tiếp click nút trả lời ra ngoài Activity
     public interface OnReplyClickListener {
         void onReplyClick(Comment parentComment);
     }
@@ -28,12 +35,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     public void setCommentList(List<Comment> comments) {
-        // Thuật toán sắp xếp hiển thị: Đưa các bình luận phản hồi nằm ngay dưới bình luận cha tương ứng
         List<Comment> sortedList = new ArrayList<>();
         for (Comment c : comments) {
-            if (c.getParentId() == 0) { // Lấy các bình luận gốc trước
+            if (c.getParentId() == 0) {
                 sortedList.add(c);
-                // Tìm kiếm xem có phản hồi nào thuộc về bình luận cha này không
                 for (Comment reply : comments) {
                     if (reply.getParentId() == c.getId()) {
                         sortedList.add(reply);
@@ -48,46 +53,71 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @NonNull
     @Override
     public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comment, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_comment, parent, false);
         return new CommentViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = commentList.get(position);
+        Context context = holder.itemView.getContext();
 
+        // Tên người dùng
         holder.tvUser.setText(comment.getUserName());
         holder.tvContent.setText(comment.getContent());
 
-        // Định dạng khoảng thời gian dạng "5 phút trước", "1 ngày trước"
+        // Thời gian
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(
-                comment.getCreatedAt(), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS);
+                comment.getCreatedAt(),
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS);
         holder.tvTime.setText(timeAgo);
 
-        // --- XỬ LÝ GIAO DIỆN PHÂN CẤP VÀ KHOẢNG CÁCH ITEM ---
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) holder.layoutItemBody.getLayoutParams();
+        // ✅ Load avatar
+        String avatarUri = comment.getAvatarUri();
+        if (avatarUri != null && !avatarUri.isEmpty()) {
+            if (avatarUri.startsWith("http")) {
+                Glide.with(context)
+                        .load(avatarUri)
+                        .circleCrop()
+                        .placeholder(R.drawable.ic_profile)
+                        .into(holder.ivAvatar);
+            } else {
+                holder.ivAvatar.setImageURI(android.net.Uri.parse(avatarUri));
+            }
+            holder.ivAvatar.setImageTintList(null);
+        } else {
+            // Không có avatar thì dùng icon mặc định
+            holder.ivAvatar.setColorFilter(
+                    context.getResources().getColor(android.R.color.darker_gray, context.getTheme())
+            );
+            holder.ivAvatar.setImageTintList(null);
+        }
 
-        int margin16Px = (int) (16 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
-        int margin48Px = (int) (48 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
+        ViewGroup.MarginLayoutParams params =
+                (ViewGroup.MarginLayoutParams) holder.layoutItemBody.getLayoutParams();
+        int margin16 = (int) (16 * context.getResources().getDisplayMetrics().density);
+        int margin48 = (int) (48 * context.getResources().getDisplayMetrics().density);
 
         if (comment.getParentId() > 0) {
-            // Nếu là phản hồi (Reply): Thụt lề trái 48dp
-            params.setMargins(margin48Px, 0, 0, margin16Px);
-
-            // Cho phép hiển thị nút "Trả lời" ở cả các câu reply con
-            holder.tvReplyAction.setVisibility(View.VISIBLE);
-
-            holder.itemView.setBackgroundColor(0xFFF9F9F9); // Nền xám nhẹ cho dòng reply
+            params.setMargins(margin48, 0, 0, margin16);
+            holder.itemView.setBackgroundColor(0xFFF9F9F9);
         } else {
-            // Nếu là bình luận gốc: Lề trái bằng 0 thông thường
-            params.setMargins(0, 0, 0, margin16Px);
-            holder.tvReplyAction.setVisibility(View.VISIBLE);
-            holder.itemView.setBackgroundColor(0x00000000); // Trong suốt
+            params.setMargins(0, 0, 0, margin16);
+            holder.itemView.setBackgroundColor(0x00000000);
         }
         holder.layoutItemBody.setLayoutParams(params);
+        holder.tvReplyAction.setVisibility(View.VISIBLE);
 
-        // Sự kiện khi bấm nút Trả lời
+        // ✅ Kiểm tra đăng nhập trước khi cho reply
         holder.tvReplyAction.setOnClickListener(v -> {
+            SessionManager sessionManager = new SessionManager(context);
+            if (!sessionManager.isLoggedIn()) {
+                Toast.makeText(context,
+                        "Vui lòng đăng nhập để trả lời!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (replyClickListener != null) {
                 replyClickListener.onReplyClick(comment);
             }
@@ -102,6 +132,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView tvUser, tvContent, tvTime, tvReplyAction;
         LinearLayout layoutItemBody;
+        ShapeableImageView ivAvatar;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -110,6 +141,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             tvTime = itemView.findViewById(R.id.tvCommentTime);
             tvReplyAction = itemView.findViewById(R.id.tvReplyAction);
             layoutItemBody = itemView.findViewById(R.id.layoutItemBody);
+            ivAvatar = itemView.findViewById(R.id.imgAvatar); // ✅
         }
     }
 }
