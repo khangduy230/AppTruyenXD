@@ -101,8 +101,8 @@ public class AccountFragment extends Fragment {
         });
 
         getParentFragmentManager().setFragmentResultListener("key_dang_nhap", getViewLifecycleOwner(), (requestKey, result) -> {
-            KiemTraVaCapNhatUI();           // hiển thị data local trước
-            fetchProfileRoiCapNhatUI();     // fetch Supabase ngay sau khi login
+            KiemTraVaCapNhatUI();
+            fetchProfileRoiCapNhatUI();
         });
 
         KiemTraVaCapNhatUI();
@@ -114,8 +114,8 @@ public class AccountFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (sessionManager != null) {
-            KiemTraVaCapNhatUI();         // hiển thị data local trước
-            fetchProfileRoiCapNhatUI();   // fetch Supabase rồi cập nhật sau
+            KiemTraVaCapNhatUI();
+            fetchProfileRoiCapNhatUI();
         }
     }
 
@@ -127,7 +127,7 @@ public class AccountFragment extends Fragment {
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
+                .url(SupabaseConfig.PROJECT_URL + "rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
@@ -136,7 +136,6 @@ public class AccountFragment extends Fragment {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                // Thất bại thì dùng data local có sẵn
             }
 
             @Override
@@ -199,7 +198,6 @@ public class AccountFragment extends Fragment {
                 String savedUri = sessionManager.getAvatarUri();
                 if (savedUri != null && !savedUri.isEmpty()) {
                     if (savedUri.startsWith("http")) {
-                        // Load URL từ Supabase Storage bằng Glide
                         Glide.with(this)
                                 .load(savedUri)
                                 .circleCrop()

@@ -288,7 +288,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
+                .url(SupabaseConfig.PROJECT_URL + "rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)

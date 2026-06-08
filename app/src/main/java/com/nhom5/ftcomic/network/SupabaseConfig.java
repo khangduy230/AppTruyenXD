@@ -2,7 +2,7 @@ package com.nhom5.ftcomic.network;
 
 public class SupabaseConfig {
 
-    public static final String PROJECT_URL = "https://enkliqnftrprfyszkyov.supabase.co";
+    public static final String PROJECT_URL = "https://enkliqnftrprfyszkyov.supabase.co/";
 
     public static final String BASE_URL = PROJECT_URL + "rest/v1/";
 

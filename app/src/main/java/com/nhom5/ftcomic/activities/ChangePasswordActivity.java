@@ -91,7 +91,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     MediaType.parse("application/json")
             );
 
-            // ✅ Dùng SupabaseConfig, không có dấu / thừa
             Request request = new Request.Builder()
                     .url(SupabaseConfig.AUTH_BASE_URL + "user")
                     .put(requestBody)
