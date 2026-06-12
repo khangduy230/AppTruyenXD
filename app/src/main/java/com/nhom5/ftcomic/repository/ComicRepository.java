@@ -287,12 +287,6 @@ public class ComicRepository {
         List<Comic> comics = new ArrayList<>();
 
         for (ComicResponse item : responses) {
-            int remoteRatingCount = item.getCommentCount();
-
-            if (remoteRatingCount <= 0) {
-                remoteRatingCount = 40;
-            }
-
             Comic comic = new Comic(
                     item.getId(),
                     R.drawable.thientai,
@@ -304,7 +298,7 @@ public class ComicRepository {
                     item.getSection(),
                     item.getLikeCount(),
                     item.getRating(),
-                    remoteRatingCount,
+                    item.getRatingCount(),
                     item.getCommentCount(),
                     item.getViewCount()
             );

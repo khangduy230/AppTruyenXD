@@ -1,5 +1,20 @@
 package com.nhom5.ftcomic.activities;
 
+import androidx.lifecycle.LiveData;
+
+import com.nhom5.ftcomic.fragments.LoginFragment;
+import com.nhom5.ftcomic.network.SupabaseApi;
+import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.request.FavoriteRequest;
+import com.nhom5.ftcomic.network.response.FavoriteResponse;
+import com.nhom5.ftcomic.utils.SessionManager;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,6 +50,8 @@ import java.util.ArrayList;
 
 public class DetailComicActivity extends AppCompatActivity {
 
+    private SessionManager sessionManager;
+    private LiveData<Integer> favoriteLiveData;
     private LinearLayout layoutRating;
     private Comic currentComic;
 
@@ -74,6 +91,7 @@ public class DetailComicActivity extends AppCompatActivity {
 
         appDatabase = AppDatabase.getInstance(this);
         comicRepository = new ComicRepository(this);
+        sessionManager = new SessionManager(this);
 
         bindViews();
         setupBackButton();
@@ -296,7 +314,27 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void observeFavoriteStatus() {
-        appDatabase.favoriteDao().isFavoriteLive(comicId).observe(this, count -> {
+        if (favoriteLiveData != null) {
+            favoriteLiveData.removeObservers(this);
+        }
+
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            isFavorite = false;
+            btnSave.setText("Lưu vào thư viện");
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            isFavorite = false;
+            btnSave.setText("Lưu vào thư viện");
+            return;
+        }
+
+        favoriteLiveData = appDatabase.favoriteDao().isFavoriteLive(userId, comicId);
+
+        favoriteLiveData.observe(this, count -> {
             isFavorite = count != null && count > 0;
 
             if (isFavorite) {
@@ -314,14 +352,19 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void toggleFavorite() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            if (isFavorite) {
-                appDatabase.favoriteDao().deleteFavoriteByComicId(comicId);
-            } else {
-                Favorite favorite = new Favorite(comicId, System.currentTimeMillis());
-                appDatabase.favoriteDao().insertFavorite(favorite);
-            }
-        });
+        if (!sessionManager.isLoggedIn()) {
+            openLoginThen(() -> {
+                observeFavoriteStatus();
+                syncFavoritesFromSupabase();
+            });
+            return;
+        }
+
+        if (isFavorite) {
+            deleteFavoriteFromSupabase();
+        } else {
+            addFavoriteToSupabase();
+        }
     }
 
     private void openReaderActivity(int chapterId) {
@@ -444,5 +487,205 @@ public class DetailComicActivity extends AppCompatActivity {
 
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
         builder.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        observeFavoriteStatus();
+
+        if (sessionManager != null && sessionManager.isLoggedIn()) {
+            syncFavoritesFromSupabase();
+        } else {
+            isFavorite = false;
+
+            if (btnSave != null) {
+                btnSave.setText("Lưu vào thư viện");
+                btnSave.setEnabled(true);
+            }
+        }
+    }
+
+    private void addFavoriteToSupabase() {
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnSave.setEnabled(false);
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+        FavoriteRequest request = new FavoriteRequest(userId, comicId);
+
+        api.addFavorite("return=minimal", request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                btnSave.setEnabled(true);
+
+                if (response.isSuccessful() || response.code() == 409) {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        appDatabase.favoriteDao().insertFavorite(
+                                new Favorite(userId, comicId, System.currentTimeMillis())
+                        );
+
+                        appDatabase.comicDao().increaseLikeCount(comicId);
+                    });
+
+                    isFavorite = true;
+                    runOnUiThread(() -> btnSave.setText("Đã lưu"));
+
+                    Toast.makeText(DetailComicActivity.this, "Đã lưu truyện", Toast.LENGTH_SHORT).show();
+
+                    syncFavoritesFromSupabase();
+
+                    if (comicRepository != null) {
+                        comicRepository.syncAllHomeComics();
+                    }
+                } else {
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Lưu truyện thất bại: " + response.code(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                btnSave.setEnabled(true);
+
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi lưu truyện: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void deleteFavoriteFromSupabase() {
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnSave.setEnabled(false);
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.deleteFavorite(
+                "eq." + userId,
+                "eq." + comicId
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                btnSave.setEnabled(true);
+
+                if (response.isSuccessful()) {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        appDatabase.favoriteDao().deleteFavoriteByComicId(userId, comicId);
+                        appDatabase.comicDao().decreaseLikeCount(comicId);
+                    });
+
+                    isFavorite = false;
+                    runOnUiThread(() -> btnSave.setText("Lưu vào thư viện"));
+
+                    Toast.makeText(DetailComicActivity.this, "Đã bỏ lưu truyện", Toast.LENGTH_SHORT).show();
+
+                    syncFavoritesFromSupabase();
+
+                    if (comicRepository != null) {
+                        comicRepository.syncAllHomeComics();
+                    }
+                } else {
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Bỏ lưu thất bại: " + response.code(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                btnSave.setEnabled(true);
+
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi bỏ lưu: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void syncFavoritesFromSupabase() {
+        if (!sessionManager.isLoggedIn()) {
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            return;
+        }
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.getMyFavorites(
+                "eq." + userId,
+                "created_at.desc"
+        ).enqueue(new Callback<List<FavoriteResponse>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteResponse>> call, Response<List<FavoriteResponse>> response) {
+                if (!response.isSuccessful()) {
+                    return;
+                }
+
+                List<FavoriteResponse> remoteFavorites = response.body();
+
+                if (remoteFavorites == null) {
+                    remoteFavorites = new java.util.ArrayList<>();
+                }
+
+                java.util.List<Favorite> localFavorites = new java.util.ArrayList<>();
+
+                for (FavoriteResponse item : remoteFavorites) {
+                    localFavorites.add(
+                            new Favorite(
+                                    userId,
+                                    item.getComicId(),
+                                    item.getCreatedAtMillis()
+                            )
+                    );
+                }
+
+                AppDatabase.databaseWriteExecutor.execute(() -> {
+                    appDatabase.favoriteDao().deleteFavoritesByUser(userId);
+                    appDatabase.favoriteDao().insertFavorites(localFavorites);
+                });
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteResponse>> call, Throwable t) {
+                // Không spam Toast ở đây
+            }
+        });
+    }
+
+    private void openLoginThen(Runnable afterLogin) {
+        LoginFragment loginFragment = new LoginFragment();
+        loginFragment.show(getSupportFragmentManager(), "LoginFragment");
+
+        getSupportFragmentManager().setFragmentResultListener(
+                "key_dang_nhap",
+                this,
+                (requestKey, result) -> afterLogin.run()
+        );
     }
 }

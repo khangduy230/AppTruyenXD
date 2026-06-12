@@ -317,12 +317,6 @@ public class SearchFragment extends Fragment {
         List<Comic> comics = new ArrayList<>();
 
         for (ComicResponse item : responses) {
-
-            int safeRatingCount = item.getCommentCount();
-            if (safeRatingCount <= 0) {
-                safeRatingCount = 40;
-            }
-
             Comic comic = new Comic(
                     item.getId(),
                     R.drawable.thientai,
@@ -334,7 +328,7 @@ public class SearchFragment extends Fragment {
                     item.getSection(),
                     item.getLikeCount(),
                     item.getRating(),
-                    safeRatingCount,
+                    item.getRatingCount(),
                     item.getCommentCount(),
                     item.getViewCount()
             );

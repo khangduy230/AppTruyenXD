@@ -1,5 +1,19 @@
 package com.nhom5.ftcomic.network;
 
+import com.nhom5.ftcomic.network.request.CommentRequest;
+import com.nhom5.ftcomic.network.response.CommentResponse;
+
+import com.nhom5.ftcomic.network.request.FavoriteRequest;
+import com.nhom5.ftcomic.network.response.FavoriteResponse;
+
+import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
+import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
+
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+
 import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
@@ -61,5 +75,48 @@ public interface SupabaseApi {
     Call<List<ComicResponse>> getComicsByIds(
             @Query("id") String idFilter,
             @Query("order") String order
+    );
+
+    @GET("comments_with_profiles")
+    Call<List<CommentResponse>> getCommentsByComicId(
+            @Query("comic_id") String comicIdFilter,
+            @Query("order") String order
+    );
+
+    @POST("comments")
+    Call<Void> addComment(
+            @Header("Prefer") String prefer,
+            @Body CommentRequest request
+    );
+
+    @GET("favorites_with_millis")
+    Call<List<FavoriteResponse>> getMyFavorites(
+            @Query("user_id") String userIdFilter,
+            @Query("order") String order
+    );
+
+    @POST("favorites")
+    Call<Void> addFavorite(
+            @Header("Prefer") String prefer,
+            @Body FavoriteRequest request
+    );
+
+    @DELETE("favorites")
+    Call<Void> deleteFavorite(
+            @Query("user_id") String userIdFilter,
+            @Query("comic_id") String comicIdFilter
+    );
+
+    @GET("reading_history_with_millis")
+    Call<List<ReadingHistoryResponse>> getMyReadingHistory(
+            @Query("user_id") String userIdFilter,
+            @Query("order") String order
+    );
+
+    @POST("reading_history")
+    Call<Void> saveReadingHistory(
+            @Header("Prefer") String prefer,
+            @Query("on_conflict") String onConflict,
+            @Body ReadingHistoryRequest request
     );
 }

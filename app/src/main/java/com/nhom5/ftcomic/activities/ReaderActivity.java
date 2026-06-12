@@ -1,5 +1,14 @@
 package com.nhom5.ftcomic.activities;
 
+import com.nhom5.ftcomic.network.SupabaseApi;
+import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
+import com.nhom5.ftcomic.utils.SessionManager;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +44,7 @@ import androidx.transition.TransitionSet;
 
 public class ReaderActivity extends AppCompatActivity {
 
+    private SessionManager sessionManager;
     private RecyclerView recyclerViewPages;
     private TextView tvEmptyState;
     private Button btnDownloadChapter;
@@ -65,6 +75,8 @@ public class ReaderActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reader);
+
+        sessionManager = new SessionManager(this);
 
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
 
@@ -374,15 +386,55 @@ public class ReaderActivity extends AppCompatActivity {
     }
 
     private void saveReadingHistory() {
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            ReadingHistory history = new ReadingHistory(
-                    comicId,
-                    chapterId,
-                    1,
-                    System.currentTimeMillis()
-            );
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            return;
+        }
 
-            appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            return;
+        }
+
+        int pageNumber = 1;
+
+        ReadingHistoryRequest request = new ReadingHistoryRequest(
+                userId,
+                comicId,
+                chapterId,
+                pageNumber
+        );
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.saveReadingHistory(
+                "resolution=merge-duplicates,return=minimal",
+                "user_id,comic_id",
+                request
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        ReadingHistory history = new ReadingHistory(
+                                userId,
+                                comicId,
+                                chapterId,
+                                pageNumber,
+                                System.currentTimeMillis()
+                        );
+
+                        appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
+                    });
+                } else {
+                    Log.e("READING_HISTORY", "Save failed: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("READING_HISTORY", "Network error: " + t.getMessage());
+            }
         });
     }
     private void showChapterListBottomSheet() {
