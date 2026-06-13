@@ -2,13 +2,13 @@ package com.nhom5.ftcomic.network;
 
 public class SupabaseConfig {
 
-    public static final String PROJECT_URL = "https://pcdjenihcwddqzbhwusx.supabase.co/";
+    public static final String PROJECT_URL = "https://enkliqnftrprfyszkyov.supabase.co/";
 
     public static final String BASE_URL = PROJECT_URL + "rest/v1/";
     public static final String AUTH_BASE_URL = PROJECT_URL + "auth/v1/";
 
     // Giữ publishable key hiện tại của bạn ở đây
-    public static final String API_KEY = "sb_publishable_YhQu9gIg4CgJifgm4xCSXQ_PzgJImF8";
+    public static final String API_KEY = "sb_publishable_AmtjAUXr15c4VmXZfl-UEg_Njdqm6Zq";
 
     public static final String STORAGE_PUBLIC_URL =
             PROJECT_URL + "storage/v1/object/public/";
