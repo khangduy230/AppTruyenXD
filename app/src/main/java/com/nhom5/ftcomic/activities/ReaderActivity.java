@@ -42,6 +42,9 @@ public class ReaderActivity extends AppCompatActivity {
     private LinearLayout layoutDownloadProgress;
     private TextView tvDownloadProgress;
     private ProgressBar progressDownload;
+    
+    // Nút "X" dùng để huỷ bỏ tiến trình tải chương
+    private View btnCancelDownload;
 
     private AppBarLayout appBarLayout;
     private LinearLayout bottomBar;
@@ -60,6 +63,8 @@ public class ReaderActivity extends AppCompatActivity {
     private int currentChapterNumber = 1;
 
     private boolean isDownloading = false;
+    // Quản lý tải xuống offline
+    private OfflineDownloadManager downloadManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,26 +94,25 @@ public class ReaderActivity extends AppCompatActivity {
 
         bindViews();
         setupRecyclerView();
-        // setupDownloadButton();
 
         observeChapterPages();
         observeDownloadedStatus();
         saveReadingHistory();
 
         comicRepository.syncPagesByChapterId(chapterId);
-        //Lấy tên truyện gắn lên thanh toolbar trong chap
+        
+        // Lấy tên truyện gắn lên thanh toolbar
         comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
             if (comic != null) {
                 topAppBar.setTitle(comic.getName());
             }
         });
 
-        // Lấy và quan sát toàn bộ chương của bộ truyện này từ SQLite (Room)
+        // Lấy danh sách chương để xử lý logic chuyển chương
         comicRepository.getChaptersByComicId(comicId).observe(this, chapters -> {
             if (chapters != null && !chapters.isEmpty()) {
-                allChaptersInComic = chapters; // Lưu danh sách chương vào biến toàn cục
+                allChaptersInComic = chapters;
 
-                // Tìm số chương (chapterNumber) của chapterId hiện tại
                 for (Chapter ch : chapters) {
                     if (ch.getId() == chapterId) {
                         currentChapterNumber = ch.getChapterNumber();
@@ -117,29 +121,22 @@ public class ReaderActivity extends AppCompatActivity {
                     }
                 }
 
-                // Logic ẩn/hiện nút "Chương trước" và "Chương sau" dựa trên số chương thực tế
                 if (currentChapterNumber <= 1) {
                     btnPreviousChapter.setVisibility(View.GONE);
                 } else {
                     btnPreviousChapter.setVisibility(View.VISIBLE);
                 }
 
-                // Tìm nút chương sau và ẩn đi nếu đang ở chương cuối cùng
                 Button btnNextChapter = findViewById(R.id.btnNextChapter);
                 if (currentChapterNumber >= chapters.size()) {
                     btnNextChapter.setVisibility(View.GONE);
                 } else {
                     btnNextChapter.setVisibility(View.VISIBLE);
-                    // Hiển thị text động theo số chương tiếp theo
-                    //btnNextChapter.setText("Chương " + (currentChapterNumber + 1));
                 }
             }
         });
 
-        // Thiết lập sự kiện click cho toàn bộ thanh điều hướng dưới
         setupBottomBarNavigation();
-
-
     }
 
     private void bindViews() {
@@ -153,9 +150,22 @@ public class ReaderActivity extends AppCompatActivity {
         layoutDownloadProgress = findViewById(R.id.layoutDownloadProgress);
         tvDownloadProgress = findViewById(R.id.tvDownloadProgress);
         progressDownload = findViewById(R.id.progressDownload);
+        
+        // Ánh xạ nút Huỷ tải từ layout
+        btnCancelDownload = findViewById(R.id.btnCancelDownload);
 
         appBarLayout.bringToFront();
         bottomBar.bringToFront();
+
+        // Gán sự kiện click cho nút huỷ tải
+        if (btnCancelDownload != null) {
+            btnCancelDownload.setOnClickListener(v -> {
+                if (downloadManager != null) {
+                    // Gọi lệnh dừng tải trong OfflineDownloadManager
+                    downloadManager.cancel();
+                }
+            });
+        }
     }
 
     private void setupRecyclerView() {
@@ -166,19 +176,15 @@ public class ReaderActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                // dy > 0: cuộn xuống, dy < 0: cuộn lên.
-                // Dùng Math.abs(dy) > 5 để bỏ qua những rung chấn ngón tay quá nhẹ
                 if (Math.abs(dy) > 5) {
                     hideSystemUI();
                 }
             }
         });
 
-        // 2. XỬ LÝ HIỆN/ẨN KHI BẤM VÀO MÀN HÌNH (Dùng GestureDetector)
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                // Chỉ bắt sự kiện chạm 1 lần dứt khoát (không phải vuốt)
                 toggleSystemUI();
                 return super.onSingleTapConfirmed(e);
             }
@@ -186,87 +192,71 @@ public class ReaderActivity extends AppCompatActivity {
 
         recyclerViewPages.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
-            return false; // Bắt buộc trả về false để RecyclerView vẫn nhận được sự kiện cuộn (scroll)
+            return false;
         });
     }
 
     private void setupBottomBarNavigation() {
-        // 1. Nút tải chương cũ của bạn
         btnDownloadChapter.setOnClickListener(v -> downloadCurrentChapter());
-
-        // 2. Xử lý nút Menu Danh sách chương
         findViewById(R.id.btnChapterList).setOnClickListener(v -> showChapterListBottomSheet());
-
-        // 3. Xử lý nút bấm quay lại Chương trước
         btnPreviousChapter.setOnClickListener(v -> {
             int targetChapterNumber = currentChapterNumber - 1;
             navigateToChapterByNumber(targetChapterNumber);
         });
-
-        // 4. Xử lý nút bấm tiến tới Chương sau
         findViewById(R.id.btnNextChapter).setOnClickListener(v -> {
             int targetChapterNumber = currentChapterNumber + 1;
             navigateToChapterByNumber(targetChapterNumber);
         });
     }
 
-    // Hàm phụ trợ tìm ra ID của chương dựa trên số chương người dùng muốn tới để chuyển màn hình
     private void navigateToChapterByNumber(int targetChapterNumber) {
         for (Chapter ch : allChaptersInComic) {
             if (ch.getChapterNumber() == targetChapterNumber) {
                 getIntent().putExtra("CHAPTER_ID", ch.getId());
                 getIntent().putExtra("COMIC_ID", comicId);
-                recreate(); // Khởi động lại màn hình đọc với ID chương mới
+                recreate();
                 break;
             }
         }
     }
 
     private void hideSystemUI() {
-        if (!isUiVisible) return; // Nếu đang ẩn rồi thì bỏ qua
+        if (!isUiVisible) return;
         isUiVisible = false;
 
-        // Tạo hiệu ứng trượt LÊN cho thanh Top
         Slide slideTop = new Slide(Gravity.TOP);
         slideTop.addTarget(appBarLayout);
-        slideTop.setDuration(150); // Tốc độ trượt (ms)
+        slideTop.setDuration(150);
 
-        // Tạo hiệu ứng trượt XUỐNG cho thanh Bottom
         Slide slideBottom = new Slide(Gravity.BOTTOM);
         slideBottom.addTarget(bottomBar);
         slideBottom.setDuration(150);
 
-        // Gộp 2 hiệu ứng lại
         TransitionSet transitionSet = new TransitionSet();
         transitionSet.addTransition(slideTop);
         transitionSet.addTransition(slideBottom);
 
-        // Áp dụng hiệu ứng
         TransitionManager.beginDelayedTransition((ViewGroup) findViewById(android.R.id.content), transitionSet);
         appBarLayout.setVisibility(View.GONE);
         bottomBar.setVisibility(View.GONE);
     }
 
     private void showSystemUI() {
-        if (isUiVisible) return; // Nếu đang hiện rồi thì bỏ qua
+        if (isUiVisible) return;
         isUiVisible = true;
 
-        // Tương tự, tạo hiệu ứng trượt LÊN cho thanh Top khi xuất hiện
         Slide slideTop = new Slide(Gravity.TOP);
         slideTop.addTarget(appBarLayout);
         slideTop.setDuration(150);
 
-        // Tạo hiệu ứng trượt XUỐNG cho thanh Bottom khi xuất hiện
         Slide slideBottom = new Slide(Gravity.BOTTOM);
         slideBottom.addTarget(bottomBar);
         slideBottom.setDuration(150);
 
-        // Gộp 2 hiệu ứng lại
         TransitionSet transitionSet = new TransitionSet();
         transitionSet.addTransition(slideTop);
         transitionSet.addTransition(slideBottom);
 
-        // Áp dụng hiệu ứng
         TransitionManager.beginDelayedTransition((ViewGroup) findViewById(android.R.id.content), transitionSet);
         appBarLayout.setVisibility(View.VISIBLE);
         bottomBar.setVisibility(View.VISIBLE);
@@ -283,9 +273,6 @@ public class ReaderActivity extends AppCompatActivity {
         comicRepository.getPagesByChapterId(chapterId)
                 .observe(this, pages -> {
                     totalPages = pages == null ? 0 : pages.size();
-
-                    Log.d("READER_DEBUG", "Số page trong Room = " + totalPages);
-
                     if (pages == null || pages.isEmpty()) {
                         tvEmptyState.setVisibility(View.VISIBLE);
                         recyclerViewPages.setVisibility(View.GONE);
@@ -314,6 +301,9 @@ public class ReaderActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Thực hiện tải chương hiện tại về máy để xem offline
+     */
     private void downloadCurrentChapter() {
         if (comicId == -1 || chapterId == -1) {
             Toast.makeText(this, "Không đủ dữ liệu để tải chương", Toast.LENGTH_SHORT).show();
@@ -325,7 +315,7 @@ public class ReaderActivity extends AppCompatActivity {
             return;
         }
 
-        OfflineDownloadManager downloadManager = new OfflineDownloadManager(this);
+        downloadManager = new OfflineDownloadManager(this);
 
         downloadManager.downloadChapter(comicId, chapterId, new OfflineDownloadManager.DownloadCallback() {
             @Override
@@ -335,6 +325,7 @@ public class ReaderActivity extends AppCompatActivity {
                 btnDownloadChapter.setEnabled(false);
                 btnDownloadChapter.setText("Đang tải...");
 
+                // Hiển thị thanh tiến trình tải
                 layoutDownloadProgress.setVisibility(View.VISIBLE);
                 progressDownload.setMax(totalPages);
                 progressDownload.setProgress(0);
@@ -343,6 +334,7 @@ public class ReaderActivity extends AppCompatActivity {
 
             @Override
             public void onProgress(int currentPage, int totalPages) {
+                // Cập nhật số lượng trang đã tải xong
                 progressDownload.setProgress(currentPage);
                 tvDownloadProgress.setText("Đang tải " + currentPage + "/" + totalPages);
             }
@@ -351,6 +343,7 @@ public class ReaderActivity extends AppCompatActivity {
             public void onSuccess(int totalPages) {
                 isDownloading = false;
 
+                // Ẩn thanh tiến trình khi hoàn tất
                 layoutDownloadProgress.setVisibility(View.GONE);
                 btnDownloadChapter.setText("Đã tải");
                 btnDownloadChapter.setEnabled(false);
@@ -370,6 +363,19 @@ public class ReaderActivity extends AppCompatActivity {
 
                 Toast.makeText(ReaderActivity.this, message, Toast.LENGTH_LONG).show();
             }
+
+            /**
+             * Callback được gọi khi người dùng chủ động nhấn nút huỷ (X)
+             */
+            @Override
+            public void onCancel() {
+                isDownloading = false;
+                // Ẩn giao diện tải và khôi phục nút Tải chương
+                layoutDownloadProgress.setVisibility(View.GONE);
+                btnDownloadChapter.setText("Tải chương này");
+                btnDownloadChapter.setEnabled(true);
+                Toast.makeText(ReaderActivity.this, "Đã huỷ tải", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -381,10 +387,10 @@ public class ReaderActivity extends AppCompatActivity {
                     1,
                     System.currentTimeMillis()
             );
-
             appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
         });
     }
+    
     private void showChapterListBottomSheet() {
         com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
@@ -394,7 +400,6 @@ public class ReaderActivity extends AppCompatActivity {
 
         android.widget.ListView listView = bottomSheetView.findViewById(R.id.listViewChapters);
 
-        // Chuyển danh sách đối tượng Chapter từ DB thành chuỗi ký tự hiển thị lên giao diện
         ArrayList<String> displayNames = new ArrayList<>();
         for (Chapter ch : allChaptersInComic) {
             displayNames.add("Chương " + ch.getChapterNumber() + ": " + ch.getChapterName());
@@ -403,17 +408,14 @@ public class ReaderActivity extends AppCompatActivity {
         android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_1, displayNames);
         listView.setAdapter(adapter);
-
-        // Đẩy danh sách tự động cuộn đến vị trí chương hiện tại đang đọc cho tiện
         listView.setSelection(currentChapterNumber - 1);
 
-        // Khi bấm vào một chương bất kỳ trong danh sách
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Chapter selectedChapter = allChaptersInComic.get(position);
             getIntent().putExtra("CHAPTER_ID", selectedChapter.getId());
             getIntent().putExtra("COMIC_ID", comicId);
             bottomSheetDialog.dismiss();
-            recreate(); // Reload lại trang truyện theo chương vừa click
+            recreate();
         });
 
         bottomSheetDialog.show();

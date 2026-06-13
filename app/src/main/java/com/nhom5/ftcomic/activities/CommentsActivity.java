@@ -47,7 +47,7 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
         }
 
         appDatabase = AppDatabase.getInstance(this);
-        sessionManager = new SessionManager(this); // ✅ khởi tạo SessionManager
+        sessionManager = new SessionManager(this); //  khởi tạo SessionManager
 
         findViewById(R.id.topAppBar).setOnClickListener(v -> finish());
         RecyclerView recyclerView = findViewById(R.id.recyclerViewComments);
@@ -69,7 +69,7 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
 
         tvCancelReply.setOnClickListener(v -> exitReplyMode());
 
-        // ✅ Kiểm tra đăng nhập khi bấm gửi
+        // Kiểm tra đăng nhập khi bấm gửi
         btnSend.setOnClickListener(v -> {
             if (!sessionManager.isLoggedIn()) {
                 // Chưa đăng nhập → mở LoginFragment
@@ -87,7 +87,7 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             sendNewComment();
         });
 
-        // ✅ Kiểm tra đăng nhập khi bấm vào ô nhập
+        //  Kiểm tra đăng nhập khi bấm vào ô nhập
         edtComment.setOnClickListener(v -> {
             if (!sessionManager.isLoggedIn()) {
                 LoginFragment loginFragment = new LoginFragment();
@@ -110,7 +110,7 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
 
     @Override
     public void onReplyClick(Comment parentComment) {
-        // ✅ Kiểm tra đăng nhập khi bấm trả lời
+        //  Kiểm tra đăng nhập khi bấm trả lời
         if (!sessionManager.isLoggedIn()) {
             LoginFragment loginFragment = new LoginFragment();
             loginFragment.show(getSupportFragmentManager(), "LoginFragment");
@@ -156,7 +156,7 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             finalContent = "@" + replyingToUser + ": " + content;
         }
 
-        // ✅ Lấy tên và avatar thật từ SessionManager
+        //  Lấy tên và avatar thật từ SessionManager
         String savedUsername = sessionManager.getUsername();
         String email = sessionManager.getEmail();
         String displayName;
@@ -169,13 +169,13 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             displayName = "Người dùng ẩn danh";
         }
 
-        String avatarUri = sessionManager.getAvatarUri(); // ✅ lấy avatar
+        String avatarUri = sessionManager.getAvatarUri(); // lấy avatar
 
         Comment newComment = new Comment(
                 comicId,
                 selectedParentCommentId,
-                displayName,   // ✅ tên thật
-                avatarUri,     // ✅ avatar thật
+                displayName,   //  tên thật
+                avatarUri,     // avatar thật
                 finalContent,
                 System.currentTimeMillis()
         );
