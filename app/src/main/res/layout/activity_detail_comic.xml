@@ -122,10 +122,14 @@
                 android:weightSum="3">
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/layoutLikeAction"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="4dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     app:cardBackgroundColor="?attr/colorSurfaceContainer"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"

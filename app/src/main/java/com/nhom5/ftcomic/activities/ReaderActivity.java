@@ -86,17 +86,15 @@ public class ReaderActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
-        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
-
-        topAppBar.setNavigationOnClickListener(v -> {
-            getOnBackPressedDispatcher().onBackPressed();
-        });
+        comicId = getIntent().getIntExtra("COMIC_ID", -1);
+        chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
 
         startPageNumber = getIntent().getIntExtra("PAGE_NUMBER", 1);
         currentPageNumber = Math.max(1, startPageNumber);
 
         Log.d("READER_DEBUG", "comicId = " + comicId);
         Log.d("READER_DEBUG", "chapterId = " + chapterId);
+        Log.d("READER_DEBUG", "startPageNumber = " + startPageNumber);
 
         if (comicId <= 0 || chapterId <= 0) {
             Toast.makeText(
@@ -109,16 +107,23 @@ public class ReaderActivity extends AppCompatActivity {
             return;
         }
 
+        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
+        topAppBar.setNavigationOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+        });
+
         appDatabase = AppDatabase.getInstance(this);
         comicRepository = new ComicRepository(this);
 
         bindViews();
         setupRecyclerView();
-        // setupDownloadButton();
 
+        comicRepository.syncChaptersByComicId(comicId);
         comicRepository.syncPagesByChapterId(chapterId);
+
         observeChapterPages();
         observeDownloadedStatus();
+
         saveReadingHistory();
 
         comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
@@ -127,12 +132,10 @@ public class ReaderActivity extends AppCompatActivity {
             }
         });
 
-        // Lấy và quan sát toàn bộ chương của bộ truyện này từ SQLite (Room)
         comicRepository.getChaptersByComicId(comicId).observe(this, chapters -> {
             if (chapters != null && !chapters.isEmpty()) {
-                allChaptersInComic = chapters; // Lưu danh sách chương vào biến toàn cục
+                allChaptersInComic = chapters;
 
-                // Tìm số chương (chapterNumber) của chapterId hiện tại
                 for (Chapter ch : chapters) {
                     if (ch.getId() == chapterId) {
                         currentChapterNumber = ch.getChapterNumber();
@@ -141,29 +144,23 @@ public class ReaderActivity extends AppCompatActivity {
                     }
                 }
 
-                // Logic ẩn/hiện nút "Chương trước" và "Chương sau" dựa trên số chương thực tế
                 if (currentChapterNumber <= 1) {
                     btnPreviousChapter.setVisibility(View.GONE);
                 } else {
                     btnPreviousChapter.setVisibility(View.VISIBLE);
                 }
 
-                // Tìm nút chương sau và ẩn đi nếu đang ở chương cuối cùng
                 Button btnNextChapter = findViewById(R.id.btnNextChapter);
+
                 if (currentChapterNumber >= chapters.size()) {
                     btnNextChapter.setVisibility(View.GONE);
                 } else {
                     btnNextChapter.setVisibility(View.VISIBLE);
-                    // Hiển thị text động theo số chương tiếp theo
-                    //btnNextChapter.setText("Chương " + (currentChapterNumber + 1));
                 }
             }
         });
 
-        // Thiết lập sự kiện click cho toàn bộ thanh điều hướng dưới
         setupBottomBarNavigation();
-
-
     }
 
     private void bindViews() {
@@ -327,25 +324,30 @@ public class ReaderActivity extends AppCompatActivity {
                 .observe(this, pages -> {
                     totalPages = pages == null ? 0 : pages.size();
 
+                    Log.d("READER_DEBUG", "chapterId đang đọc = " + chapterId);
                     Log.d("READER_DEBUG", "Số page trong Room = " + totalPages);
 
                     if (pages == null || pages.isEmpty()) {
                         tvEmptyState.setVisibility(View.VISIBLE);
+                        tvEmptyState.setText("Chương này chưa có trang truyện");
                         recyclerViewPages.setVisibility(View.GONE);
-                    } else {
-                        tvEmptyState.setVisibility(View.GONE);
-                        recyclerViewPages.setVisibility(View.VISIBLE);
-                        readerPageAdapter.setPageList(pages);
-                        if (startPageNumber > 1 && startPageNumber <= pages.size()) {
-                            recyclerViewPages.post(() -> {
-                                LinearLayoutManager layoutManager =
-                                        (LinearLayoutManager) recyclerViewPages.getLayoutManager();
+                        return;
+                    }
 
-                                if (layoutManager != null) {
-                                    layoutManager.scrollToPositionWithOffset(startPageNumber - 1, 0);
-                                }
-                            });
-                        }
+                    tvEmptyState.setVisibility(View.GONE);
+                    recyclerViewPages.setVisibility(View.VISIBLE);
+
+                    readerPageAdapter.setPageList(pages);
+
+                    if (startPageNumber > 1 && startPageNumber <= pages.size()) {
+                        recyclerViewPages.post(() -> {
+                            LinearLayoutManager layoutManager =
+                                    (LinearLayoutManager) recyclerViewPages.getLayoutManager();
+
+                            if (layoutManager != null) {
+                                layoutManager.scrollToPositionWithOffset(startPageNumber - 1, 0);
+                            }
+                        });
                     }
                 });
     }

@@ -2,8 +2,12 @@ package com.nhom5.ftcomic.activities;
 
 import androidx.lifecycle.LiveData;
 
+
 import com.nhom5.ftcomic.network.request.RatingRequest;
 import com.nhom5.ftcomic.network.response.RatingResponse;
+
+import com.nhom5.ftcomic.network.request.LikeRequest;
+import com.nhom5.ftcomic.network.response.LikeResponse;
 
 import android.content.ActivityNotFoundException;
 import com.nhom5.ftcomic.fragments.LoginFragment;
@@ -54,6 +58,7 @@ import java.util.ArrayList;
 
 public class DetailComicActivity extends AppCompatActivity {
 
+
     private SessionManager sessionManager;
     private LiveData<Integer> favoriteLiveData;
     private LinearLayout layoutRating;
@@ -76,6 +81,8 @@ public class DetailComicActivity extends AppCompatActivity {
 
     private int comicId = -1;
     private boolean isFavorite = false;
+    private boolean isLiked = false;
+    private boolean isLikeRequestRunning = false;
     private int firstChapterId = -1;
 
     @Override
@@ -108,6 +115,7 @@ public class DetailComicActivity extends AppCompatActivity {
         observeCategories();
         observeFavoriteStatus();
         observeUserRating();
+        syncMyLikeFromSupabase();
 
         comicRepository.syncChaptersByComicId(comicId);
         comicRepository.syncCategoriesByComicId(comicId);
@@ -223,7 +231,32 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
+    /*
+      Nút này chỉ dùng để LƯU TRUYỆN / ĐỌC SAU.
+      Không liên quan đến like.
+    */
         btnSave.setOnClickListener(v -> toggleFavorite());
+
+    /*
+      Ô lượt thích / số tim dùng để LIKE truyện.
+      Không gọi toggleFavorite nữa.
+    */
+        if (tvLikeCount != null) {
+            tvLikeCount.setClickable(true);
+            tvLikeCount.setOnClickListener(v -> toggleLike());
+        }
+
+    /*
+      Trường hợp layout XML có ô/card chứa tim,
+      bạn thêm android:id="@+id/layoutLikeAction" vào XML rồi dùng đoạn này.
+      Nếu chưa có id này thì code vẫn chạy bình thường.
+    */
+        View layoutLikeAction = findViewById(R.id.layoutLikeAction);
+
+        if (layoutLikeAction != null) {
+            layoutLikeAction.setClickable(true);
+            layoutLikeAction.setOnClickListener(v -> toggleLike());
+        }
 
         View btnShare = findViewById(R.id.btnShare);
 
@@ -376,10 +409,10 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void toggleFavorite() {
-        if (!sessionManager.isLoggedIn()) {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
             openLoginThen(() -> {
                 observeFavoriteStatus();
-                syncFavoritesFromSupabase();
+                addFavoriteToSupabase();
             });
             return;
         }
@@ -468,8 +501,10 @@ public class DetailComicActivity extends AppCompatActivity {
 
         if (sessionManager != null && sessionManager.isLoggedIn()) {
             syncFavoritesFromSupabase();
+            syncMyLikeFromSupabase();
         } else {
             isFavorite = false;
+            isLiked = false;
 
             if (btnSave != null) {
                 btnSave.setText("Lưu vào thư viện");
@@ -479,10 +514,20 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void addFavoriteToSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            Toast.makeText(this, "Bạn cần đăng nhập để lưu truyện", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = sessionManager.getUserId();
 
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -494,6 +539,9 @@ public class DetailComicActivity extends AppCompatActivity {
         api.addFavorite("return=minimal", request).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                android.util.Log.d("FAVORITE_SUPABASE", "ADD URL = " + call.request().url());
+                android.util.Log.d("FAVORITE_SUPABASE", "ADD CODE = " + response.code());
+
                 btnSave.setEnabled(true);
 
                 if (response.isSuccessful() || response.code() == 409) {
@@ -501,21 +549,34 @@ public class DetailComicActivity extends AppCompatActivity {
                         appDatabase.favoriteDao().insertFavorite(
                                 new Favorite(userId, comicId, System.currentTimeMillis())
                         );
-
-                        appDatabase.comicDao().increaseLikeCount(comicId);
                     });
 
                     isFavorite = true;
-                    runOnUiThread(() -> btnSave.setText("Đã lưu"));
 
-                    Toast.makeText(DetailComicActivity.this, "Đã lưu truyện", Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> {
+                        btnSave.setText("Đã lưu");
+                    });
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã lưu vào thư viện",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
                     syncFavoritesFromSupabase();
 
-                    if (comicRepository != null) {
-                        comicRepository.syncAllHomeComics();
-                    }
                 } else {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("FAVORITE_SUPABASE", "ADD ERROR CODE = " + response.code());
+                        android.util.Log.e("FAVORITE_SUPABASE", "ADD ERROR BODY = " + error);
+                    } catch (Exception e) {
+                        android.util.Log.e("FAVORITE_SUPABASE", "Không đọc được errorBody", e);
+                    }
+
                     Toast.makeText(
                             DetailComicActivity.this,
                             "Lưu truyện thất bại: " + response.code(),
@@ -528,6 +589,8 @@ public class DetailComicActivity extends AppCompatActivity {
             public void onFailure(Call<Void> call, Throwable t) {
                 btnSave.setEnabled(true);
 
+                android.util.Log.e("FAVORITE_SUPABASE", "ADD FAIL = " + t.getMessage(), t);
+
                 Toast.makeText(
                         DetailComicActivity.this,
                         "Lỗi mạng khi lưu truyện: " + t.getMessage(),
@@ -538,10 +601,20 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void deleteFavoriteFromSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            Toast.makeText(this, "Bạn cần đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = sessionManager.getUserId();
 
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -555,25 +628,42 @@ public class DetailComicActivity extends AppCompatActivity {
         ).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                android.util.Log.d("FAVORITE_SUPABASE", "DELETE URL = " + call.request().url());
+                android.util.Log.d("FAVORITE_SUPABASE", "DELETE CODE = " + response.code());
+
                 btnSave.setEnabled(true);
 
                 if (response.isSuccessful()) {
                     AppDatabase.databaseWriteExecutor.execute(() -> {
                         appDatabase.favoriteDao().deleteFavoriteByComicId(userId, comicId);
-                        appDatabase.comicDao().decreaseLikeCount(comicId);
                     });
 
                     isFavorite = false;
-                    runOnUiThread(() -> btnSave.setText("Lưu vào thư viện"));
 
-                    Toast.makeText(DetailComicActivity.this, "Đã bỏ lưu truyện", Toast.LENGTH_SHORT).show();
+                    runOnUiThread(() -> {
+                        btnSave.setText("Lưu vào thư viện");
+                    });
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã bỏ lưu khỏi thư viện",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
                     syncFavoritesFromSupabase();
 
-                    if (comicRepository != null) {
-                        comicRepository.syncAllHomeComics();
-                    }
                 } else {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("FAVORITE_SUPABASE", "DELETE ERROR CODE = " + response.code());
+                        android.util.Log.e("FAVORITE_SUPABASE", "DELETE ERROR BODY = " + error);
+                    } catch (Exception e) {
+                        android.util.Log.e("FAVORITE_SUPABASE", "Không đọc được errorBody", e);
+                    }
+
                     Toast.makeText(
                             DetailComicActivity.this,
                             "Bỏ lưu thất bại: " + response.code(),
@@ -585,6 +675,8 @@ public class DetailComicActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 btnSave.setEnabled(true);
+
+                android.util.Log.e("FAVORITE_SUPABASE", "DELETE FAIL = " + t.getMessage(), t);
 
                 Toast.makeText(
                         DetailComicActivity.this,
@@ -893,5 +985,255 @@ public class DetailComicActivity extends AppCompatActivity {
                 ).show();
             }
         });
+    }
+
+    private void toggleLike() {
+        if (isLikeRequestRunning) {
+            return;
+        }
+
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            openLoginThen(() -> {
+                syncMyLikeFromSupabase();
+                addLikeToSupabase();
+            });
+            return;
+        }
+
+        if (isLiked) {
+            deleteLikeFromSupabase();
+        } else {
+            addLikeToSupabase();
+        }
+    }
+
+    private void syncMyLikeFromSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            isLiked = false;
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            isLiked = false;
+            return;
+        }
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.getMyLike(
+                "eq." + userId,
+                "eq." + comicId,
+                1
+        ).enqueue(new Callback<List<LikeResponse>>() {
+            @Override
+            public void onResponse(Call<List<LikeResponse>> call, Response<List<LikeResponse>> response) {
+                android.util.Log.d("LIKE_SUPABASE", "GET URL = " + call.request().url());
+                android.util.Log.d("LIKE_SUPABASE", "GET CODE = " + response.code());
+
+                if (response.isSuccessful()) {
+                    List<LikeResponse> likes = response.body();
+                    isLiked = likes != null && !likes.isEmpty();
+                } else {
+                    isLiked = false;
+
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("LIKE_SUPABASE", "GET ERROR = " + error);
+                    } catch (Exception e) {
+                        android.util.Log.e("LIKE_SUPABASE", "Không đọc được errorBody", e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<LikeResponse>> call, Throwable t) {
+                isLiked = false;
+                android.util.Log.e("LIKE_SUPABASE", "GET FAIL = " + t.getMessage(), t);
+            }
+        });
+    }
+
+    private void addLikeToSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            Toast.makeText(this, "Bạn cần đăng nhập để thích truyện", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isLikeRequestRunning = true;
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+        LikeRequest request = new LikeRequest(userId, comicId);
+
+        api.addLike("return=minimal", request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLikeRequestRunning = false;
+
+                android.util.Log.d("LIKE_SUPABASE", "ADD URL = " + call.request().url());
+                android.util.Log.d("LIKE_SUPABASE", "ADD CODE = " + response.code());
+
+                if (response.isSuccessful()) {
+                    isLiked = true;
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã thích truyện",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    syncMyLikeFromSupabase();
+                    refreshComicAfterLikeChanged();
+
+                } else if (response.code() == 409) {
+                    isLiked = true;
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Bạn đã thích truyện này rồi",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    syncMyLikeFromSupabase();
+                    refreshComicAfterLikeChanged();
+
+                } else {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("LIKE_SUPABASE", "ADD ERROR CODE = " + response.code());
+                        android.util.Log.e("LIKE_SUPABASE", "ADD ERROR BODY = " + error);
+                    } catch (Exception e) {
+                        android.util.Log.e("LIKE_SUPABASE", "Không đọc được errorBody", e);
+                    }
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Thích truyện thất bại: " + response.code(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLikeRequestRunning = false;
+
+                android.util.Log.e("LIKE_SUPABASE", "ADD FAIL = " + t.getMessage(), t);
+
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi thích truyện: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void deleteLikeFromSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            Toast.makeText(this, "Bạn cần đăng nhập", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isLikeRequestRunning = true;
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.deleteLike(
+                "eq." + userId,
+                "eq." + comicId
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLikeRequestRunning = false;
+
+                android.util.Log.d("LIKE_SUPABASE", "DELETE URL = " + call.request().url());
+                android.util.Log.d("LIKE_SUPABASE", "DELETE CODE = " + response.code());
+
+                if (response.isSuccessful()) {
+                    isLiked = false;
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã bỏ thích truyện",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    syncMyLikeFromSupabase();
+                    refreshComicAfterLikeChanged();
+
+                } else {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("LIKE_SUPABASE", "DELETE ERROR CODE = " + response.code());
+                        android.util.Log.e("LIKE_SUPABASE", "DELETE ERROR BODY = " + error);
+                    } catch (Exception e) {
+                        android.util.Log.e("LIKE_SUPABASE", "Không đọc được errorBody", e);
+                    }
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Bỏ thích thất bại: " + response.code(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLikeRequestRunning = false;
+
+                android.util.Log.e("LIKE_SUPABASE", "DELETE FAIL = " + t.getMessage(), t);
+
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi bỏ thích: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void refreshComicAfterLikeChanged() {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (comicRepository != null) {
+                comicRepository.syncComicById(comicId);
+                comicRepository.syncAllHomeComics();
+            }
+        }, 00);
     }
 }
