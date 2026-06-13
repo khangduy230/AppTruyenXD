@@ -367,10 +367,21 @@ public class DetailComicActivity extends AppCompatActivity {
         }
     }
 
-    private void openReaderActivity(int chapterId) {
+    private void openReaderActivity(int targetChapterId) {
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (targetChapterId <= 0) {
+            Toast.makeText(this, "Không tìm thấy CHAPTER_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent intent = new Intent(this, ReaderActivity.class);
         intent.putExtra("COMIC_ID", comicId);
-        intent.putExtra("CHAPTER_ID", chapterId);
+        intent.putExtra("CHAPTER_ID", targetChapterId);
+        intent.putExtra("PAGE_NUMBER", 1);
         startActivity(intent);
     }
 

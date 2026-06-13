@@ -1,5 +1,8 @@
 package com.nhom5.ftcomic.activities;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.content.Intent;
 import com.nhom5.ftcomic.network.SupabaseApi;
 import com.nhom5.ftcomic.network.SupabaseClient;
 import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
@@ -44,6 +47,11 @@ import androidx.transition.TransitionSet;
 
 public class ReaderActivity extends AppCompatActivity {
 
+    private int currentPageNumber = 1;
+    private int startPageNumber = 1;
+
+    private final Handler historyHandler = new Handler(Looper.getMainLooper());
+    private Runnable historyRunnable;
     private SessionManager sessionManager;
     private RecyclerView recyclerViewPages;
     private TextView tvEmptyState;
@@ -84,14 +92,19 @@ public class ReaderActivity extends AppCompatActivity {
             getOnBackPressedDispatcher().onBackPressed();
         });
 
-        comicId = getIntent().getIntExtra("COMIC_ID", -1);
-        chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
+        startPageNumber = getIntent().getIntExtra("PAGE_NUMBER", 1);
+        currentPageNumber = Math.max(1, startPageNumber);
 
         Log.d("READER_DEBUG", "comicId = " + comicId);
         Log.d("READER_DEBUG", "chapterId = " + chapterId);
 
-        if (chapterId == -1) {
-            Toast.makeText(this, "Không lấy được CHAPTER_ID", Toast.LENGTH_SHORT).show();
+        if (comicId <= 0 || chapterId <= 0) {
+            Toast.makeText(
+                    this,
+                    "Không lấy được COMIC_ID hoặc CHAPTER_ID",
+                    Toast.LENGTH_SHORT
+            ).show();
+
             finish();
             return;
         }
@@ -103,12 +116,11 @@ public class ReaderActivity extends AppCompatActivity {
         setupRecyclerView();
         // setupDownloadButton();
 
+        comicRepository.syncPagesByChapterId(chapterId);
         observeChapterPages();
         observeDownloadedStatus();
         saveReadingHistory();
 
-        comicRepository.syncPagesByChapterId(chapterId);
-        //Lấy tên truyện gắn lên thanh toolbar trong chap
         comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
             if (comic != null) {
                 topAppBar.setTitle(comic.getName());
@@ -178,10 +190,24 @@ public class ReaderActivity extends AppCompatActivity {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                // dy > 0: cuộn xuống, dy < 0: cuộn lên.
-                // Dùng Math.abs(dy) > 5 để bỏ qua những rung chấn ngón tay quá nhẹ
+
                 if (Math.abs(dy) > 5) {
                     hideSystemUI();
+                }
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (layoutManager != null) {
+                    int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
+
+                    if (firstVisiblePosition != RecyclerView.NO_POSITION) {
+                        int newPageNumber = firstVisiblePosition + 1;
+
+                        if (newPageNumber != currentPageNumber) {
+                            currentPageNumber = newPageNumber;
+                            scheduleSaveReadingHistory();
+                        }
+                    }
                 }
             }
         });
@@ -224,14 +250,19 @@ public class ReaderActivity extends AppCompatActivity {
 
     // Hàm phụ trợ tìm ra ID của chương dựa trên số chương người dùng muốn tới để chuyển màn hình
     private void navigateToChapterByNumber(int targetChapterNumber) {
+        if (allChaptersInComic == null || allChaptersInComic.isEmpty()) {
+            Toast.makeText(this, "Chưa tải được danh sách chương", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         for (Chapter ch : allChaptersInComic) {
             if (ch.getChapterNumber() == targetChapterNumber) {
-                getIntent().putExtra("CHAPTER_ID", ch.getId());
-                getIntent().putExtra("COMIC_ID", comicId);
-                recreate(); // Khởi động lại màn hình đọc với ID chương mới
-                break;
+                openChapter(ch.getId(), 1);
+                return;
             }
         }
+
+        Toast.makeText(this, "Không tìm thấy chương " + targetChapterNumber, Toast.LENGTH_SHORT).show();
     }
 
     private void hideSystemUI() {
@@ -305,6 +336,16 @@ public class ReaderActivity extends AppCompatActivity {
                         tvEmptyState.setVisibility(View.GONE);
                         recyclerViewPages.setVisibility(View.VISIBLE);
                         readerPageAdapter.setPageList(pages);
+                        if (startPageNumber > 1 && startPageNumber <= pages.size()) {
+                            recyclerViewPages.post(() -> {
+                                LinearLayoutManager layoutManager =
+                                        (LinearLayoutManager) recyclerViewPages.getLayoutManager();
+
+                                if (layoutManager != null) {
+                                    layoutManager.scrollToPositionWithOffset(startPageNumber - 1, 0);
+                                }
+                            });
+                        }
                     }
                 });
     }
@@ -396,13 +437,13 @@ public class ReaderActivity extends AppCompatActivity {
             return;
         }
 
-        int pageNumber = 1;
+        int safePageNumber = Math.max(1, currentPageNumber);
 
         ReadingHistoryRequest request = new ReadingHistoryRequest(
                 userId,
                 comicId,
                 chapterId,
-                pageNumber
+                safePageNumber
         );
 
         SupabaseApi api = SupabaseClient.getApi(this);
@@ -420,7 +461,7 @@ public class ReaderActivity extends AppCompatActivity {
                                 userId,
                                 comicId,
                                 chapterId,
-                                pageNumber,
+                                safePageNumber,
                                 System.currentTimeMillis()
                         );
 
@@ -462,12 +503,61 @@ public class ReaderActivity extends AppCompatActivity {
         // Khi bấm vào một chương bất kỳ trong danh sách
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Chapter selectedChapter = allChaptersInComic.get(position);
-            getIntent().putExtra("CHAPTER_ID", selectedChapter.getId());
-            getIntent().putExtra("COMIC_ID", comicId);
+
             bottomSheetDialog.dismiss();
-            recreate(); // Reload lại trang truyện theo chương vừa click
+
+            if (selectedChapter == null || selectedChapter.getId() <= 0) {
+                Toast.makeText(this, "Không tìm thấy CHAPTER_ID", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            openChapter(selectedChapter.getId(), 1);
         });
 
         bottomSheetDialog.show();
+    }
+
+    private void scheduleSaveReadingHistory() {
+        if (historyRunnable != null) {
+            historyHandler.removeCallbacks(historyRunnable);
+        }
+
+        historyRunnable = this::saveReadingHistory;
+        historyHandler.postDelayed(historyRunnable, 800);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveReadingHistory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (historyRunnable != null) {
+            historyHandler.removeCallbacks(historyRunnable);
+        }
+
+        super.onDestroy();
+    }
+
+    private void openChapter(int targetChapterId, int targetPageNumber) {
+        if (comicId <= 0) {
+            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (targetChapterId <= 0) {
+            Toast.makeText(this, "Không tìm thấy CHAPTER_ID", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, ReaderActivity.class);
+        intent.putExtra("COMIC_ID", comicId);
+        intent.putExtra("CHAPTER_ID", targetChapterId);
+        intent.putExtra("PAGE_NUMBER", Math.max(1, targetPageNumber));
+
+        startActivity(intent);
+        finish();
     }
 }

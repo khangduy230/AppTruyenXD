@@ -112,6 +112,7 @@ public class ReadingHistoryActivity extends AppCompatActivity {
                         Intent intent = new Intent(ReadingHistoryActivity.this, ReaderActivity.class);
                         intent.putExtra("COMIC_ID", comic.getId());
                         intent.putExtra("CHAPTER_ID", historyRecord.getChapterId());
+                        intent.putExtra("PAGE_NUMBER", historyRecord.getPageNumber());
                         startActivity(intent);
                     } else {
                         Toast.makeText(
