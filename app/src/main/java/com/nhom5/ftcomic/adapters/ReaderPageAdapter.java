@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.models.ChapterPage;
 
@@ -28,6 +29,7 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
     public ReaderPageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_reader_page, parent, false);
+
         return new ReaderPageViewHolder(view);
     }
 
@@ -36,6 +38,7 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
         ChapterPage page = pageList.get(position);
 
         if (page == null) {
+            holder.imgPage.setImageResource(R.drawable.thientai);
             return;
         }
 
@@ -51,6 +54,7 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
                         .error(R.drawable.thientai)
                         .fitCenter()
                         .into(holder.imgPage);
+
                 return;
             }
         }
@@ -60,6 +64,7 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
         if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.thientai)
                     .error(R.drawable.thientai)
                     .fitCenter()
@@ -71,10 +76,7 @@ public class ReaderPageAdapter extends RecyclerView.Adapter<ReaderPageAdapter.Re
 
     @Override
     public int getItemCount() {
-        if (pageList == null) {
-            return 0;
-        }
-        return pageList.size();
+        return pageList == null ? 0 : pageList.size();
     }
 
     public void setPageList(List<ChapterPage> pageList) {

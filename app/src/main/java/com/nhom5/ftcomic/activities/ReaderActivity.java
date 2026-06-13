@@ -1,20 +1,15 @@
 package com.nhom5.ftcomic.activities;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.content.Intent;
-import com.nhom5.ftcomic.network.SupabaseApi;
-import com.nhom5.ftcomic.network.SupabaseClient;
-import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
-import com.nhom5.ftcomic.utils.SessionManager;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -24,6 +19,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.Slide;
+import androidx.transition.TransitionManager;
+import androidx.transition.TransitionSet;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -31,19 +29,21 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ReaderPageAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.Chapter;
-import com.nhom5.ftcomic.models.DownloadedChapter;
 import com.nhom5.ftcomic.models.ReadingHistory;
+import com.nhom5.ftcomic.network.SupabaseApi;
+import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
 import com.nhom5.ftcomic.repository.ComicRepository;
+import com.nhom5.ftcomic.utils.NetworkUtils;
 import com.nhom5.ftcomic.utils.OfflineDownloadManager;
-import androidx.transition.TransitionManager;
-import android.view.ViewGroup;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import com.nhom5.ftcomic.utils.SessionManager;
+
 import java.util.ArrayList;
 import java.util.List;
-import android.view.Gravity;
-import androidx.transition.Slide;
-import androidx.transition.TransitionSet;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ReaderActivity extends AppCompatActivity {
 
@@ -52,7 +52,9 @@ public class ReaderActivity extends AppCompatActivity {
 
     private final Handler historyHandler = new Handler(Looper.getMainLooper());
     private Runnable historyRunnable;
+
     private SessionManager sessionManager;
+
     private RecyclerView recyclerViewPages;
     private TextView tvEmptyState;
     private Button btnDownloadChapter;
@@ -63,7 +65,7 @@ public class ReaderActivity extends AppCompatActivity {
 
     private AppBarLayout appBarLayout;
     private LinearLayout bottomBar;
-    private boolean isUiVisible = true; // Cờ theo dõi trạng thái ẩn/hiện
+    private boolean isUiVisible = true;
 
     private ReaderPageAdapter readerPageAdapter;
 
@@ -118,8 +120,16 @@ public class ReaderActivity extends AppCompatActivity {
         bindViews();
         setupRecyclerView();
 
-        comicRepository.syncChaptersByComicId(comicId);
-        comicRepository.syncPagesByChapterId(chapterId);
+        if (NetworkUtils.isOnline(this)) {
+            comicRepository.syncChaptersByComicId(comicId);
+            comicRepository.syncPagesByChapterId(chapterId);
+        } else {
+            Toast.makeText(
+                    this,
+                    "Đang dùng dữ liệu offline đã lưu",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
 
         observeChapterPages();
         observeDownloadedStatus();
@@ -183,6 +193,7 @@ public class ReaderActivity extends AppCompatActivity {
         readerPageAdapter = new ReaderPageAdapter(new ArrayList<>());
         recyclerViewPages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPages.setAdapter(readerPageAdapter);
+
         recyclerViewPages.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -192,7 +203,8 @@ public class ReaderActivity extends AppCompatActivity {
                     hideSystemUI();
                 }
 
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                LinearLayoutManager layoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (layoutManager != null) {
                     int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
@@ -209,43 +221,39 @@ public class ReaderActivity extends AppCompatActivity {
             }
         });
 
-        // 2. XỬ LÝ HIỆN/ẨN KHI BẤM VÀO MÀN HÌNH (Dùng GestureDetector)
-        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-                // Chỉ bắt sự kiện chạm 1 lần dứt khoát (không phải vuốt)
-                toggleSystemUI();
-                return super.onSingleTapConfirmed(e);
-            }
-        });
+        GestureDetector gestureDetector = new GestureDetector(
+                this,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        toggleSystemUI();
+                        return super.onSingleTapConfirmed(e);
+                    }
+                }
+        );
 
         recyclerViewPages.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event);
-            return false; // Bắt buộc trả về false để RecyclerView vẫn nhận được sự kiện cuộn (scroll)
+            return false;
         });
     }
 
     private void setupBottomBarNavigation() {
-        // 1. Nút tải chương cũ của bạn
         btnDownloadChapter.setOnClickListener(v -> downloadCurrentChapter());
 
-        // 2. Xử lý nút Menu Danh sách chương
         findViewById(R.id.btnChapterList).setOnClickListener(v -> showChapterListBottomSheet());
 
-        // 3. Xử lý nút bấm quay lại Chương trước
         btnPreviousChapter.setOnClickListener(v -> {
             int targetChapterNumber = currentChapterNumber - 1;
             navigateToChapterByNumber(targetChapterNumber);
         });
 
-        // 4. Xử lý nút bấm tiến tới Chương sau
         findViewById(R.id.btnNextChapter).setOnClickListener(v -> {
             int targetChapterNumber = currentChapterNumber + 1;
             navigateToChapterByNumber(targetChapterNumber);
         });
     }
 
-    // Hàm phụ trợ tìm ra ID của chương dựa trên số chương người dùng muốn tới để chuyển màn hình
     private void navigateToChapterByNumber(int targetChapterNumber) {
         if (allChaptersInComic == null || allChaptersInComic.isEmpty()) {
             Toast.makeText(this, "Chưa tải được danh sách chương", Toast.LENGTH_SHORT).show();
@@ -262,63 +270,6 @@ public class ReaderActivity extends AppCompatActivity {
         Toast.makeText(this, "Không tìm thấy chương " + targetChapterNumber, Toast.LENGTH_SHORT).show();
     }
 
-    private void hideSystemUI() {
-        if (!isUiVisible) return; // Nếu đang ẩn rồi thì bỏ qua
-        isUiVisible = false;
-
-        // Tạo hiệu ứng trượt LÊN cho thanh Top
-        Slide slideTop = new Slide(Gravity.TOP);
-        slideTop.addTarget(appBarLayout);
-        slideTop.setDuration(150); // Tốc độ trượt (ms)
-
-        // Tạo hiệu ứng trượt XUỐNG cho thanh Bottom
-        Slide slideBottom = new Slide(Gravity.BOTTOM);
-        slideBottom.addTarget(bottomBar);
-        slideBottom.setDuration(150);
-
-        // Gộp 2 hiệu ứng lại
-        TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(slideTop);
-        transitionSet.addTransition(slideBottom);
-
-        // Áp dụng hiệu ứng
-        TransitionManager.beginDelayedTransition((ViewGroup) findViewById(android.R.id.content), transitionSet);
-        appBarLayout.setVisibility(View.GONE);
-        bottomBar.setVisibility(View.GONE);
-    }
-
-    private void showSystemUI() {
-        if (isUiVisible) return; // Nếu đang hiện rồi thì bỏ qua
-        isUiVisible = true;
-
-        // Tương tự, tạo hiệu ứng trượt LÊN cho thanh Top khi xuất hiện
-        Slide slideTop = new Slide(Gravity.TOP);
-        slideTop.addTarget(appBarLayout);
-        slideTop.setDuration(150);
-
-        // Tạo hiệu ứng trượt XUỐNG cho thanh Bottom khi xuất hiện
-        Slide slideBottom = new Slide(Gravity.BOTTOM);
-        slideBottom.addTarget(bottomBar);
-        slideBottom.setDuration(150);
-
-        // Gộp 2 hiệu ứng lại
-        TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(slideTop);
-        transitionSet.addTransition(slideBottom);
-
-        // Áp dụng hiệu ứng
-        TransitionManager.beginDelayedTransition((ViewGroup) findViewById(android.R.id.content), transitionSet);
-        appBarLayout.setVisibility(View.VISIBLE);
-        bottomBar.setVisibility(View.VISIBLE);
-    }
-
-    private void toggleSystemUI() {
-        if (isUiVisible) {
-            hideSystemUI();
-        } else {
-            showSystemUI();
-        }
-    }
     private void observeChapterPages() {
         comicRepository.getPagesByChapterId(chapterId)
                 .observe(this, pages -> {
@@ -370,8 +321,13 @@ public class ReaderActivity extends AppCompatActivity {
     }
 
     private void downloadCurrentChapter() {
-        if (comicId == -1 || chapterId == -1) {
+        if (comicId <= 0 || chapterId <= 0) {
             Toast.makeText(this, "Không đủ dữ liệu để tải chương", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!NetworkUtils.isOnline(this)) {
+            Toast.makeText(this, "Cần có mạng để tải chương offline", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -410,9 +366,11 @@ public class ReaderActivity extends AppCompatActivity {
                 btnDownloadChapter.setText("Đã tải");
                 btnDownloadChapter.setEnabled(false);
 
-                Toast.makeText(ReaderActivity.this,
+                Toast.makeText(
+                        ReaderActivity.this,
                         "Đã tải xong " + totalPages + " trang",
-                        Toast.LENGTH_SHORT).show();
+                        Toast.LENGTH_SHORT
+                ).show();
             }
 
             @Override
@@ -430,6 +388,11 @@ public class ReaderActivity extends AppCompatActivity {
 
     private void saveReadingHistory() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            return;
+        }
+
+        if (!NetworkUtils.isOnline(this)) {
+            Log.w("READING_HISTORY", "Offline, không sync lịch sử đọc lên Supabase");
             return;
         }
 
@@ -480,7 +443,13 @@ public class ReaderActivity extends AppCompatActivity {
             }
         });
     }
+
     private void showChapterListBottomSheet() {
+        if (allChaptersInComic == null || allChaptersInComic.isEmpty()) {
+            Toast.makeText(this, "Chưa có danh sách chương", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);
 
@@ -489,20 +458,21 @@ public class ReaderActivity extends AppCompatActivity {
 
         android.widget.ListView listView = bottomSheetView.findViewById(R.id.listViewChapters);
 
-        // Chuyển danh sách đối tượng Chapter từ DB thành chuỗi ký tự hiển thị lên giao diện
         ArrayList<String> displayNames = new ArrayList<>();
+
         for (Chapter ch : allChaptersInComic) {
             displayNames.add("Chương " + ch.getChapterNumber() + ": " + ch.getChapterName());
         }
 
         android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
-                this, android.R.layout.simple_list_item_1, displayNames);
+                this,
+                android.R.layout.simple_list_item_1,
+                displayNames
+        );
+
         listView.setAdapter(adapter);
+        listView.setSelection(Math.max(0, currentChapterNumber - 1));
 
-        // Đẩy danh sách tự động cuộn đến vị trí chương hiện tại đang đọc cho tiện
-        listView.setSelection(currentChapterNumber - 1);
-
-        // Khi bấm vào một chương bất kỳ trong danh sách
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Chapter selectedChapter = allChaptersInComic.get(position);
 
@@ -561,5 +531,69 @@ public class ReaderActivity extends AppCompatActivity {
 
         startActivity(intent);
         finish();
+    }
+
+    private void hideSystemUI() {
+        if (!isUiVisible) {
+            return;
+        }
+
+        isUiVisible = false;
+
+        Slide slideTop = new Slide(Gravity.TOP);
+        slideTop.addTarget(appBarLayout);
+        slideTop.setDuration(150);
+
+        Slide slideBottom = new Slide(Gravity.BOTTOM);
+        slideBottom.addTarget(bottomBar);
+        slideBottom.setDuration(150);
+
+        TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(slideTop);
+        transitionSet.addTransition(slideBottom);
+
+        TransitionManager.beginDelayedTransition(
+                (ViewGroup) findViewById(android.R.id.content),
+                transitionSet
+        );
+
+        appBarLayout.setVisibility(View.GONE);
+        bottomBar.setVisibility(View.GONE);
+    }
+
+    private void showSystemUI() {
+        if (isUiVisible) {
+            return;
+        }
+
+        isUiVisible = true;
+
+        Slide slideTop = new Slide(Gravity.TOP);
+        slideTop.addTarget(appBarLayout);
+        slideTop.setDuration(150);
+
+        Slide slideBottom = new Slide(Gravity.BOTTOM);
+        slideBottom.addTarget(bottomBar);
+        slideBottom.setDuration(150);
+
+        TransitionSet transitionSet = new TransitionSet();
+        transitionSet.addTransition(slideTop);
+        transitionSet.addTransition(slideBottom);
+
+        TransitionManager.beginDelayedTransition(
+                (ViewGroup) findViewById(android.R.id.content),
+                transitionSet
+        );
+
+        appBarLayout.setVisibility(View.VISIBLE);
+        bottomBar.setVisibility(View.VISIBLE);
+    }
+
+    private void toggleSystemUI() {
+        if (isUiVisible) {
+            hideSystemUI();
+        } else {
+            showSystemUI();
+        }
     }
 }
