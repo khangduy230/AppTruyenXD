@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.AllStoryActivity;
@@ -20,6 +21,7 @@ import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
 import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.repository.ComicRepository;
+import com.nhom5.ftcomic.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
@@ -52,9 +54,10 @@ public class HomeFragment extends Fragment {
         comicRepository = new ComicRepository(requireContext());
 
         setupRecyclerViews();
+
+        // Luôn observe Room trước để mất mạng vẫn có dữ liệu cache
         observeComicsFromRoom();
 
-        // Thiết lập sự kiện click để chuyển sang AllStoryActivity
         if (tvAllComicsTitle != null) {
             tvAllComicsTitle.setOnClickListener(v -> {
                 Intent intent = new Intent(requireContext(), AllStoryActivity.class);
@@ -62,14 +65,23 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        // Gọi API Supabase rồi lưu vào Room
-        comicRepository.syncAllHomeComics();
+        // Có mạng thì sync Supabase -> Room
+        // Mất mạng thì vẫn hiển thị dữ liệu Room
+        if (NetworkUtils.isOnline(requireContext())) {
+            comicRepository.syncAllHomeComics();
+        } else {
+            Toast.makeText(
+                    requireContext(),
+                    "Đang hiển thị dữ liệu đã lưu offline",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     private void setupRecyclerViews() {
-        featuredAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
-        rankingAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
-        allComicsAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
+        featuredAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
+        rankingAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
+        allComicsAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
 
         setupHorizontalRecyclerView(recyclerFeatured, featuredAdapter);
         setupHorizontalRecyclerView(recyclerRanking, rankingAdapter);
@@ -90,18 +102,35 @@ public class HomeFragment extends Fragment {
 
     private void observeComicsFromRoom() {
         comicRepository.getComicsBySection("featured")
-                .observe(getViewLifecycleOwner(), comics -> featuredAdapter.setComicList(comics));
+                .observe(getViewLifecycleOwner(), comics -> {
+                    if (comics != null) {
+                        featuredAdapter.setComicList(comics);
+                    }
+                });
 
-        comicRepository.getComicsBySection("ranking")
-                .observe(getViewLifecycleOwner(), comics -> rankingAdapter.setComicList(comics));
+        comicRepository.getRankingComics()
+                .observe(getViewLifecycleOwner(), comics -> {
+                    if (comics != null) {
+                        rankingAdapter.setComicList(comics);
+                    }
+                });
 
-        comicRepository.getComicsBySection("all")
-                .observe(getViewLifecycleOwner(), comics -> allComicsAdapter.setComicList(comics));
+        comicRepository.getAllComicsLive()
+                .observe(getViewLifecycleOwner(), comics -> {
+                    if (comics != null) {
+                        allComicsAdapter.setComicList(comics);
+                    }
+                });
     }
 
     private void openDetailComic(Comic comic) {
+        if (comic == null) {
+            return;
+        }
+
         Intent intent = new Intent(requireContext(), DetailComicActivity.class);
         intent.putExtra("COMIC_ID", comic.getId());
+        intent.putExtra("COMIC_COVER_URL", comic.getCoverUrl());
         startActivity(intent);
     }
 }

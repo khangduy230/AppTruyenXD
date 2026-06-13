@@ -17,17 +17,27 @@ public interface ReadingHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertOrUpdateHistory(ReadingHistory history);
 
-    @Query("SELECT * FROM reading_history WHERE comicId = :comicId LIMIT 1")
-    ReadingHistory getHistoryByComicId(int comicId);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertHistories(List<ReadingHistory> histories);
+
+    @Query("SELECT * FROM reading_history WHERE userId = :userId AND comicId = :comicId LIMIT 1")
+    ReadingHistory getHistoryByComicId(String userId, int comicId);
+
+    @Query("SELECT * FROM reading_history WHERE userId = :userId AND comicId = :comicId LIMIT 1")
+    ReadingHistory getHistoryByComicIdSync(String userId, int comicId);
 
     @Query("SELECT comics.* FROM comics " +
             "INNER JOIN reading_history ON comics.id = reading_history.comicId " +
+            "WHERE reading_history.userId = :userId " +
             "ORDER BY reading_history.lastReadAt DESC")
-    LiveData<List<Comic>> getHistoryComics();
+    LiveData<List<Comic>> getHistoryComics(String userId);
 
-    @Query("DELETE FROM reading_history WHERE comicId = :comicId")
-    void deleteHistoryByComicId(int comicId);
+    @Query("DELETE FROM reading_history WHERE userId = :userId AND comicId = :comicId")
+    void deleteHistoryByComicId(String userId, int comicId);
 
-    @Query("SELECT * FROM reading_history WHERE comicId = :comicId LIMIT 1")
-    com.nhom5.ftcomic.models.ReadingHistory getHistoryByComicIdSync(int comicId);
+    @Query("DELETE FROM reading_history WHERE userId = :userId")
+    void deleteHistoriesByUser(String userId);
+
+    @Query("DELETE FROM reading_history")
+    void deleteAllHistories();
 }

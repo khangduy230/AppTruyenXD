@@ -43,4 +43,25 @@ public interface ComicDao {
 
     @Query("DELETE FROM comics")
     void deleteAllComics();
+
+    @Query("UPDATE comics SET commentCount = :commentCount WHERE id = :comicId")
+    void updateCommentCount(int comicId, int commentCount);
+
+    @Query("UPDATE comics SET commentCount = commentCount + 1 WHERE id = :comicId")
+    void increaseCommentCount(int comicId);
+
+    @Query("UPDATE comics SET likeCount = :likeCount WHERE id = :comicId")
+    void updateLikeCount(int comicId, int likeCount);
+
+    @Query("UPDATE comics SET likeCount = likeCount + 1 WHERE id = :comicId")
+    void increaseLikeCount(int comicId);
+
+    @Query("UPDATE comics SET likeCount = CASE WHEN likeCount > 0 THEN likeCount - 1 ELSE 0 END WHERE id = :comicId")
+    void decreaseLikeCount(int comicId);
+
+    @Query("SELECT * FROM comics ORDER BY rating DESC, likeCount DESC, viewCount DESC, id ASC")
+    LiveData<List<Comic>> getRankingComics();
+
+    @Query("SELECT * FROM comics ORDER BY id ASC")
+    LiveData<List<Comic>> getAllComicsLive();
 }

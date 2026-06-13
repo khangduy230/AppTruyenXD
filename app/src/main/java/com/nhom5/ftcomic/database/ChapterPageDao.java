@@ -33,4 +33,7 @@ public interface ChapterPageDao {
 
     @Query("DELETE FROM chapter_pages WHERE chapterId = :chapterId")
     void deletePagesByChapterId(int chapterId);
+
+    @Query("UPDATE chapter_pages SET localFilePath = ''")
+    void clearAllLocalFilePaths();
 }

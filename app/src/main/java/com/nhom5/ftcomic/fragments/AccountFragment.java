@@ -1,5 +1,6 @@
 package com.nhom5.ftcomic.fragments;
 
+import com.nhom5.ftcomic.database.AppDatabase;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -115,7 +116,20 @@ public class AccountFragment extends Fragment {
         );
 
         btnLogout.setOnClickListener(v -> {
+            String oldUserId = sessionManager.getUserId();
+
             sessionManager.logout();
+
+            AppDatabase db = AppDatabase.getInstance(requireContext());
+
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                if (oldUserId != null && !oldUserId.trim().isEmpty()) {
+                    db.favoriteDao().deleteFavoritesByUser(oldUserId);
+                    db.readingHistoryDao().deleteHistoriesByUser(oldUserId);
+                    db.ratingDao().deleteRatingsByUser(oldUserId);
+                }
+            });
+
             Toast.makeText(getContext(), "Đã đăng xuất thành công!", Toast.LENGTH_SHORT).show();
             updateUI();
         });

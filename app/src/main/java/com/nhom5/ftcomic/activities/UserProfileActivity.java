@@ -151,6 +151,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void uploadAvatarAndSaveProfile(Uri imageUri, String username) {
         byte[] imageBytes;
+
         try {
             imageBytes = readBytes(imageUri);
         } catch (IOException e) {
@@ -159,34 +160,44 @@ public class UserProfileActivity extends AppCompatActivity {
             return;
         }
 
-        String userId      = sessionManager.getUserId();
+        String userId = sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
-        String fileName    = userId + ".jpg";
+
+        if (userId == null || userId.trim().isEmpty()
+                || accessToken == null || accessToken.trim().isEmpty()) {
+            setLoadingState(false);
+            showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
+            return;
+        }
+
+        String fileName = userId + ".jpg";
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "/storage/v1/object/avatars/" + fileName)
+                .url(SupabaseConfig.PROJECT_URL
+                        + "/storage/v1/object/"
+                        + SupabaseConfig.AVATARS_BUCKET
+                        + "/"
+                        + fileName)
                 .post(RequestBody.create(imageBytes, MEDIA_TYPE_IMAGE))
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .addHeader("apikey",        SupabaseConfig.API_KEY)
-                .addHeader("Content-Type",  "image/jpeg")
-                .addHeader("x-upsert",      "true")
+                .addHeader("apikey", SupabaseConfig.API_KEY)
+                .addHeader("Content-Type", "image/jpeg")
+                .addHeader("x-upsert", "true")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 setLoadingState(false);
-                showToast("Upload ảnh thất bại, vui lòng thử lại!");
+                showToast("Upload ảnh thất bại: " + e.getMessage());
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                // Luôn đọc body để tránh leak connection
+            public void onResponse(Call call, Response response) {
                 String body = readBody(response);
+
                 if (response.isSuccessful()) {
-                    // URL lưu vào DB — không có timestamp
-                    String avatarUrl = SupabaseConfig.PROJECT_URL
-                            + "/storage/v1/object/public/avatars/" + fileName;
+                    String avatarUrl = SupabaseConfig.getAvatarPublicUrl(fileName);
                     saveProfileData(username, avatarUrl);
                 } else {
                     setLoadingState(false);
@@ -201,13 +212,21 @@ public class UserProfileActivity extends AppCompatActivity {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void saveProfileData(String username, String avatarUrl) {
-        String userId      = sessionManager.getUserId();
+        String userId = sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
 
+        if (userId == null || userId.trim().isEmpty()
+                || accessToken == null || accessToken.trim().isEmpty()) {
+            setLoadingState(false);
+            showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
+            return;
+        }
+
         JSONObject body = new JSONObject();
+
         try {
-            body.put("id",       userId);
             body.put("username", username);
+
             if (avatarUrl != null) {
                 body.put("avatar_url", avatarUrl);
             }
@@ -218,39 +237,43 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles")
-                .post(RequestBody.create(body.toString(), MEDIA_TYPE_JSON))
+                .url(SupabaseConfig.PROJECT_URL
+                        + "/rest/v1/profiles?id=eq."
+                        + userId)
+                .patch(RequestBody.create(body.toString(), MEDIA_TYPE_JSON))
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .addHeader("apikey",        SupabaseConfig.API_KEY)
-                .addHeader("Content-Type",  "application/json")
-                .addHeader("Prefer",        "resolution=merge-duplicates")
+                .addHeader("apikey", SupabaseConfig.API_KEY)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Prefer", "return=representation")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 setLoadingState(false);
-                showToast("Lỗi kết nối khi cập nhật thông tin!");
+                showToast("Lỗi kết nối khi cập nhật thông tin: " + e.getMessage());
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 String respBody = readBody(response);
+
                 setLoadingState(false);
 
                 if (response.isSuccessful()) {
-                    // Cập nhật session local
                     sessionManager.saveUsername(username);
+
                     if (avatarUrl != null) {
                         sessionManager.saveAvatarUri(avatarUrl);
                     }
 
                     runOnUiThread(() -> {
                         if (tvDisplayName != null) tvDisplayName.setText(username);
-                        // Reload avatar với cache-bust để hiển thị ảnh mới ngay lập tức
+
                         if (avatarUrl != null) {
                             loadAvatarFromUrl(avatarUrl);
                         }
+
                         selectedImageUri = null;
                     });
 

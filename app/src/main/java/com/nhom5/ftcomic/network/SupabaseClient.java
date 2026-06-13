@@ -1,5 +1,9 @@
 package com.nhom5.ftcomic.network;
 
+import android.content.Context;
+
+import com.nhom5.ftcomic.utils.SessionManager;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -9,26 +13,46 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SupabaseClient {
 
     private static Retrofit retrofit;
+    private static Context appContext;
 
-    public static Retrofit getRetrofit() {
+    public static SupabaseApi getApi(Context context) {
+        appContext = context.getApplicationContext();
+        return getRetrofit().create(SupabaseApi.class);
+    }
+
+    // Giữ lại hàm cũ để những chỗ lấy dữ liệu public vẫn không lỗi
+    public static SupabaseApi getApi() {
+        return getRetrofit().create(SupabaseApi.class);
+    }
+
+    private static Retrofit getRetrofit() {
         if (retrofit == null) {
 
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(chain -> {
-                        Request originalRequest = chain.request();
+                        String bearerToken = SupabaseConfig.API_KEY;
 
-                        Request newRequest = originalRequest.newBuilder()
+                        if (appContext != null) {
+                            SessionManager sessionManager = new SessionManager(appContext);
+                            String accessToken = sessionManager.getAccessToken();
+
+                            if (accessToken != null && !accessToken.trim().isEmpty()) {
+                                bearerToken = accessToken;
+                            }
+                        }
+
+                        Request request = chain.request().newBuilder()
                                 .addHeader("apikey", SupabaseConfig.API_KEY)
-                                .addHeader("Authorization", "Bearer " + SupabaseConfig.API_KEY)
+                                .addHeader("Authorization", "Bearer " + bearerToken)
                                 .addHeader("Content-Type", "application/json")
                                 .build();
 
-                        return chain.proceed(newRequest);
+                        return chain.proceed(request);
                     })
-                    .addInterceptor(loggingInterceptor)
+                    .addInterceptor(logging)
                     .build();
 
             retrofit = new Retrofit.Builder()
@@ -39,9 +63,5 @@ public class SupabaseClient {
         }
 
         return retrofit;
-    }
-
-    public static SupabaseApi getApi() {
-        return getRetrofit().create(SupabaseApi.class);
     }
 }

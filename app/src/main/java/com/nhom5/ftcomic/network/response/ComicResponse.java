@@ -28,8 +28,11 @@ public class ComicResponse {
     @SerializedName("like_count")
     private int likeCount;
 
-    @SerializedName("rating")
+    @SerializedName("rating_avg")
     private float rating;
+
+    @SerializedName("rating_count")
+    private int ratingCount;
 
     @SerializedName("comment_count")
     private int commentCount;
@@ -42,26 +45,23 @@ public class ComicResponse {
     }
 
     public String getName() {
-        return name;
+        return safe(name, "Chưa có tên");
     }
 
     public String getAuthor() {
-        return author;
+        return safe(author, "Đang cập nhật");
     }
 
     public String getDescription() {
-        return description;
+        return safe(description, "Chưa có mô tả.");
     }
 
     public String getStatus() {
-        return status;
+        return safe(status, "Đang ra");
     }
 
     public String getSection() {
-        if (section == null || section.trim().isEmpty()) {
-            return "all";
-        }
-        return section;
+        return safe(section, "all");
     }
 
     public String getCoverUrl() {
@@ -76,11 +76,22 @@ public class ComicResponse {
         return rating;
     }
 
+    public int getRatingCount() {
+        return ratingCount;
+    }
+
     public int getCommentCount() {
         return commentCount;
     }
 
     public int getViewCount() {
         return viewCount;
+    }
+
+    private String safe(String value, String fallback) {
+        if (value == null || value.trim().isEmpty()) {
+            return fallback;
+        }
+        return value;
     }
 }
