@@ -126,6 +126,7 @@ public class AccountFragment extends Fragment {
                 if (oldUserId != null && !oldUserId.trim().isEmpty()) {
                     db.favoriteDao().deleteFavoritesByUser(oldUserId);
                     db.readingHistoryDao().deleteHistoriesByUser(oldUserId);
+                    db.ratingDao().deleteRatingsByUser(oldUserId);
                 }
             });
 

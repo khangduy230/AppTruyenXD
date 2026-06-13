@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
                 Rating.class,
                 Comment.class
         },
-        version = 13,
+        version = 14,
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

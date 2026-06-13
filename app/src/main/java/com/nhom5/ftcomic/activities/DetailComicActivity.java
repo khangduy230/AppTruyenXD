@@ -2,6 +2,10 @@ package com.nhom5.ftcomic.activities;
 
 import androidx.lifecycle.LiveData;
 
+import com.nhom5.ftcomic.network.request.RatingRequest;
+import com.nhom5.ftcomic.network.response.RatingResponse;
+
+import android.content.ActivityNotFoundException;
 import com.nhom5.ftcomic.fragments.LoginFragment;
 import com.nhom5.ftcomic.network.SupabaseApi;
 import com.nhom5.ftcomic.network.SupabaseClient;
@@ -221,6 +225,12 @@ public class DetailComicActivity extends AppCompatActivity {
     private void setupButtons() {
         btnSave.setOnClickListener(v -> toggleFavorite());
 
+        View btnShare = findViewById(R.id.btnShare);
+
+        if (btnShare != null) {
+            btnShare.setOnClickListener(v -> shareComic());
+        }
+
         layoutRating.setOnClickListener(v -> {
             if (currentComic != null) {
                 showRatingDialog();
@@ -346,9 +356,23 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void observeUserRating() {
-        appDatabase.ratingDao().getUserRatingLive(comicId).observe(this, rating -> {
-            myOldRating = rating;
-        });
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            myOldRating = null;
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            myOldRating = null;
+            return;
+        }
+
+        appDatabase.ratingDao()
+                .getUserRatingLive(userId, comicId)
+                .observe(this, rating -> myOldRating = rating);
+
+        syncMyRatingFromSupabase();
     }
 
     private void toggleFavorite() {
@@ -386,11 +410,26 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void showRatingDialog() {
+        if (currentComic == null) {
+            Toast.makeText(this, "Chưa có dữ liệu truyện", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            openLoginThen(() -> {
+                observeUserRating();
+                showRatingDialog();
+            });
+            return;
+        }
+
         com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
 
         android.view.View dialogView = getLayoutInflater().inflate(R.layout.dialog_rating, null);
         RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
+
+        ratingBar.setStepSize(1.0f);
 
         if (myOldRating != null) {
             ratingBar.setRating(myOldRating.getUserStars());
@@ -401,98 +440,19 @@ public class DetailComicActivity extends AppCompatActivity {
         builder.setView(dialogView);
 
         builder.setPositiveButton("Gửi", (dialog, which) -> {
-            if (currentComic == null) {
-                return;
-            }
+            int newStars = Math.round(ratingBar.getRating());
 
-            float newUserStars = ratingBar.getRating();
-
-            if (newUserStars == 0) {
+            if (newStars <= 0) {
                 Toast.makeText(this, "Vui lòng chọn ít nhất 1 sao!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            float currentRatingAverage = currentComic.getRating();
-            int currentTotalRatings = currentComic.getRatingCount();
-
-            int finalTotalRatings;
-            float finalRatingAverage;
-
-            if (myOldRating == null) {
-                finalTotalRatings = currentTotalRatings + 1;
-
-                float totalStars =
-                        (currentRatingAverage * (float) currentTotalRatings) + newUserStars;
-
-                finalRatingAverage = totalStars / (float) finalTotalRatings;
-
-                Toast.makeText(this,
-                        "Cảm ơn bạn đã đánh giá " + (int) newUserStars + " sao!",
-                        Toast.LENGTH_SHORT).show();
-
-            } else {
-                finalTotalRatings = currentTotalRatings;
-
-                float oldUserStars = myOldRating.getUserStars();
-
-                float totalStars =
-                        (currentRatingAverage * (float) currentTotalRatings)
-                                - oldUserStars
-                                + newUserStars;
-
-                finalRatingAverage = totalStars / (float) finalTotalRatings;
-
-                Toast.makeText(this,
-                        "Đã cập nhật đánh giá thành " + (int) newUserStars + " sao!",
-                        Toast.LENGTH_SHORT).show();
-            }
-
-            if (finalTotalRatings > 0) {
-                finalRatingAverage = Math.round(finalRatingAverage * 10.0f) / 10.0f;
-            } else {
-                finalRatingAverage = 0.0f;
-            }
-
-            currentComic.setRating(finalRatingAverage);
-            currentComic.setRatingCount(finalTotalRatings);
-
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                appDatabase.comicDao().updateComic(currentComic);
-                appDatabase.ratingDao().insertOrUpdateRating(new Rating(comicId, newUserStars));
-            });
+            submitRatingToSupabase(newStars);
         });
 
         if (myOldRating != null) {
             builder.setNeutralButton("Xóa đánh giá", (dialog, which) -> {
-                if (currentComic == null) {
-                    return;
-                }
-
-                float currentRatingAverage = currentComic.getRating();
-                int currentTotalRatings = currentComic.getRatingCount();
-
-                int finalTotalRatings = currentTotalRatings - 1;
-                float finalRatingAverage = 0.0f;
-
-                if (finalTotalRatings > 0) {
-                    float oldUserStars = myOldRating.getUserStars();
-
-                    float totalStars =
-                            (currentRatingAverage * (float) currentTotalRatings) - oldUserStars;
-
-                    finalRatingAverage = totalStars / (float) finalTotalRatings;
-                    finalRatingAverage = Math.round(finalRatingAverage * 10.0f) / 10.0f;
-                }
-
-                currentComic.setRating(finalRatingAverage);
-                currentComic.setRatingCount(finalTotalRatings);
-
-                AppDatabase.databaseWriteExecutor.execute(() -> {
-                    appDatabase.comicDao().updateComic(currentComic);
-                    appDatabase.ratingDao().deleteRatingByComicId(comicId);
-                });
-
-                Toast.makeText(this, "Đã hủy đánh giá của bạn!", Toast.LENGTH_SHORT).show();
+                deleteRatingFromSupabase();
             });
         }
 
@@ -698,5 +658,240 @@ public class DetailComicActivity extends AppCompatActivity {
                 this,
                 (requestKey, result) -> afterLogin.run()
         );
+    }
+
+    private void shareComic() {
+        if (currentComic == null) {
+            Toast.makeText(this, "Chưa có dữ liệu truyện để chia sẻ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String shareText =
+                "Mình đang đọc truyện: " + currentComic.getName() + "\n"
+                        + "Tác giả: " + currentComic.getAuthor() + "\n"
+                        + "Trạng thái: " + currentComic.getStatus() + "\n\n"
+                        + "Mở app FTComic để đọc truyện này nhé!";
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, currentComic.getName());
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Chia sẻ truyện"));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Không tìm thấy ứng dụng để chia sẻ", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void syncMyRatingFromSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            return;
+        }
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.getMyRating(
+                "eq." + userId,
+                "eq." + comicId,
+                1
+        ).enqueue(new Callback<List<RatingResponse>>() {
+            @Override
+            public void onResponse(Call<List<RatingResponse>> call,
+                                   Response<List<RatingResponse>> response) {
+                if (!response.isSuccessful()) {
+                    return;
+                }
+
+                List<RatingResponse> remoteRatings = response.body();
+
+                AppDatabase.databaseWriteExecutor.execute(() -> {
+                    if (remoteRatings == null || remoteRatings.isEmpty()) {
+                        appDatabase.ratingDao().deleteRatingByComicId(userId, comicId);
+                    } else {
+                        RatingResponse item = remoteRatings.get(0);
+
+                        appDatabase.ratingDao().insertOrUpdateRating(
+                                new Rating(
+                                        userId,
+                                        item.getComicId(),
+                                        item.getRating()
+                                )
+                        );
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<List<RatingResponse>> call, Throwable t) {
+                // Không spam Toast
+            }
+        });
+    }
+
+    private void submitRatingToSupabase(int stars) {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            Toast.makeText(this, "Bạn cần đăng nhập để đánh giá", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        RatingRequest request = new RatingRequest(userId, comicId, stars);
+
+        api.upsertRating(
+                "resolution=merge-duplicates,return=representation",
+                "user_id,comic_id",
+                request
+        ).enqueue(new Callback<List<RatingResponse>>() {
+            @Override
+            public void onResponse(Call<List<RatingResponse>> call, Response<List<RatingResponse>> response) {
+                android.util.Log.d("RATING_SUPABASE", "URL = " + call.request().url());
+                android.util.Log.d("RATING_SUPABASE", "CODE = " + response.code());
+
+                if (response.isSuccessful()) {
+                    List<RatingResponse> result = response.body();
+
+                    if (result == null || result.isEmpty()) {
+                        android.util.Log.e("RATING_SUPABASE", "Supabase success nhưng không trả row rating");
+                        Toast.makeText(
+                                DetailComicActivity.this,
+                                "Supabase chưa trả dữ liệu đánh giá",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+
+                    RatingResponse savedRating = result.get(0);
+
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        appDatabase.ratingDao().insertOrUpdateRating(
+                                new Rating(
+                                        userId,
+                                        savedRating.getComicId(),
+                                        savedRating.getRating()
+                                )
+                        );
+                    });
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã đánh giá " + savedRating.getRating() + " sao",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    syncMyRatingFromSupabase();
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (comicRepository != null) {
+                            comicRepository.syncComicById(comicId);
+                            comicRepository.syncAllHomeComics();
+                        }
+                    }, 800);
+
+                } else {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Không có errorBody";
+
+                        android.util.Log.e("RATING_SUPABASE", "ERROR = " + error);
+
+                        Toast.makeText(
+                                DetailComicActivity.this,
+                                "Gửi đánh giá thất bại: " + response.code(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                    } catch (Exception e) {
+                        android.util.Log.e("RATING_SUPABASE", "Không đọc được errorBody", e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<RatingResponse>> call, Throwable t) {
+                android.util.Log.e("RATING_SUPABASE", "FAIL = " + t.getMessage(), t);
+
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi gửi đánh giá: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void deleteRatingFromSupabase() {
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+
+        if (userId == null || userId.trim().isEmpty()) {
+            return;
+        }
+
+        SupabaseApi api = SupabaseClient.getApi(this);
+
+        api.deleteRating(
+                "eq." + userId,
+                "eq." + comicId
+        ).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        appDatabase.ratingDao().deleteRatingByComicId(userId, comicId);
+                    });
+
+                    myOldRating = null;
+
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Đã xóa đánh giá",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    syncMyRatingFromSupabase();
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (comicRepository != null) {
+                            comicRepository.syncComicById(comicId);
+                            comicRepository.syncAllHomeComics();
+                        }
+                    }, 800);
+                } else {
+                    Toast.makeText(
+                            DetailComicActivity.this,
+                            "Xóa đánh giá thất bại: " + response.code(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(
+                        DetailComicActivity.this,
+                        "Lỗi mạng khi xóa đánh giá: " + t.getMessage(),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 }

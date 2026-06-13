@@ -92,10 +92,10 @@ public class HomeFragment extends Fragment {
         comicRepository.getComicsBySection("featured")
                 .observe(getViewLifecycleOwner(), comics -> featuredAdapter.setComicList(comics));
 
-        comicRepository.getComicsBySection("ranking")
+        comicRepository.getRankingComics()
                 .observe(getViewLifecycleOwner(), comics -> rankingAdapter.setComicList(comics));
 
-        comicRepository.getComicsBySection("all")
+        comicRepository.getAllComicsLive()
                 .observe(getViewLifecycleOwner(), comics -> allComicsAdapter.setComicList(comics));
     }
 

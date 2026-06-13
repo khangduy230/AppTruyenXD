@@ -1,5 +1,6 @@
 package com.nhom5.ftcomic.utils;
 
+import com.nhom5.ftcomic.utils.AppSettings;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,6 +40,11 @@ public class OfflineDownloadManager {
     }
 
     public void downloadChapter(int comicId, int chapterId, DownloadCallback callback) {
+        if (!AppSettings.canDownloadNow(context)) {
+            postError(callback, "Bạn đang bật chế độ chỉ tải khi có WiFi");
+            return;
+        }
+
         AppDatabase.databaseWriteExecutor.execute(() -> {
             try {
                 List<ChapterPage> pages = appDatabase.chapterPageDao()

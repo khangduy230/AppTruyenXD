@@ -9,6 +9,9 @@ import com.nhom5.ftcomic.network.response.FavoriteResponse;
 import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
 import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
 
+import com.nhom5.ftcomic.network.request.RatingRequest;
+import com.nhom5.ftcomic.network.response.RatingResponse;
+
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Header;
@@ -118,5 +121,35 @@ public interface SupabaseApi {
             @Header("Prefer") String prefer,
             @Query("on_conflict") String onConflict,
             @Body ReadingHistoryRequest request
+    );
+
+    @GET("comics")
+    Call<List<ComicResponse>> getAllComicsRemote(
+            @Query("order") String order
+    );
+
+    @GET("ratings")
+    Call<List<RatingResponse>> getMyRating(
+            @Query("user_id") String userIdFilter,
+            @Query("comic_id") String comicIdFilter,
+            @Query("limit") int limit
+    );
+
+    @POST("ratings")
+    Call<List<RatingResponse>> upsertRating(
+            @Header("Prefer") String prefer,
+            @Query("on_conflict") String onConflict,
+            @Body RatingRequest request
+    );
+
+    @DELETE("ratings")
+    Call<Void> deleteRating(
+            @Query("user_id") String userIdFilter,
+            @Query("comic_id") String comicIdFilter
+    );
+
+    @DELETE("reading_history")
+    Call<Void> deleteMyReadingHistory(
+            @Query("user_id") String userIdFilter
     );
 }

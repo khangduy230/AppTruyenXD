@@ -185,21 +185,28 @@ public class AllStoryActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         recyclerViewAllStory.setLayoutManager(gridLayoutManager);
         // Khởi tạo Adapter và gắn vào RecyclerView
-        comicAdapter = new ComicAdapter(new ArrayList<>(), comic -> {});
+        comicAdapter = new ComicAdapter(new ArrayList<>(), comic -> {
+            android.content.Intent intent = new android.content.Intent(
+                    AllStoryActivity.this,
+                    DetailComicActivity.class
+            );
+            intent.putExtra("COMIC_ID", comic.getId());
+            startActivity(intent);
+        });
         recyclerViewAllStory.setAdapter(comicAdapter);
     }
     // Khởi tạo Repository và lấy dữ liệu thực tế từ database/server
     private void setupData() {
         comicRepository = new ComicRepository(this);
 
-        // Quan sát dữ liệu LiveData từ database, tự động cập nhật UI khi có thay đổi
-        comicRepository.getComicsBySection("all").observe(this, comics -> {
+        comicRepository.getAllComicsLive().observe(this, comics -> {
             if (comics != null) {
                 fullComicList = new ArrayList<>(comics);
                 displayedList = new ArrayList<>(comics);
                 comicAdapter.setComicList(displayedList);
             }
         });
-        comicRepository.syncComicsBySection("all");
+
+        comicRepository.syncAllComicsFromSupabase();
     }
 }

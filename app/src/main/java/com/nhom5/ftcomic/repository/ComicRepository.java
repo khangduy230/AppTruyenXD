@@ -68,8 +68,7 @@ public class ComicRepository {
 
     public void syncAllHomeComics() {
         syncComicsBySection("featured");
-        syncComicsBySection("ranking");
-        syncComicsBySection("all");
+        syncAllComicsFromSupabase();
     }
 
     public void syncComicsBySection(String section) {
@@ -388,5 +387,95 @@ public class ComicRepository {
         } catch (Exception e) {
             Log.e(TAG, "Không đọc được error body", e);
         }
+    }
+
+    public LiveData<List<Comic>> getRankingComics() {
+        return appDatabase.comicDao().getRankingComics();
+    }
+
+    public LiveData<List<Comic>> getAllComicsLive() {
+        return appDatabase.comicDao().getAllComicsLive();
+    }
+
+    public void syncAllComicsFromSupabase() {
+        SupabaseClient.getApi()
+                .getAllComicsRemote("id.asc")
+                .enqueue(new Callback<List<ComicResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<ComicResponse>> call,
+                                           Response<List<ComicResponse>> response) {
+                        Log.d(TAG, "All comics URL: " + call.request().url());
+                        Log.d(TAG, "All comics code: " + response.code());
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Comic> comics = mapComicResponsesToEntities(response.body());
+
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.comicDao().insertComics(comics);
+                                Log.d(TAG, "Đã lưu tất cả truyện, size=" + comics.size());
+                            });
+                        } else {
+                            logErrorBody(response, "syncAllComicsFromSupabase");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
+                        Log.e(TAG, "syncAllComicsFromSupabase lỗi API", t);
+                    }
+                });
+    }
+
+    public void syncComicById(int comicId) {
+        if (comicId <= 0) {
+            Log.e(TAG, "comicId không hợp lệ khi syncComicById: " + comicId);
+            return;
+        }
+
+        SupabaseClient.getApi()
+                .getComicById("eq." + comicId)
+                .enqueue(new Callback<List<ComicResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<ComicResponse>> call,
+                                           Response<List<ComicResponse>> response) {
+                        Log.d(TAG, "Comic detail URL: " + call.request().url());
+                        Log.d(TAG, "Comic detail code: " + response.code());
+
+                        if (response.isSuccessful()
+                                && response.body() != null
+                                && !response.body().isEmpty()) {
+
+                            ComicResponse item = response.body().get(0);
+
+                            Comic comic = new Comic(
+                                    item.getId(),
+                                    R.drawable.thientai,
+                                    item.getCoverUrl(),
+                                    item.getName(),
+                                    item.getAuthor(),
+                                    item.getDescription(),
+                                    item.getStatus(),
+                                    item.getSection(),
+                                    item.getLikeCount(),
+                                    item.getRating(),
+                                    item.getRatingCount(),
+                                    item.getCommentCount(),
+                                    item.getViewCount()
+                            );
+
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.comicDao().insertComic(comic);
+                                Log.d(TAG, "Đã sync lại comic id=" + comicId);
+                            });
+                        } else {
+                            logErrorBody(response, "syncComicById");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
+                        Log.e(TAG, "syncComicById lỗi API", t);
+                    }
+                });
     }
 }
