@@ -16,8 +16,8 @@ public class SupabaseConfig {
     public static final String COMICS_BUCKET = "comics-storage";
     public static final String AVATARS_BUCKET = "avatars";
 
-    public static String getComicCoverUrl(String fileName) {
-        return STORAGE_PUBLIC_URL + COMICS_BUCKET + "/covers/" + fileName;
+    public static String getAvatarPublicUrl(String fileName) {
+        return STORAGE_PUBLIC_URL + AVATARS_BUCKET + "/" + fileName;
     }
 
     public static String getChapterPageUrl(String folderName, int chapterNumber, int pageNumber) {
