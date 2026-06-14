@@ -23,6 +23,7 @@ import com.nhom5.ftcomic.models.DownloadedChapter;
 import com.nhom5.ftcomic.models.ReadingHistory;
 import com.nhom5.ftcomic.repository.ComicRepository;
 import com.nhom5.ftcomic.utils.OfflineDownloadManager;
+import com.nhom5.ftcomic.utils.SessionManager;
 import androidx.transition.TransitionManager;
 import android.view.ViewGroup;
 import android.view.GestureDetector;
@@ -54,6 +55,7 @@ public class ReaderActivity extends AppCompatActivity {
 
     private AppDatabase appDatabase;
     private ComicRepository comicRepository;
+    private SessionManager sessionManager;
 
     private int comicId = -1;
     private int chapterId = -1;
@@ -83,14 +85,15 @@ public class ReaderActivity extends AppCompatActivity {
         Log.d("READER_DEBUG", "comicId = " + comicId);
         Log.d("READER_DEBUG", "chapterId = " + chapterId);
 
-        if (chapterId == -1) {
-            Toast.makeText(this, "Không lấy được CHAPTER_ID", Toast.LENGTH_SHORT).show();
+        if (chapterId == -1 || comicId == -1) {
+            Toast.makeText(this, "Không lấy được thông tin truyện/chương", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         appDatabase = AppDatabase.getInstance(this);
         comicRepository = new ComicRepository(this);
+        sessionManager = new SessionManager(this);
 
         bindViews();
         setupRecyclerView();
@@ -273,6 +276,7 @@ public class ReaderActivity extends AppCompatActivity {
         comicRepository.getPagesByChapterId(chapterId)
                 .observe(this, pages -> {
                     totalPages = pages == null ? 0 : pages.size();
+                    Log.d("READER_DEBUG", "Total pages observed: " + totalPages);
                     if (pages == null || pages.isEmpty()) {
                         tvEmptyState.setVisibility(View.VISIBLE);
                         recyclerViewPages.setVisibility(View.GONE);
@@ -380,8 +384,14 @@ public class ReaderActivity extends AppCompatActivity {
     }
 
     private void saveReadingHistory() {
+        String userId = sessionManager.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            userId = "guest";
+        }
+        final String finalUserId = userId;
         AppDatabase.databaseWriteExecutor.execute(() -> {
             ReadingHistory history = new ReadingHistory(
+                    finalUserId,
                     comicId,
                     chapterId,
                     1,
