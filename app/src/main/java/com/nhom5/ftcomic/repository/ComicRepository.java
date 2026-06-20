@@ -86,6 +86,10 @@ public class ComicRepository {
         return appDatabase.categoryDao().getCategoriesByComicId(comicId);
     }
 
+    public LiveData<List<Category>> getAllCategoriesLive() {
+        return appDatabase.categoryDao().getAllCategories();
+    }
+
     // =========================
     // Sync truyện trang chủ
     // =========================
@@ -97,6 +101,7 @@ public class ComicRepository {
 
         syncComicsBySection("featured");
         syncAllComicsFromSupabase();
+        syncAllCategories();
     }
 
     public void syncComicsBySection(String section) {
@@ -362,7 +367,7 @@ public class ComicRepository {
         syncComicCategoryRefsByComicId(comicId);
     }
 
-    private void syncAllCategories() {
+    public void syncAllCategories() {
         if (!canSyncFromSupabase("syncAllCategories")) {
             return;
         }
