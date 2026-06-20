@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +22,7 @@ import com.nhom5.ftcomic.models.Comment;
 import com.nhom5.ftcomic.repository.ComicRepository;
 import com.nhom5.ftcomic.utils.SessionManager;
 
-public class CommentsActivity extends AppCompatActivity implements CommentsAdapter.OnReplyClickListener {
+public class CommentsActivity extends AppCompatActivity implements CommentsAdapter.OnCommentClickListener {
 
     private CommentsAdapter commentsAdapter;
     private AppDatabase appDatabase;
@@ -132,6 +133,24 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
         setupReplyMode(parentComment);
     }
 
+    @Override
+    public void onDeleteClick(Comment comment) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xóa bình luận")
+                .setMessage("Bạn có chắc chắn muốn xóa bình luận này không?")
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    comicRepository.deleteCommentFromRemote(comment.getId(), () -> {
+                        runOnUiThread(() -> {
+                            Toast.makeText(CommentsActivity.this, "Đã xóa bình luận!", Toast.LENGTH_SHORT).show();
+                            // Kích hoạt đồng bộ lại để giao diện sạch sẽ
+                            comicRepository.syncCommentsByComicId(comicId);
+                        });
+                    });
+                })
+                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
     private void setupReplyMode(Comment parentComment) {
         replyingToUser = parentComment.getUserName();
 
@@ -188,14 +207,11 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
                 chapterId > 0 ? chapterName : ""
         );
 
-
         AppDatabase.databaseWriteExecutor.execute(() -> {
             appDatabase.commentDao().insertComment(newComment);
 
-            // Lấy ID người dùng thật đang đăng nhập từ SessionManager
             String currentUserId = sessionManager.getUserId();
 
-            // Truyền currentUserId vào làm tham số thứ nhất
             comicRepository.sendCommentToRemote(currentUserId, newComment, () -> {
                 runOnUiThread(() -> {
                     comicRepository.syncCommentsByComicId(comicId);

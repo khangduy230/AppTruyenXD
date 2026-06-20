@@ -174,4 +174,9 @@ public interface SupabaseApi {
             @Query("user_id") String userIdFilter,
             @Query("comic_id") String comicIdFilter
     );
+
+    @DELETE("comments")
+    Call<Void> deleteComment(
+            @Query("id") String idFilter
+    );
 }

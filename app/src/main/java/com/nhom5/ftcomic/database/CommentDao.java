@@ -24,4 +24,7 @@ public interface CommentDao {
 
     @Query("DELETE FROM comments WHERE comicId = :comicId")
     void deleteCommentsByComicId(int comicId);
+
+    @Query("DELETE FROM comments WHERE id = :commentId")
+    void deleteCommentById(int commentId);
 }

@@ -37,7 +37,7 @@
         android:clipToPadding="false"
         android:paddingHorizontal="16dp"
         android:paddingTop="10dp"
-        android:paddingBottom="90dp"
+        android:paddingBottom="140dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <LinearLayout

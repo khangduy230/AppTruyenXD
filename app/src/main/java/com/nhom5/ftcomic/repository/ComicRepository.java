@@ -624,4 +624,29 @@ public class ComicRepository {
                     }
                 });
     }
+
+    public void deleteCommentFromRemote(int commentId, Runnable onSuccessCallback) {
+        SupabaseClient.getApi()
+                .deleteComment("eq." + commentId)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.commentDao().deleteCommentById(commentId);
+                                if (onSuccessCallback != null) {
+                                    onSuccessCallback.run();
+                                }
+                            });
+                        } else {
+                            logErrorBody(response, "deleteCommentFromRemote");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e(TAG, "deleteCommentFromRemote thất bại", t);
+                    }
+                });
+    }
 }

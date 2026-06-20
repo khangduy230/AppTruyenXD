@@ -24,14 +24,16 @@ import java.util.List;
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
 
     private List<Comment> commentList = new ArrayList<>();
-    private final OnReplyClickListener replyClickListener;
+    private final OnCommentClickListener clickListener;
 
-    public interface OnReplyClickListener {
+    // Đổi tên và tích hợp thêm sự kiện xóa bình luận
+    public interface OnCommentClickListener {
         void onReplyClick(Comment parentComment);
+        void onDeleteClick(Comment comment);
     }
 
-    public CommentsAdapter(OnReplyClickListener replyClickListener) {
-        this.replyClickListener = replyClickListener;
+    public CommentsAdapter(OnCommentClickListener clickListener) {
+        this.clickListener = clickListener;
     }
 
     public void setCommentList(List<Comment> comments) {
@@ -62,16 +64,15 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = commentList.get(position);
         Context context = holder.itemView.getContext();
+        SessionManager sessionManager = new SessionManager(context);
 
         holder.tvUser.setText(comment.getUserName());
         holder.tvContent.setText(comment.getContent());
-
 
         if (comment.getChapterId() > 0 && comment.getChapterName() != null && !comment.getChapterName().isEmpty()) {
             holder.tvLevel.setVisibility(View.VISIBLE);
             holder.tvLevel.setText("- " + comment.getChapterName());
         } else {
-            // Không đọc chap nào (trang chi tiết) thì ẩn hẳn
             holder.tvLevel.setVisibility(View.GONE);
         }
 
@@ -115,14 +116,27 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         holder.layoutItemBody.setLayoutParams(params);
         holder.tvReplyAction.setVisibility(View.VISIBLE);
 
+        // Logic ẩn/hiện nút Xóa: Chỉ hiện khi user hiện tại chính là người đăng comment này
+        String currentUsername = sessionManager.getUsername();
+        if (sessionManager.isLoggedIn() && currentUsername != null && currentUsername.equals(comment.getUserName())) {
+            holder.tvDeleteAction.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvDeleteAction.setVisibility(View.GONE);
+        }
+
         holder.tvReplyAction.setOnClickListener(v -> {
-            SessionManager sessionManager = new SessionManager(context);
             if (!sessionManager.isLoggedIn()) {
                 Toast.makeText(context, "Vui lòng đăng nhập để trả lời!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (replyClickListener != null) {
-                replyClickListener.onReplyClick(comment);
+            if (clickListener != null) {
+                clickListener.onReplyClick(comment);
+            }
+        });
+
+        holder.tvDeleteAction.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onDeleteClick(comment);
             }
         });
     }
@@ -133,19 +147,21 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     static class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView tvUser, tvContent, tvTime, tvReplyAction, tvLevel; // Thêm tvLevel vào đây
+        TextView tvUser, tvContent, tvTime, tvReplyAction, tvLevel, tvDeleteAction;
         LinearLayout layoutItemBody;
         ShapeableImageView ivAvatar;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
             tvUser = itemView.findViewById(R.id.tvUserName);
-            tvLevel = itemView.findViewById(R.id.tvLevel); // Ánh xạ tvLevel
+            tvLevel = itemView.findViewById(R.id.tvLevel);
             tvContent = itemView.findViewById(R.id.tvCommentContent);
             tvTime = itemView.findViewById(R.id.tvCommentTime);
             tvReplyAction = itemView.findViewById(R.id.tvReplyAction);
             layoutItemBody = itemView.findViewById(R.id.layoutItemBody);
             ivAvatar = itemView.findViewById(R.id.imgAvatar);
+
+            tvDeleteAction = itemView.findViewById(R.id.tvDeleteAction);
         }
     }
 }
