@@ -63,18 +63,24 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         Comment comment = commentList.get(position);
         Context context = holder.itemView.getContext();
 
-        // Tên người dùng
         holder.tvUser.setText(comment.getUserName());
         holder.tvContent.setText(comment.getContent());
 
-        // Thời gian
+
+        if (comment.getChapterId() > 0 && comment.getChapterName() != null && !comment.getChapterName().isEmpty()) {
+            holder.tvLevel.setVisibility(View.VISIBLE);
+            holder.tvLevel.setText("- " + comment.getChapterName());
+        } else {
+            // Không đọc chap nào (trang chi tiết) thì ẩn hẳn
+            holder.tvLevel.setVisibility(View.GONE);
+        }
+
         CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(
                 comment.getCreatedAt(),
                 System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS);
         holder.tvTime.setText(timeAgo);
 
-        // ✅ Load avatar
         String avatarUri = comment.getAvatarUri();
         if (avatarUri != null && !avatarUri.isEmpty()) {
             if (avatarUri.startsWith("http")) {
@@ -88,7 +94,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             }
             holder.ivAvatar.setImageTintList(null);
         } else {
-            // Không có avatar thì dùng icon mặc định
             holder.ivAvatar.setColorFilter(
                     context.getResources().getColor(android.R.color.darker_gray, context.getTheme())
             );
@@ -110,12 +115,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         holder.layoutItemBody.setLayoutParams(params);
         holder.tvReplyAction.setVisibility(View.VISIBLE);
 
-        // ✅ Kiểm tra đăng nhập trước khi cho reply
         holder.tvReplyAction.setOnClickListener(v -> {
             SessionManager sessionManager = new SessionManager(context);
             if (!sessionManager.isLoggedIn()) {
-                Toast.makeText(context,
-                        "Vui lòng đăng nhập để trả lời!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Vui lòng đăng nhập để trả lời!", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (replyClickListener != null) {
@@ -130,18 +133,19 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     static class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView tvUser, tvContent, tvTime, tvReplyAction;
+        TextView tvUser, tvContent, tvTime, tvReplyAction, tvLevel; // Thêm tvLevel vào đây
         LinearLayout layoutItemBody;
         ShapeableImageView ivAvatar;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
             tvUser = itemView.findViewById(R.id.tvUserName);
+            tvLevel = itemView.findViewById(R.id.tvLevel); // Ánh xạ tvLevel
             tvContent = itemView.findViewById(R.id.tvCommentContent);
             tvTime = itemView.findViewById(R.id.tvCommentTime);
             tvReplyAction = itemView.findViewById(R.id.tvReplyAction);
             layoutItemBody = itemView.findViewById(R.id.layoutItemBody);
-            ivAvatar = itemView.findViewById(R.id.imgAvatar); // ✅
+            ivAvatar = itemView.findViewById(R.id.imgAvatar);
         }
     }
 }

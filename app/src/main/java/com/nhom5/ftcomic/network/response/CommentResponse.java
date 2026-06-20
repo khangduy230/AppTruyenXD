@@ -28,6 +28,12 @@ public class CommentResponse {
     @SerializedName("avatar_url")
     private String avatarUrl;
 
+    @SerializedName("chapter_id")
+    private int chapterId;
+
+    @SerializedName("chapter_name")
+    private String chapterName;
+
     public int getId() {
         return id;
     }
@@ -48,18 +54,26 @@ public class CommentResponse {
         return content == null ? "" : content;
     }
 
-    public long getCreatedAtMillis() {
+    public long getCreatedAt() {
         return createdAtMillis;
     }
 
-    public String getUsername() {
+    public String getUserName() {
         if (username == null || username.trim().isEmpty()) {
-            return "Người dùng";
+            return "Người dùng ẩn danh";
         }
         return username;
     }
 
-    public String getAvatarUrl() {
+    public String getAvatarUri() {
         return avatarUrl;
+    }
+
+    public int getChapterId() {
+        return chapterId;
+    }
+
+    public String getChapterName() {
+        return chapterName;
     }
 }

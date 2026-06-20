@@ -50,9 +50,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="- Cấp 1"
+                    android:text="- Chương 1"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSecondaryContainer" />
+                    android:textColor="?attr/colorOnSecondaryContainer"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <TextView

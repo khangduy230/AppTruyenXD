@@ -43,7 +43,7 @@ public class ReaderActivity extends AppCompatActivity {
     private LinearLayout layoutDownloadProgress;
     private TextView tvDownloadProgress;
     private ProgressBar progressDownload;
-    
+
     // Nút "X" dùng để huỷ bỏ tiến trình tải chương
     private View btnCancelDownload;
 
@@ -63,6 +63,8 @@ public class ReaderActivity extends AppCompatActivity {
 
     private List<Chapter> allChaptersInComic = new ArrayList<>();
     private int currentChapterNumber = 1;
+    // ✅ THÊM BIẾN LƯU TÊN CHƯƠNG ĐỂ CHUYỂN SANG ACTIVITY BÌNH LUẬN
+    private String currentChapterName = "";
 
     private boolean isDownloading = false;
     // Quản lý tải xuống offline
@@ -103,7 +105,7 @@ public class ReaderActivity extends AppCompatActivity {
         saveReadingHistory();
 
         comicRepository.syncPagesByChapterId(chapterId);
-        
+
         // Lấy tên truyện gắn lên thanh toolbar
         comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
             if (comic != null) {
@@ -119,6 +121,8 @@ public class ReaderActivity extends AppCompatActivity {
                 for (Chapter ch : chapters) {
                     if (ch.getId() == chapterId) {
                         currentChapterNumber = ch.getChapterNumber();
+                        // ✅ LƯU LẠI TÊN CHƯƠNG HIỆN TẠI TỪ DATABASE
+                        currentChapterName = ch.getChapterName();
                         topAppBar.setSubtitle("Chương " + currentChapterNumber);
                         break;
                     }
@@ -153,7 +157,7 @@ public class ReaderActivity extends AppCompatActivity {
         layoutDownloadProgress = findViewById(R.id.layoutDownloadProgress);
         tvDownloadProgress = findViewById(R.id.tvDownloadProgress);
         progressDownload = findViewById(R.id.progressDownload);
-        
+
         // Ánh xạ nút Huỷ tải từ layout
         btnCancelDownload = findViewById(R.id.btnCancelDownload);
 
@@ -202,6 +206,20 @@ public class ReaderActivity extends AppCompatActivity {
     private void setupBottomBarNavigation() {
         btnDownloadChapter.setOnClickListener(v -> downloadCurrentChapter());
         findViewById(R.id.btnChapterList).setOnClickListener(v -> showChapterListBottomSheet());
+
+        // ✅ THÊM SỰ KIỆN CLICK CHO NÚT BÌNH LUẬN TRONG BOTTOM BAR
+        View btnCommentInChap = findViewById(R.id.btnCommentInChap); // Hãy chắc chắn ID này khớp với ID bạn đặt trong file XML activity_reader
+        if (btnCommentInChap != null) {
+            btnCommentInChap.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(ReaderActivity.this, CommentsActivity.class);
+                intent.putExtra("COMIC_ID", comicId);
+                intent.putExtra("CHAPTER_ID", chapterId);
+                // Gửi text hiển thị dạng "Chương 1" hoặc tên cụ thể để gắn tag
+                intent.putExtra("CHAPTER_NAME", "Chương " + currentChapterNumber);
+                startActivity(intent);
+            });
+        }
+
         btnPreviousChapter.setOnClickListener(v -> {
             int targetChapterNumber = currentChapterNumber - 1;
             navigateToChapterByNumber(targetChapterNumber);
@@ -400,7 +418,7 @@ public class ReaderActivity extends AppCompatActivity {
             appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
         });
     }
-    
+
     private void showChapterListBottomSheet() {
         com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
                 new com.google.android.material.bottomsheet.BottomSheetDialog(this);

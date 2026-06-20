@@ -12,12 +12,15 @@ import com.nhom5.ftcomic.models.Chapter;
 import com.nhom5.ftcomic.models.ChapterPage;
 import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.models.ComicCategoryCrossRef;
+import com.nhom5.ftcomic.models.Comment;
 import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.request.CommentRequest;
 import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
 import com.nhom5.ftcomic.network.response.ComicCategoryResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
+import com.nhom5.ftcomic.network.response.CommentResponse;
 import com.nhom5.ftcomic.utils.NetworkUtils;
 
 import java.util.ArrayList;
@@ -545,5 +548,80 @@ public class ComicRepository {
         } catch (Exception e) {
             Log.e(TAG, "Không đọc được error body", e);
         }
+    }
+    public void syncCommentsByComicId(int comicId) {
+        if (!canSyncFromSupabase("syncCommentsByComicId")) return;
+
+        SupabaseClient.getApi()
+                .getCommentsByComicId("eq." + comicId, "created_at.desc")
+                .enqueue(new Callback<List<CommentResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<CommentResponse>> call, Response<List<CommentResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Comment> comments = new ArrayList<>();
+                            for (CommentResponse res : response.body()) {
+                                // Map dữ liệu từ Cloud Response về Room Entity
+                                Comment comment = new Comment(
+                                        res.getComicId(),
+                                        res.getParentId(),
+                                        res.getUserName(),
+                                        res.getAvatarUri(),
+                                        res.getContent(),
+                                        res.getCreatedAt(),
+                                        res.getChapterId(),
+                                        res.getChapterName()
+                                );
+                                comment.setId(res.getId());
+                                comments.add(comment);
+                            }
+                            AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.commentDao().deleteCommentsByComicId(comicId);
+                                appDatabase.commentDao().insertComments(comments);
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<CommentResponse>> call, Throwable t) {
+                        Log.e("ComicRepository", "Lỗi sync comment", t);
+                    }
+                });
+    }
+
+
+    public void sendCommentToRemote(String userId, Comment comment, Runnable onSuccessCallback) {
+        CommentRequest request = new CommentRequest(
+                userId,
+                comment.getComicId(),
+                comment.getParentId(),
+                comment.getUserName(),
+                comment.getAvatarUri(),
+                comment.getContent(),
+                comment.getChapterId(),
+                comment.getChapterName()
+        );
+
+        SupabaseClient.getApi()
+                .addComment("return=representation", request)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            if (onSuccessCallback != null) onSuccessCallback.run();
+                        } else {
+                            // Log lỗi để kiểm tra trong Logcat nếu Supabase từ chối
+                            try {
+                                if (response.errorBody() != null) {
+                                    Log.e("SUPABASE_COMMENT", "Lỗi lưu: " + response.errorBody().string());
+                                }
+                            } catch (Exception e) { e.printStackTrace(); }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e("ComicRepository", "Không thể gửi bình luận lên Cloud", t);
+                    }
+                });
     }
 }

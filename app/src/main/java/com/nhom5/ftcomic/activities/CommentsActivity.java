@@ -18,6 +18,7 @@ import com.nhom5.ftcomic.adapters.CommentsAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.fragments.LoginFragment;
 import com.nhom5.ftcomic.models.Comment;
+import com.nhom5.ftcomic.repository.ComicRepository;
 import com.nhom5.ftcomic.utils.SessionManager;
 
 public class CommentsActivity extends AppCompatActivity implements CommentsAdapter.OnReplyClickListener {
@@ -25,12 +26,17 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
     private CommentsAdapter commentsAdapter;
     private AppDatabase appDatabase;
     private SessionManager sessionManager;
+    private ComicRepository comicRepository;
+
     private EditText edtComment;
     private LinearLayout layoutReplyHeader;
     private TextView tvReplyStatus;
     private View btnSend;
 
     private int comicId = -1;
+    private int chapterId = -1;
+    private String chapterName = "";
+
     private int selectedParentCommentId = 0;
     private String replyingToUser = "";
 
@@ -40,6 +46,9 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
         setContentView(R.layout.activity_comment);
 
         comicId = getIntent().getIntExtra("COMIC_ID", -1);
+        chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
+        chapterName = getIntent().getStringExtra("CHAPTER_NAME");
+
         if (comicId == -1) {
             Toast.makeText(this, "Không tìm thấy dữ liệu truyện để bình luận!", Toast.LENGTH_SHORT).show();
             finish();
@@ -47,7 +56,10 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
         }
 
         appDatabase = AppDatabase.getInstance(this);
-        sessionManager = new SessionManager(this); //  khởi tạo SessionManager
+        sessionManager = new SessionManager(this);
+        comicRepository = new ComicRepository(this);
+
+        comicRepository.syncCommentsByComicId(comicId);
 
         findViewById(R.id.topAppBar).setOnClickListener(v -> finish());
         RecyclerView recyclerView = findViewById(R.id.recyclerViewComments);
@@ -69,14 +81,11 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
 
         tvCancelReply.setOnClickListener(v -> exitReplyMode());
 
-        // Kiểm tra đăng nhập khi bấm gửi
         btnSend.setOnClickListener(v -> {
             if (!sessionManager.isLoggedIn()) {
-                // Chưa đăng nhập → mở LoginFragment
                 LoginFragment loginFragment = new LoginFragment();
                 loginFragment.show(getSupportFragmentManager(), "LoginFragment");
 
-                // Lắng nghe sau khi đăng nhập thành công
                 getSupportFragmentManager().setFragmentResultListener(
                         "key_dang_nhap",
                         this,
@@ -87,7 +96,6 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             sendNewComment();
         });
 
-        //  Kiểm tra đăng nhập khi bấm vào ô nhập
         edtComment.setOnClickListener(v -> {
             if (!sessionManager.isLoggedIn()) {
                 LoginFragment loginFragment = new LoginFragment();
@@ -110,7 +118,6 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
 
     @Override
     public void onReplyClick(Comment parentComment) {
-        //  Kiểm tra đăng nhập khi bấm trả lời
         if (!sessionManager.isLoggedIn()) {
             LoginFragment loginFragment = new LoginFragment();
             loginFragment.show(getSupportFragmentManager(), "LoginFragment");
@@ -156,7 +163,6 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             finalContent = "@" + replyingToUser + ": " + content;
         }
 
-        //  Lấy tên và avatar thật từ SessionManager
         String savedUsername = sessionManager.getUsername();
         String email = sessionManager.getEmail();
         String displayName;
@@ -169,19 +175,33 @@ public class CommentsActivity extends AppCompatActivity implements CommentsAdapt
             displayName = "Người dùng ẩn danh";
         }
 
-        String avatarUri = sessionManager.getAvatarUri(); // lấy avatar
+        String avatarUri = sessionManager.getAvatarUri();
 
         Comment newComment = new Comment(
                 comicId,
                 selectedParentCommentId,
-                displayName,   //  tên thật
-                avatarUri,     // avatar thật
+                displayName,
+                avatarUri,
                 finalContent,
-                System.currentTimeMillis()
+                System.currentTimeMillis(),
+                chapterId > 0 ? chapterId : 0,
+                chapterId > 0 ? chapterName : ""
         );
+
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
             appDatabase.commentDao().insertComment(newComment);
+
+            // Lấy ID người dùng thật đang đăng nhập từ SessionManager
+            String currentUserId = sessionManager.getUserId();
+
+            // Truyền currentUserId vào làm tham số thứ nhất
+            comicRepository.sendCommentToRemote(currentUserId, newComment, () -> {
+                runOnUiThread(() -> {
+                    comicRepository.syncCommentsByComicId(comicId);
+                });
+            });
+
             runOnUiThread(() -> {
                 edtComment.setText("");
                 hideKeyboard();
