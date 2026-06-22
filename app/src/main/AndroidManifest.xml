@@ -18,9 +18,38 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FTComic">
         <activity
+            android:name=".activities.UpChapterActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.NewChapActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.NewChapterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.EditChapterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.NewStoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.EditInformationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.StoryManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".StoryManagementActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.AllStoryActivity"
             android:exported="false" />
-
         <activity
             android:name=".activities.ChangePasswordActivity"
             android:exported="false" />
