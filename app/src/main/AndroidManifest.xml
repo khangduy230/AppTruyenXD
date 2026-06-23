@@ -18,6 +18,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FTComic">
         <activity
+            android:name=".activities.ManageComicsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ItemChapterManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ChapterManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ChapterManageActivity2"
+            android:exported="false" />
+        <activity
             android:name=".activities.UpChapterActivity"
             android:exported="true">
             <intent-filter>

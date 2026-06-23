@@ -17,6 +17,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DownloadedActivity;
+import com.nhom5.ftcomic.activities.ManageComicsActivity;
 import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
 import com.nhom5.ftcomic.activities.UserProfileActivity;
@@ -43,7 +44,7 @@ public class AccountFragment extends Fragment {
 
     private View               layoutUserInfo;
     private TextView           tvUserName, tvUserEmail;
-    private TextView           btnLogin, btnLogout, btnDownload, btnHistory;
+    private TextView           btnLogin, btnLogout, btnDownload, btnHistory, btnManage;
     private View               btnSettings;
     private ShapeableImageView ivAvatar;
     private SessionManager     sessionManager;
@@ -91,6 +92,7 @@ public class AccountFragment extends Fragment {
         btnDownload    = view.findViewById(R.id.btn_download);
         btnSettings    = view.findViewById(R.id.btn_settings);
         btnHistory     = view.findViewById(R.id.btn_history);
+        btnManage      = view.findViewById(R.id.btn_manage);
         ivAvatar       = view.findViewById(R.id.iv_avatar);
     }
 
@@ -108,6 +110,14 @@ public class AccountFragment extends Fragment {
         if (btnHistory != null) {
             btnHistory.setOnClickListener(v ->
                     startActivity(new Intent(getActivity(), ReadingHistoryActivity.class))
+            );
+        }
+
+        if (btnManage != null) {
+            btnManage.setOnClickListener(v ->
+                    AuthHelper.KiemTraVaThucHien(getContext(), getParentFragmentManager(), () ->
+                            startActivity(new Intent(getActivity(), ManageComicsActivity.class))
+                    )
             );
         }
 
