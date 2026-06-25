@@ -1,50 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_background"
+    android:background="?attr/colorSurface"
     tools:context=".activities.NewStoryActivity">
 
-    <!-- Top Bar -->
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/md_theme_onBackground" />
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="?attr/collapsingToolbarLayoutLargeStyle"
+            android:layout_width="match_parent"
+            android:layout_height="152dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
+            app:title="Tạo truyện mới"
+            app:titleCollapseMode="fade">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="?attr/colorOnSurface" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCreateStory"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnBack">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Tạo truyện mới"
-                android:textColor="@color/md_theme_onBackground"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+            android:paddingHorizontal="24dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="88dp">
 
             <!-- Story Name -->
             <com.google.android.material.textfield.TextInputLayout
@@ -58,7 +61,7 @@
                     android:id="@+id/edtStoryTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Lmao" />
+                    android:text="" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Story Introduction -->
@@ -75,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:minLines="5"
-                    android:text="Lòng tôi tan nát khi nhận ra tôi là gay\nĐời có hiểu cho hay, sẽ mỉa mai tình tôi?\nĐàn ông cớ sao lại đi yêu một người đàn ông?\nSao trời cao trớ trêu cợt đùa cuộc đời tôi?\nKhi tôi cũng muốn làm một người đàn ông\nĐược che chở chở cho anh, đến suốt cuộc đời." />
+                    android:text="" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Author Section -->
@@ -97,7 +100,7 @@
                         android:id="@+id/edtAuthor"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="123123123" />
+                        android:text="" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -105,7 +108,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:text="Bạn là tác giả?"
-                    android:textColor="@color/md_theme_onBackground"
+                    android:textColor="?attr/colorOnBackground"
                     android:textStyle="bold" />
 
                 <com.google.android.material.checkbox.MaterialCheckBox
@@ -121,8 +124,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="Thể loại"
-                android:textColor="@color/md_theme_onBackground"
-                android:textSize="18sp"
+                android:textColor="?attr/colorOnBackground"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textStyle="bold" />
 
             <com.google.android.material.chip.ChipGroup
@@ -132,27 +135,12 @@
                 android:layout_marginBottom="24dp">
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="LGBT+"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đam mỹ"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
                     android:id="@+id/btnAddGenre"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Thêm thể loại"
-                    app:chipIcon="@android:drawable/ic_input_add" />
-
+                    app:chipIcon="@drawable/ic_plus" />
             </com.google.android.material.chip.ChipGroup>
 
             <!-- Cover Image -->
@@ -161,8 +149,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="Bìa truyện"
-                android:textColor="@color/md_theme_onBackground"
-                android:textSize="18sp"
+                android:textColor="?attr/colorOnBackground"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
@@ -170,9 +158,12 @@
                 android:layout_width="120dp"
                 android:layout_height="180dp"
                 android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true"
                 app:cardCornerRadius="12dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="@color/md_theme_outlineVariant">
+                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -186,7 +177,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="+ Tải ảnh lên"
-                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -194,20 +185,18 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.button.MaterialButton
+    <!-- FAB: Tạo truyện mới -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btnCreateStory"
-        style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
-        android:backgroundTint="@color/md_theme_primaryContainer"
-        android:paddingHorizontal="24dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
         android:text="Tạo truyện"
-        android:textColor="@color/md_theme_onPrimaryContainer"
+        android:textColor="?attr/colorOnPrimary"
+        app:backgroundTint="?attr/colorPrimary"
+        app:elevation="6dp"
         app:icon="@drawable/ic_up_load"
-        app:iconTint="@color/md_theme_onPrimaryContainer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:iconTint="?attr/colorOnPrimary" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

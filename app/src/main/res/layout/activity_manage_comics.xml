@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="152dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
             app:title="Quản lý truyện"
             app:titleCollapseMode="fade">
 

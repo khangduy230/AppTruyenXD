@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.nhom5.ftcomic.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class UpChapterActivity extends AppCompatActivity {
 
@@ -29,9 +30,9 @@ public class UpChapterActivity extends AppCompatActivity {
         }
 
         // Xử lý nút quay lại
-        View btnBack = findViewById(R.id.btnBack);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.setNavigationOnClickListener(v -> finish());
         }
     }
 }

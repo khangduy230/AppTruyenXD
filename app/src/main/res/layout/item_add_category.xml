@@ -15,7 +15,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="24dp"
-        android:background="#79747E"
+        android:background="?attr/colorOutline"
         android:alpha="0.4" />
 
     <!-- Section: Đối tượng -->
@@ -23,8 +23,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Đối tượng"
-        android:textColor="@color/md_theme_onSurface"
-        android:textSize="16sp"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="?attr/colorOnSurface"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
 
@@ -58,8 +58,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Định dạng"
-        android:textColor="@color/md_theme_onSurface"
-        android:textSize="16sp"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="?attr/colorOnSurface"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
 
@@ -99,8 +99,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Thể loại"
-        android:textColor="@color/md_theme_onSurface"
-        android:textSize="16sp"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="?attr/colorOnSurface"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
 
