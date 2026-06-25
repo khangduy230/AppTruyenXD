@@ -136,6 +136,21 @@
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
                 <TextView
+                    android:id="@+id/btn_manage_users"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:drawablePadding="16dp"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="Quản lý người dùng"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    app:drawableStartCompat="@drawable/ic_profile"
+                    app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+                <TextView
                     android:id="@+id/btn_history"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"

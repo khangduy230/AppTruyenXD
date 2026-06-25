@@ -21,6 +21,9 @@
             android:name=".activities.ManageComicsActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.ManageUsersActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.ItemChapterManageActivity"
             android:exported="false" />
         <activity

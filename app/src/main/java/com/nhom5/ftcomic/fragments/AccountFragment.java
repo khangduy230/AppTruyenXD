@@ -21,6 +21,7 @@ import com.nhom5.ftcomic.activities.ManageComicsActivity;
 import com.nhom5.ftcomic.activities.ReadingHistoryActivity;
 import com.nhom5.ftcomic.activities.SettingsActivity;
 import com.nhom5.ftcomic.activities.UserProfileActivity;
+import com.nhom5.ftcomic.activities.ManageUsersActivity;
 import com.nhom5.ftcomic.network.SupabaseConfig;
 import com.nhom5.ftcomic.utils.AuthHelper;
 import com.nhom5.ftcomic.utils.SessionManager;
@@ -44,7 +45,7 @@ public class AccountFragment extends Fragment {
 
     private View               layoutUserInfo;
     private TextView           tvUserName, tvUserEmail;
-    private TextView           btnLogin, btnLogout, btnDownload, btnHistory, btnManage;
+    private TextView           btnLogin, btnLogout, btnDownload, btnHistory, btnManage, btnManageUsers;
     private View               btnSettings;
     private ShapeableImageView ivAvatar;
     private SessionManager     sessionManager;
@@ -93,6 +94,7 @@ public class AccountFragment extends Fragment {
         btnSettings    = view.findViewById(R.id.btn_settings);
         btnHistory     = view.findViewById(R.id.btn_history);
         btnManage      = view.findViewById(R.id.btn_manage);
+        btnManageUsers = view.findViewById(R.id.btn_manage_users);
         ivAvatar       = view.findViewById(R.id.iv_avatar);
     }
 
@@ -117,6 +119,14 @@ public class AccountFragment extends Fragment {
             btnManage.setOnClickListener(v ->
                     AuthHelper.KiemTraVaThucHien(getContext(), getParentFragmentManager(), () ->
                             startActivity(new Intent(getActivity(), ManageComicsActivity.class))
+                    )
+            );
+        }
+
+        if (btnManageUsers != null) {
+            btnManageUsers.setOnClickListener(v ->
+                    AuthHelper.KiemTraVaThucHien(getContext(), getParentFragmentManager(), () ->
+                            startActivity(new Intent(getActivity(), ManageUsersActivity.class))
                     )
             );
         }
@@ -230,6 +240,7 @@ public class AccountFragment extends Fragment {
         if (layoutUserInfo != null) layoutUserInfo.setVisibility(isLogged ? View.VISIBLE : View.GONE);
         if (btnLogout != null)      btnLogout.setVisibility(isLogged ? View.VISIBLE : View.GONE);
         if (btnLogin != null)       btnLogin.setVisibility(isLogged ? View.GONE : View.VISIBLE);
+        if (btnManageUsers != null) btnManageUsers.setVisibility(isLogged ? View.VISIBLE : View.GONE);
 
         if (!isLogged) {
             if (tvUserEmail != null) tvUserEmail.setText("");
