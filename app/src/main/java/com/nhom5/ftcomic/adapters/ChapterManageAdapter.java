@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.EditChapterActivity;
 import com.nhom5.ftcomic.models.Chapter;
+import com.nhom5.ftcomic.utils.DateTimeUtils;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class ChapterManageAdapter extends RecyclerView.Adapter<ChapterManageAdap
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Chapter chapter = chapterList.get(position);
         holder.tvChapterName.setText(chapter.getChapterName());
-        holder.tvChapterDate.setText(chapter.getUpdatedAt());
+        holder.tvChapterDate.setText(DateTimeUtils.formatChapterDate(chapter.getUpdatedAt()));
 
         // Bấm vào nút Sửa chương (ic_pencil)
         holder.btnEditChapter.setOnClickListener(v -> {

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.models.Chapter;
+import com.nhom5.ftcomic.utils.DateTimeUtils;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterV
         Chapter chapter = chapterList.get(position);
 
         holder.tvChapterName.setText(chapter.getChapterName());
-        holder.tvChapterDate.setText(chapter.getUpdatedAt());
+        holder.tvChapterDate.setText(DateTimeUtils.formatChapterDate(chapter.getUpdatedAt()));
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
