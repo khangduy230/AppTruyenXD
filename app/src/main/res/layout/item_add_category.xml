@@ -6,9 +6,8 @@
     android:background="@drawable/bg_bottom_sheet"
     android:orientation="vertical"
     android:paddingHorizontal="24dp"
-    android:paddingBottom="32dp">
+    android:paddingBottom="24dp">
 
-    <!-- Drag Handle -->
     <View
         android:layout_width="32dp"
         android:layout_height="4dp"
@@ -18,83 +17,6 @@
         android:background="?attr/colorOutline"
         android:alpha="0.4" />
 
-    <!-- Section: Đối tượng -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Đối tượng"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupTarget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp">
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Con gái" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Con trai" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Trẻ em" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- Section: Định dạng -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Định dạng"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupFormat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp">
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Truyện ngắn" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Manhwa" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Manhua" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Manga" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- Section: Thể loại -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -107,31 +29,17 @@
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroupGenreSelection"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp" />
 
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gay" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GayPT" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GayVP" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hmmm" />
-    </com.google.android.material.chip.ChipGroup>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmCategory"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="Xác nhận"
+        android:textColor="?attr/colorOnPrimary"
+        app:backgroundTint="?attr/colorPrimary"
+        app:cornerRadius="14dp"
+        android:textStyle="bold" />
 
 </LinearLayout>

@@ -58,6 +58,12 @@ public interface SupabaseApi {
             @Query("id") String idFilter
     );
 
+    @GET("comics")
+    Call<List<ComicResponse>> getComicsByUploader(
+            @Query("uploader_id") String uploaderFilter,
+            @Query("order") String order
+    );
+
     @GET("chapters")
     Call<List<ChapterResponse>> getChaptersByComicId(
             @Query("comic_id") String comicIdFilter,

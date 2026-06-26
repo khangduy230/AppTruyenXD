@@ -2,10 +2,11 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://tools.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="?attr/colorSurface"
     tools:context=".activities.EditInformationActivity">
 
@@ -49,7 +50,6 @@
             android:paddingTop="24dp"
             android:paddingBottom="100dp">
 
-            <!-- Story Name -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -61,10 +61,9 @@
                     android:id="@+id/edtStoryTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Lmao" />
+                    android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Story Introduction -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -77,26 +76,62 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
-                    android:minLines="5"
-                    android:text="Giới thiệu truyện..." />
+                    android:minLines="5" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Author -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 android:hint="Tác giả">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edtAuthor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tác giả" />
+                    android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Genres -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Tài khoản dịch giả (Người đăng)">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtTranslator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:longClickable="false"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:hint="Trạng thái hiển thị truyện">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spinnerStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchHideComic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Ẩn Truyện"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textStyle="bold" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -113,20 +148,6 @@
                 android:layout_marginBottom="24dp">
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="LGBT+"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đam mỹ"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
                     android:id="@+id/btnAddGenre"
                     style="@style/Widget.Material3.Chip.Assist"
                     android:layout_width="wrap_content"
@@ -135,7 +156,6 @@
                     app:chipIcon="@drawable/ic_plus" />
             </com.google.android.material.chip.ChipGroup>
 
-            <!-- Cover Image -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -161,8 +181,7 @@
                         android:id="@+id/imgCover"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/thientai" />
+                        android:scaleType="centerCrop" />
 
                     <View
                         android:layout_width="match_parent"
@@ -184,7 +203,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Floating Action Buttons -->
     <LinearLayout
         android:id="@+id/layoutBottomButtons"
         android:layout_width="wrap_content"
@@ -204,17 +222,6 @@
             app:tint="?attr/colorError"
             app:backgroundTint="?attr/colorErrorContainer"
             android:contentDescription="Delete story" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnHide"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            app:fabSize="normal"
-            app:srcCompat="@drawable/ic_invisible"
-            app:tint="?attr/colorOnSurfaceVariant"
-            app:backgroundTint="?attr/colorSurfaceVariant"
-            android:contentDescription="Hide story" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/btnSave"

@@ -15,15 +15,15 @@ import com.bumptech.glide.Glide;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.ChapterManageActivity;
 import com.nhom5.ftcomic.activities.EditInformationActivity;
-import com.nhom5.ftcomic.models.Comic;
+import com.nhom5.ftcomic.network.response.ComicResponse;
 
 import java.util.List;
 
 public class ManageComicAdapter extends RecyclerView.Adapter<ManageComicAdapter.ViewHolder> {
 
-    private List<Comic> comicList;
+    private final List<ComicResponse> comicList;
 
-    public ManageComicAdapter(List<Comic> comicList) {
+    public ManageComicAdapter(List<ComicResponse> comicList) {
         this.comicList = comicList;
     }
 
@@ -36,30 +36,28 @@ public class ManageComicAdapter extends RecyclerView.Adapter<ManageComicAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Comic comic = comicList.get(position);
+        ComicResponse comic = comicList.get(position);
         holder.tvComicTitle.setText(comic.getName());
-        
-        if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
-            Glide.with(holder.itemView.getContext())
-                    .load(comic.getCoverUrl())
-                    .into(holder.ivComicCover);
-        } else {
-            holder.ivComicCover.setImageResource(comic.getImage());
-        }
 
-        // Bấm vào Sửa thông tin
+        String author = comic.getAuthor();
+        holder.tvComicGenre.setText(author != null && !author.trim().isEmpty() ? author : "Tác giả: Chưa cập nhật");
+
+        Glide.with(holder.itemView.getContext())
+                .load(comic.getCoverUrl())
+                .placeholder(R.drawable.ic_profile)
+                .into(holder.ivComicCover);
+
         holder.btnEditInfo.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, EditInformationActivity.class);
-            intent.putExtra("COMIC_ID", comic.getId());
+            intent.putExtra("COMIC_ID", String.valueOf(comic.getId()));
             context.startActivity(intent);
         });
 
-        // Bấm vào Quản lý chương
         holder.btnManageChapters.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, ChapterManageActivity.class);
-            intent.putExtra("COMIC_ID", comic.getId());
+            intent.putExtra("COMIC_ID", String.valueOf(comic.getId()));
             intent.putExtra("COMIC_NAME", comic.getName());
             context.startActivity(intent);
         });
@@ -73,12 +71,14 @@ public class ManageComicAdapter extends RecyclerView.Adapter<ManageComicAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivComicCover;
         TextView tvComicTitle;
+        TextView tvComicGenre;
         View btnEditInfo, btnManageChapters;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivComicCover = itemView.findViewById(R.id.ivComicCover);
             tvComicTitle = itemView.findViewById(R.id.tvComicTitle);
+            tvComicGenre = itemView.findViewById(R.id.tvComicGenre);
             btnEditInfo = itemView.findViewById(R.id.btnEditInfo);
             btnManageChapters = itemView.findViewById(R.id.btnManageChapters);
         }
