@@ -3,6 +3,7 @@ package com.nhom5.ftcomic.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,14 +55,11 @@ public class UserProfileActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> pickImageLauncher;
     private Uri                    selectedImageUri = null;
 
-    // 1 client dùng chung cho toàn bộ Activity
-    private final OkHttpClient client = new OkHttpClient();
-    // Toast duy nhất, tránh queue spam
-    private Toast mToast;
+    private String targetUserId = null;
+    private boolean isAdminMode = false;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Lifecycle
-    // ─────────────────────────────────────────────────────────────────────────
+    private final OkHttpClient client = new OkHttpClient();
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,16 +68,17 @@ public class UserProfileActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
 
+        if (getIntent().hasExtra("USER_ID")) {
+            targetUserId = getIntent().getStringExtra("USER_ID");
+            isAdminMode = true;
+        }
+
         initViews();
         loadUserInfo();
         loadSavedAvatar();
         registerImagePicker();
         setupClickListeners();
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Setup
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void initViews() {
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
@@ -110,9 +110,13 @@ public class UserProfileActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> onSaveClicked());
 
         CardView cardChangePassword = findViewById(R.id.card_change_password);
-        cardChangePassword.setOnClickListener(v ->
-                startActivity(new Intent(this, ChangePasswordActivity.class))
-        );
+        cardChangePassword.setOnClickListener(v -> {
+            if (isAdminMode) {
+                showAdminChangePasswordDialog();
+            } else {
+                startActivity(new Intent(this, ChangePasswordActivity.class));
+            }
+        });
 
         findViewById(R.id.btn_change_avatar).setOnClickListener(v -> launchImagePicker());
         ivAvatar.setOnClickListener(v -> launchImagePicker());
@@ -121,10 +125,6 @@ public class UserProfileActivity extends AppCompatActivity {
     private void launchImagePicker() {
         pickImageLauncher.launch("image/*");
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Save flow
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void onSaveClicked() {
         String newUsername = etUsername.getText() != null
@@ -145,10 +145,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Network: Upload avatar
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void uploadAvatarAndSaveProfile(Uri imageUri, String username) {
         byte[] imageBytes;
 
@@ -160,7 +156,7 @@ public class UserProfileActivity extends AppCompatActivity {
             return;
         }
 
-        String userId = sessionManager.getUserId();
+        String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
 
         if (userId == null || userId.trim().isEmpty()
@@ -207,12 +203,8 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Network: Save profile
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void saveProfileData(String username, String avatarUrl) {
-        String userId = sessionManager.getUserId();
+        String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
 
         if (userId == null || userId.trim().isEmpty()
@@ -261,10 +253,12 @@ public class UserProfileActivity extends AppCompatActivity {
                 setLoadingState(false);
 
                 if (response.isSuccessful()) {
-                    sessionManager.saveUsername(username);
+                    if (!isAdminMode) {
+                        sessionManager.saveUsername(username);
 
-                    if (avatarUrl != null) {
-                        sessionManager.saveAvatarUri(avatarUrl);
+                        if (avatarUrl != null) {
+                            sessionManager.saveAvatarUri(avatarUrl);
+                        }
                     }
 
                     runOnUiThread(() -> {
@@ -285,68 +279,72 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Load data
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void loadUserInfo() {
-        String email         = sessionManager.getEmail();
-        String savedUsername = sessionManager.getUsername();
+        if (isAdminMode) {
+            String targetUserName = getIntent().getStringExtra("USER_NAME");
+            String fakeEmail = "";
+            if (targetUserName != null && !targetUserName.trim().isEmpty()) {
+                fakeEmail = targetUserName.replaceAll("\\s+", "").toLowerCase() + "@gmail.com";
+            }
 
-        etEmail.setText(email);
-        if (tvEmailSub != null) tvEmailSub.setText(email);
-
-        String displayName;
-        if (savedUsername != null && !savedUsername.isEmpty()) {
-            displayName = savedUsername;
-        } else if (email != null && email.contains("@")) {
-            displayName = email.substring(0, email.indexOf('@'));
+            etEmail.setText(fakeEmail);
+            if (tvEmailSub != null) tvEmailSub.setText(fakeEmail);
+            etUsername.setText(targetUserName);
+            if (tvDisplayName != null) tvDisplayName.setText(targetUserName);
         } else {
-            displayName = "Người dùng";
-        }
+            String email         = sessionManager.getEmail();
+            String savedUsername = sessionManager.getUsername();
 
-        etUsername.setText(displayName);
-        if (tvDisplayName != null) tvDisplayName.setText(displayName);
+            etEmail.setText(email);
+            if (tvEmailSub != null) tvEmailSub.setText(email);
+
+            String displayName;
+            if (savedUsername != null && !savedUsername.isEmpty()) {
+                displayName = savedUsername;
+            } else if (email != null && email.contains("@")) {
+                displayName = email.substring(0, email.indexOf('@'));
+            } else {
+                displayName = "Người dùng";
+            }
+
+            etUsername.setText(displayName);
+            if (tvDisplayName != null) tvDisplayName.setText(displayName);
+        }
     }
 
     private void loadSavedAvatar() {
-        String savedUri = sessionManager.getAvatarUri();
-        if (savedUri == null) return;
-
-        if (savedUri.startsWith("http")) {
-            loadAvatarFromUrl(savedUri);
+        if (isAdminMode) {
+            String avatarUrl = SupabaseConfig.getAvatarPublicUrl(targetUserId + ".jpg");
+            loadAvatarFromUrl(avatarUrl);
         } else {
-            ivAvatar.setImageURI(Uri.parse(savedUri));
-            ivAvatar.setImageTintList(null);
+            String savedUri = sessionManager.getAvatarUri();
+            if (savedUri == null) return;
+
+            if (savedUri.startsWith("http")) {
+                loadAvatarFromUrl(savedUri);
+            } else {
+                ivAvatar.setImageURI(Uri.parse(savedUri));
+                ivAvatar.setImageTintList(null);
+            }
         }
     }
 
-    /**
-     * Load ảnh từ URL. Thêm ?t=timestamp để bust Glide cache khi cùng URL
-     * nhưng file đã thay đổi trên Storage (upload đè cùng tên).
-     */
     private void loadAvatarFromUrl(String url) {
         if (isFinishing() || isDestroyed()) return;
-        // Xóa timestamp cũ nếu có, rồi thêm mới
         String baseUrl      = url.contains("?") ? url.substring(0, url.indexOf('?')) : url;
         String cacheBustUrl = baseUrl + "?t=" + System.currentTimeMillis();
 
         Glide.with(this)
                 .load(cacheBustUrl)
                 .circleCrop()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)   // không cache trên disk
-                .skipMemoryCache(true)                        // không cache trên memory
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.ic_profile)
                 .into(ivAvatar);
 
         ivAvatar.setImageTintList(null);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /** Đọc toàn bộ bytes từ Uri (dùng cho upload ảnh). */
     private byte[] readBytes(Uri uri) throws IOException {
         try (InputStream is = getContentResolver().openInputStream(uri);
              ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -360,7 +358,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    /** Đọc body string từ OkHttp Response và đóng body lại (tránh leak). */
     private String readBody(Response response) {
         try (ResponseBody rb = response.body()) {
             return rb != null ? rb.string() : "";
@@ -369,7 +366,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    /** Toast chống spam — hủy cái cũ trước khi show cái mới. */
     private void showToast(String message) {
         runOnUiThread(() -> {
             if (isFinishing() || isDestroyed()) return;
@@ -379,12 +375,78 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    /** Khóa/mở nút Save khi đang gọi mạng. */
     private void setLoadingState(boolean isLoading) {
         runOnUiThread(() -> {
             if (isFinishing() || isDestroyed()) return;
             btnSave.setEnabled(!isLoading);
             btnSave.setText(isLoading ? "Đang xử lý..." : "Lưu thông tin");
+        });
+    }
+
+    private void showAdminChangePasswordDialog() {
+        android.widget.EditText etNewPassword = new android.widget.EditText(this);
+        etNewPassword.setHint("Nhập mật khẩu mới");
+        etNewPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        container.addView(etNewPassword);
+        container.setPadding(padding, padding / 2, padding, 0);
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Đổi mật khẩu thành viên")
+                .setMessage("Nhập mật khẩu mới cho tài khoản " + etUsername.getText().toString())
+                .setView(container)
+                .setPositiveButton("Xác nhận", (dialog, which) -> {
+                    String newPassword = etNewPassword.getText().toString().trim();
+                    if (newPassword.isEmpty() || newPassword.length() < 6) {
+                        showToast("Mật khẩu phải có ít nhất 6 ký tự!");
+                        return;
+                    }
+                    adminResetPasswordRemote(newPassword);
+                })
+                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void adminResetPasswordRemote(String newPassword) {
+        setLoadingState(true);
+        String accessToken = sessionManager.getAccessToken();
+
+        JSONObject bodyJson = new JSONObject();
+        try {
+            bodyJson.put("target_user_id", targetUserId);
+            bodyJson.put("new_password", newPassword);
+        } catch (JSONException e) {
+            setLoadingState(false);
+            showToast("Lỗi đóng gói dữ liệu");
+            return;
+        }
+
+        Request request = new Request.Builder()
+                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/rpc/admin_reset_password")
+                .post(RequestBody.create(bodyJson.toString(), MEDIA_TYPE_JSON))
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .addHeader("apikey", SupabaseConfig.API_KEY)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                setLoadingState(false);
+                showToast("Lỗi kết nối server: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+                setLoadingState(false);
+                if (response.isSuccessful()) {
+                    showToast("Đã đổi mật khẩu thành công!");
+                } else {
+                    showToast("Đổi mật khẩu thất bại, mã lỗi: " + response.code());
+                }
+            }
         });
     }
 }

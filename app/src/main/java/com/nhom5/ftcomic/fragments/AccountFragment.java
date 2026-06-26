@@ -40,7 +40,6 @@ import okhttp3.ResponseBody;
 
 public class AccountFragment extends Fragment {
 
-    // Dùng chung 1 client, không tạo mới mỗi lần fetch
     private static final OkHttpClient client = new OkHttpClient();
 
     private View               layoutUserInfo;
@@ -52,14 +51,9 @@ public class AccountFragment extends Fragment {
 
     public AccountFragment() {}
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Lifecycle
-    // ─────────────────────────────────────────────────────────────────────────
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
-
         sessionManager = new SessionManager(requireContext());
 
         initViews(view);
@@ -74,15 +68,9 @@ public class AccountFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (sessionManager == null) return;
-        // Mỗi lần quay lại fragment: cập nhật UI từ session local trước,
-        // rồi fetch mới từ server để đồng bộ
         updateUI();
         fetchProfileAndUpdateUI();
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Setup
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void initViews(View view) {
         layoutUserInfo = view.findViewById(R.id.layout_user_info);
@@ -137,11 +125,9 @@ public class AccountFragment extends Fragment {
 
         btnLogout.setOnClickListener(v -> {
             String oldUserId = sessionManager.getUserId();
-
             sessionManager.logout();
 
             AppDatabase db = AppDatabase.getInstance(requireContext());
-
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 if (oldUserId != null && !oldUserId.trim().isEmpty()) {
                     db.favoriteDao().deleteFavoritesByUser(oldUserId);
@@ -170,10 +156,6 @@ public class AccountFragment extends Fragment {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Network
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void fetchProfileAndUpdateUI() {
         if (!sessionManager.isLoggedIn()) return;
 
@@ -183,7 +165,7 @@ public class AccountFragment extends Fragment {
         Request request = new Request.Builder()
                 .url(SupabaseConfig.PROJECT_URL
                         + "rest/v1/profiles?id=eq." + userId
-                        + "&select=username,avatar_url")
+                        + "&select=username,avatar_url,role")
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
@@ -191,13 +173,10 @@ public class AccountFragment extends Fragment {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                // Giữ nguyên dữ liệu session cũ, không làm gì thêm
-            }
+            public void onFailure(Call call, IOException e) {}
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                // Luôn đọc và đóng body để tránh connection leak
                 String json;
                 try (ResponseBody rb = response.body()) {
                     if (!response.isSuccessful() || rb == null) return;
@@ -218,8 +197,10 @@ public class AccountFragment extends Fragment {
                     if (!profile.isNull("avatar_url")) {
                         sessionManager.saveAvatarUri(profile.getString("avatar_url"));
                     }
+                    if (!profile.isNull("role")) {
+                        sessionManager.saveRole(profile.getString("role"));
+                    }
 
-                    // Cập nhật UI trên main thread sau khi đã lưu session mới
                     if (getActivity() == null || getActivity().isFinishing()) return;
                     getActivity().runOnUiThread(() -> updateUI());
 
@@ -230,30 +211,37 @@ public class AccountFragment extends Fragment {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // UI
-    // ─────────────────────────────────────────────────────────────────────────
-
     private void updateUI() {
         boolean isLogged = sessionManager.isLoggedIn();
 
         if (layoutUserInfo != null) layoutUserInfo.setVisibility(isLogged ? View.VISIBLE : View.GONE);
         if (btnLogout != null)      btnLogout.setVisibility(isLogged ? View.VISIBLE : View.GONE);
         if (btnLogin != null)       btnLogin.setVisibility(isLogged ? View.GONE : View.VISIBLE);
-        if (btnManageUsers != null) btnManageUsers.setVisibility(isLogged ? View.VISIBLE : View.GONE);
 
         if (!isLogged) {
             if (tvUserEmail != null) tvUserEmail.setText("");
             if (tvUserName != null)  tvUserName.setText("");
+            if (btnManage != null)      btnManage.setVisibility(View.GONE);
+            if (btnManageUsers != null) btnManageUsers.setVisibility(View.GONE);
             return;
         }
 
-        // Email
+        String role = sessionManager.getRole();
+        if ("admin".equals(role)) {
+            if (btnManage != null)      btnManage.setVisibility(View.VISIBLE);
+            if (btnManageUsers != null) btnManageUsers.setVisibility(View.VISIBLE);
+        } else if ("translator".equals(role)) {
+            if (btnManage != null)      btnManage.setVisibility(View.VISIBLE);
+            if (btnManageUsers != null) btnManageUsers.setVisibility(View.GONE);
+        } else {
+            if (btnManage != null)      btnManage.setVisibility(View.GONE);
+            if (btnManageUsers != null) btnManageUsers.setVisibility(View.GONE);
+        }
+
         if (tvUserEmail != null) {
             tvUserEmail.setText(sessionManager.getEmail());
         }
 
-        // Username
         if (tvUserName != null) {
             String username = sessionManager.getUsername();
             if (username != null && !username.isEmpty()) {
@@ -266,7 +254,6 @@ public class AccountFragment extends Fragment {
             }
         }
 
-        // Avatar
         if (ivAvatar != null) {
             String savedUri = sessionManager.getAvatarUri();
             if (savedUri != null && !savedUri.isEmpty()) {
@@ -280,22 +267,17 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    /**
-     * Load ảnh từ URL với cache-bust timestamp.
-     * Tránh Glide hiển thị ảnh cũ khi URL giống nhau nhưng file đã thay đổi.
-     */
     private void loadAvatarFromUrl(String url) {
         if (getActivity() == null || getActivity().isFinishing() || !isAdded()) return;
 
-        // Xóa timestamp cũ nếu có, rồi thêm mới
         String baseUrl      = url.contains("?") ? url.substring(0, url.indexOf('?')) : url;
         String cacheBustUrl = baseUrl + "?t=" + System.currentTimeMillis();
 
         Glide.with(this)
                 .load(cacheBustUrl)
                 .circleCrop()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)  // không cache trên disk
-                .skipMemoryCache(true)                       // không cache trên memory
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.ic_profile)
                 .into(ivAvatar);
 
