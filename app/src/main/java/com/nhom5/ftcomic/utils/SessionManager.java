@@ -13,6 +13,7 @@ public class SessionManager {
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_USERNAME = "username";
+    private static final String KEY_ROLE = "role";
 
     private final SharedPreferences sharedPreferences;
 
@@ -20,7 +21,7 @@ public class SessionManager {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void saveSession(String accessToken, String refreshToken, String userId, String email) {
+    public void saveSession(String accessToken, String refreshToken, String userId, String email, String role) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putBoolean(KEY_LOGGED_IN, true);
@@ -28,6 +29,7 @@ public class SessionManager {
         editor.putString(KEY_REFRESH_TOKEN, refreshToken);
         editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_EMAIL, email);
+        editor.putString(KEY_ROLE, role);
 
         editor.apply();
     }
@@ -52,6 +54,13 @@ public class SessionManager {
         return sharedPreferences.getString(KEY_EMAIL, "");
     }
 
+    public String getRole() {
+        return sharedPreferences.getString(KEY_ROLE, "user");
+    }
+
+    public void saveRole(String role) {
+        sharedPreferences.edit().putString(KEY_ROLE, role).apply();
+    }
 
     public void saveUsername(String username) {
         String email = getEmail();
@@ -59,7 +68,6 @@ public class SessionManager {
                 .putString("username_" + email, username)
                 .apply();
     }
-
 
     public String getUsername() {
         String email = getEmail();
@@ -74,6 +82,7 @@ public class SessionManager {
                 .putString("username_" + email, savedUsername)
                 .apply();
     }
+
     public void saveAvatarUri(String uri) {
         String email = getEmail();
         sharedPreferences.edit()
@@ -85,6 +94,4 @@ public class SessionManager {
         String email = getEmail();
         return sharedPreferences.getString("avatar_" + email, null);
     }
-
-
 }

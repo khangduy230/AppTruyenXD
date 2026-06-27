@@ -2,37 +2,50 @@ package com.nhom5.ftcomic.network;
 
 import com.nhom5.ftcomic.network.request.CommentRequest;
 import com.nhom5.ftcomic.network.response.CommentResponse;
-
 import com.nhom5.ftcomic.network.request.FavoriteRequest;
 import com.nhom5.ftcomic.network.response.FavoriteResponse;
-
 import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
 import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
-
 import com.nhom5.ftcomic.network.request.RatingRequest;
 import com.nhom5.ftcomic.network.response.RatingResponse;
-
 import com.nhom5.ftcomic.network.request.LikeRequest;
 import com.nhom5.ftcomic.network.response.LikeResponse;
-
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.Header;
-import retrofit2.http.POST;
-
 import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
 import com.nhom5.ftcomic.network.response.ComicCategoryResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
+import com.nhom5.ftcomic.models.User;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.Header;
+import retrofit2.http.PATCH;
+import retrofit2.http.POST;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface SupabaseApi {
+
+    @GET("profiles")
+    Call<List<User>> getAllProfiles(
+            @Query("order") String order
+    );
+
+    @PATCH("profiles")
+    Call<Void> updateProfileRole(
+            @Query("id") String idFilter,
+            @Body Map<String, Object> body
+    );
+
+    @DELETE("profiles")
+    Call<Void> deleteProfile(
+            @Query("id") String idFilter
+    );
 
     @GET("comics")
     Call<List<ComicResponse>> getComicsBySection(
@@ -43,6 +56,12 @@ public interface SupabaseApi {
     @GET("comics")
     Call<List<ComicResponse>> getComicById(
             @Query("id") String idFilter
+    );
+
+    @GET("comics")
+    Call<List<ComicResponse>> getComicsByUploader(
+            @Query("uploader_id") String uploaderFilter,
+            @Query("order") String order
     );
 
     @GET("chapters")
@@ -77,6 +96,7 @@ public interface SupabaseApi {
     Call<List<ComicCategoryResponse>> getComicCategoryRefsByComicId(
             @Query("comic_id") String comicIdFilter
     );
+
     @GET("comics")
     Call<List<ComicResponse>> getComicsByIds(
             @Query("id") String idFilter,
@@ -93,6 +113,11 @@ public interface SupabaseApi {
     Call<Void> addComment(
             @Header("Prefer") String prefer,
             @Body CommentRequest request
+    );
+
+    @DELETE("comments")
+    Call<Void> deleteComment(
+            @Query("id") String idFilter
     );
 
     @GET("favorites_with_millis")
@@ -173,10 +198,5 @@ public interface SupabaseApi {
     Call<Void> deleteLike(
             @Query("user_id") String userIdFilter,
             @Query("comic_id") String comicIdFilter
-    );
-
-    @DELETE("comments")
-    Call<Void> deleteComment(
-            @Query("id") String idFilter
     );
 }

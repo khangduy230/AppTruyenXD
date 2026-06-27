@@ -46,9 +46,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.fragment_login, container, false);
-
         sessionManager = new SessionManager(requireContext());
 
         bindViews(view);
@@ -75,10 +73,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
     private void setupKeyboard() {
         edtEmail.setOnClickListener(v -> {
             edtEmail.requestFocus();
-
             InputMethodManager imm = (InputMethodManager)
                     requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-
             if (imm != null) {
                 imm.showSoftInput(edtEmail, InputMethodManager.SHOW_IMPLICIT);
             }
@@ -129,9 +125,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
         }
 
         setLoading(true);
-
         AuthRequest request = new AuthRequest(email, password);
 
+        //@SuppressWarnings("deprecation")
         SupabaseAuthClient.getApi()
                 .login(request)
                 .enqueue(new Callback<AuthResponse>() {
@@ -153,14 +149,11 @@ public class LoginFragment extends BottomSheetDialogFragment {
                                     authResponse.getAccessToken(),
                                     authResponse.getRefreshToken(),
                                     authResponse.getUser().getId(),
-                                    authResponse.getUser().getEmail()
+                                    authResponse.getUser().getEmail(),
+                                    "user"
                             );
 
-                            // SỬA LỖI 4: Gọi fetchUserProfile để lấy thông tin (Username, Avatar) khi Đăng nhập
                             fetchUserProfile(authResponse.getUser().getId(), authResponse.getAccessToken());
-
-                            Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                            notifyLoginSuccess();
                         } else {
                             Toast.makeText(getContext(), getErrorMessage(response), Toast.LENGTH_LONG).show();
                         }
@@ -194,7 +187,6 @@ public class LoginFragment extends BottomSheetDialogFragment {
         }
 
         setLoading(true);
-
         AuthRequest request = new AuthRequest(email, password);
 
         SupabaseAuthClient.getApi()
@@ -212,13 +204,11 @@ public class LoginFragment extends BottomSheetDialogFragment {
                                         authResponse.getAccessToken(),
                                         authResponse.getRefreshToken(),
                                         authResponse.getUser().getId(),
-                                        authResponse.getUser().getEmail()
-                                ); // SỬA LỖI 1: Thiếu dấu chấm phẩy ở đây
+                                        authResponse.getUser().getEmail(),
+                                        "user"
+                                );
 
                                 fetchUserProfile(authResponse.getUser().getId(), authResponse.getAccessToken());
-
-                                Toast.makeText(getContext(), "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                                notifyLoginSuccess();
                             } else {
                                 Toast.makeText(getContext(),
                                         "Đăng ký thành công. Hãy kiểm tra email để xác nhận tài khoản.",
@@ -245,17 +235,14 @@ public class LoginFragment extends BottomSheetDialogFragment {
             edtEmail.setError("Vui lòng nhập email");
             return false;
         }
-
         if (TextUtils.isEmpty(password)) {
             edtPassword.setError("Vui lòng nhập mật khẩu");
             return false;
         }
-
         if (password.length() < 6) {
             edtPassword.setError("Mật khẩu tối thiểu 6 ký tự");
             return false;
         }
-
         return true;
     }
 
@@ -263,13 +250,11 @@ public class LoginFragment extends BottomSheetDialogFragment {
         if (editText.getText() == null) {
             return "";
         }
-
         return editText.getText().toString().trim();
     }
 
     private void setLoading(boolean loading) {
         btnSubmit.setEnabled(!loading);
-
         if (loading) {
             btnSubmit.setText(isLoginMode ? "Đang đăng nhập..." : "Đang đăng ký...");
         } else {
@@ -288,16 +273,20 @@ public class LoginFragment extends BottomSheetDialogFragment {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url")
+                .url(SupabaseConfig.PROJECT_URL + "rest/v1/profiles?id=eq." + userId + "&select=username,avatar_url,role")
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
                 .build();
 
-        // SỬA LỖI 2: Chỉ định rõ okhttp3.Call, okhttp3.Callback, okhttp3.Response để không bị nhầm với Retrofit
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
-            public void onFailure(okhttp3.Call call, IOException e) { }
+            public void onFailure(okhttp3.Call call, IOException e) {
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    notifyLoginSuccess();
+                });
+            }
 
             @Override
             public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
@@ -309,18 +298,24 @@ public class LoginFragment extends BottomSheetDialogFragment {
                         if (array.length() > 0) {
                             JSONObject profile = array.getJSONObject(0);
 
-                            // ✅ Lưu vào SharedPreferences để dùng offline
                             if (!profile.isNull("username")) {
                                 sessionManager.saveUsername(profile.getString("username"));
                             }
                             if (!profile.isNull("avatar_url")) {
                                 sessionManager.saveAvatarUri(profile.getString("avatar_url"));
                             }
+                            if (!profile.isNull("role")) {
+                                sessionManager.saveRole(profile.getString("role"));
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    notifyLoginSuccess();
+                });
             }
         });
     }
@@ -329,34 +324,28 @@ public class LoginFragment extends BottomSheetDialogFragment {
         try {
             if (response.errorBody() != null) {
                 String error = response.errorBody().string();
-
                 JSONObject jsonObject = new JSONObject(error);
 
                 if (jsonObject.has("message")) {
                     return jsonObject.getString("message");
                 }
-
                 if (jsonObject.has("msg")) {
                     return jsonObject.getString("msg");
                 }
-
                 if (jsonObject.has("error_description")) {
                     return jsonObject.getString("error_description");
                 }
-
                 return error;
             }
         } catch (Exception e) {
             return "Thao tác thất bại";
         }
-
         return "Thao tác thất bại";
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }

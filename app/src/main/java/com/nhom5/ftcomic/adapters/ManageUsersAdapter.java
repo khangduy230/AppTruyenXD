@@ -17,7 +17,7 @@ import java.util.List;
 public class ManageUsersAdapter extends RecyclerView.Adapter<ManageUsersAdapter.UserViewHolder> {
 
     public interface OnUserActionListener {
-        void onEdit(User user);
+        void onEdit(User user, int position);
         void onDelete(User user, int position);
     }
 
@@ -62,11 +62,18 @@ public class ManageUsersAdapter extends RecyclerView.Adapter<ManageUsersAdapter.
         }
 
         public void bind(User user, OnUserActionListener listener, int position) {
-            tvUserName.setText(user.getUsername());
+            String roleText = " (Thành viên)";
+            if ("admin".equals(user.getRole())) {
+                roleText = " (Quản lý)";
+            } else if ("translator".equals(user.getRole())) {
+                roleText = " (Dịch giả)";
+            }
+
+            tvUserName.setText(user.getUsername() + roleText);
             tvUserEmail.setText(user.getEmail());
 
             if (listener != null) {
-                btnEdit.setOnClickListener(v -> listener.onEdit(user));
+                btnEdit.setOnClickListener(v -> listener.onEdit(user, position));
                 btnDelete.setOnClickListener(v -> listener.onDelete(user, position));
             }
         }

@@ -25,6 +25,9 @@ public class ComicResponse {
     @SerializedName("cover_url")
     private String coverUrl;
 
+    @SerializedName("uploader_id")
+    private String uploaderId;
+
     @SerializedName("like_count")
     private int likeCount;
 
@@ -66,6 +69,10 @@ public class ComicResponse {
 
     public String getCoverUrl() {
         return coverUrl;
+    }
+
+    public String getUploaderId() {
+        return uploaderId;
     }
 
     public int getLikeCount() {

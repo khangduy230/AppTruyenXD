@@ -1,14 +1,21 @@
 package com.nhom5.ftcomic.models;
 
-public class User {
-    private String id;
-    private String username;
-    private String email;
+import com.google.gson.annotations.SerializedName;
 
-    public User(String id, String username, String email) {
+public class User {
+    @SerializedName("id")
+    private String id;
+
+    @SerializedName("username")
+    private String username;
+
+    @SerializedName("role")
+    private String role;
+
+    public User(String id, String username, String role) {
         this.id = id;
         this.username = username;
-        this.email = email;
+        this.role = role;
     }
 
     public String getId() {
@@ -27,11 +34,18 @@ public class User {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public String getRole() {
+        return role;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getEmail() {
+        if (username != null && !username.trim().isEmpty()) {
+            return username.replaceAll("\\s+", "").toLowerCase() + "@gmail.com";
+        }
+        return "user" + id.substring(0, 4) + "@gmail.com";
     }
 }

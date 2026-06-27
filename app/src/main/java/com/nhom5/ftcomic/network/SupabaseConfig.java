@@ -7,7 +7,6 @@ public class SupabaseConfig {
     public static final String BASE_URL = PROJECT_URL + "rest/v1/";
     public static final String AUTH_BASE_URL = PROJECT_URL + "auth/v1/";
 
-    // Giữ publishable key hiện tại của bạn ở đây
     public static final String API_KEY = "sb_publishable_AmtjAUXr15c4VmXZfl-UEg_Njdqm6Zq";
 
     public static final String STORAGE_PUBLIC_URL =
@@ -18,6 +17,11 @@ public class SupabaseConfig {
 
     public static String getAvatarPublicUrl(String fileName) {
         return STORAGE_PUBLIC_URL + AVATARS_BUCKET + "/" + fileName;
+    }
+
+    // Hàm lấy URL công khai của ảnh bìa truyện nằm trong comics-storage/covers/
+    public static String getComicCoverPublicUrl(String fileName) {
+        return STORAGE_PUBLIC_URL + COMICS_BUCKET + "/covers/" + fileName;
     }
 
     public static String getChapterPageUrl(String folderName, int chapterNumber, int pageNumber) {
