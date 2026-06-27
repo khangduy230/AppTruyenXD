@@ -1,5 +1,6 @@
 package com.nhom5.ftcomic.activities;
 
+import androidx.activity.EdgeToEdge;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.fragment.app.Fragment;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         //hiển thanh điều hướng dưới cùng
         setContentView(R.layout.activity_main);
         //ánh xạ view theo id đã đặt trong layout

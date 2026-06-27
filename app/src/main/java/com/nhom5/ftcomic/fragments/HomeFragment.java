@@ -1,37 +1,36 @@
 package com.nhom5.ftcomic.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.google.android.material.appbar.MaterialToolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.nhom5.ftcomic.R;
-import com.nhom5.ftcomic.activities.AllStoryActivity;
-import com.nhom5.ftcomic.activities.DetailComicActivity;
-import com.nhom5.ftcomic.adapters.ComicAdapter;
-import com.nhom5.ftcomic.models.Comic;
 import com.nhom5.ftcomic.repository.ComicRepository;
 import com.nhom5.ftcomic.utils.NetworkUtils;
 
-import java.util.ArrayList;
-
 public class HomeFragment extends Fragment {
 
-    private RecyclerView recyclerFeatured, recyclerRanking, recyclerAllComics;
-    private ComicAdapter featuredAdapter, rankingAdapter, allComicsAdapter;
-    private TextView tvAllComicsTitle;
-
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
     private ComicRepository comicRepository;
+    private ComicGridFragment allComicsFragment;
+
+    public void setAllComicsFragment(ComicGridFragment fragment) {
+        this.allComicsFragment = fragment;
+    }
 
     public HomeFragment() {
     }
@@ -46,27 +45,60 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        recyclerFeatured = view.findViewById(R.id.recyclerView_featured);
-        recyclerRanking = view.findViewById(R.id.recyclerView_ranking);
-        recyclerAllComics = view.findViewById(R.id.recyclerView_all_comics);
-        tvAllComicsTitle = view.findViewById(R.id.tvAllComicsTitle);
+        tabLayout = view.findViewById(R.id.tabLayoutHome);
+        viewPager = view.findViewById(R.id.viewPagerHome);
+
+        MaterialToolbar toolbar = view.findViewById(R.id.topAppBar);
+        toolbar.inflateMenu(R.menu.menu_home);
+
+        MenuItem filterItem = toolbar.getMenu().findItem(R.id.action_filter);
+        if (filterItem != null) {
+            filterItem.setVisible(false); // Ẩn mặc định cho đến khi chuyển qua tab "Tất cả"
+        }
+
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_filter) {
+                if (allComicsFragment != null) {
+                    allComicsFragment.showFilterBottomSheet();
+                }
+                return true;
+            }
+            return false;
+        });
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                MenuItem item = toolbar.getMenu().findItem(R.id.action_filter);
+                if (item != null) {
+                    item.setVisible(position == 2);
+                }
+            }
+        });
 
         comicRepository = new ComicRepository(requireContext());
 
-        setupRecyclerViews();
+        // Thiết lập Adapter cho ViewPager2
+        HomePagerAdapter adapter = new HomePagerAdapter(this);
+        viewPager.setAdapter(adapter);
 
-        // Luôn observe Room trước để mất mạng vẫn có dữ liệu cache
-        observeComicsFromRoom();
+        // Liên kết TabLayout và ViewPager2
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            switch (position) {
+                case 0:
+                    tab.setText("Mới nhất");
+                    break;
+                case 1:
+                    tab.setText("Bảng xếp hạng");
+                    break;
+                case 2:
+                    tab.setText("Tất cả");
+                    break;
+            }
+        }).attach();
 
-        if (tvAllComicsTitle != null) {
-            tvAllComicsTitle.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), AllStoryActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        // Có mạng thì sync Supabase -> Room
-        // Mất mạng thì vẫn hiển thị dữ liệu Room
+        // Đồng bộ dữ liệu truyện từ Supabase về Room khi có mạng
         if (NetworkUtils.isOnline(requireContext())) {
             comicRepository.syncAllHomeComics();
         } else {
@@ -78,59 +110,29 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void setupRecyclerViews() {
-        featuredAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
-        rankingAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
-        allComicsAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
+    private static class HomePagerAdapter extends FragmentStateAdapter {
 
-        setupHorizontalRecyclerView(recyclerFeatured, featuredAdapter);
-        setupHorizontalRecyclerView(recyclerRanking, rankingAdapter);
-        setupHorizontalRecyclerView(recyclerAllComics, allComicsAdapter);
-    }
-
-    private void setupHorizontalRecyclerView(RecyclerView recyclerView, ComicAdapter adapter) {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(
-                requireContext(),
-                LinearLayoutManager.HORIZONTAL,
-                false
-        );
-
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.setAdapter(adapter);
-    }
-
-    private void observeComicsFromRoom() {
-        comicRepository.getComicsBySection("featured")
-                .observe(getViewLifecycleOwner(), comics -> {
-                    if (comics != null) {
-                        featuredAdapter.setComicList(comics);
-                    }
-                });
-
-        comicRepository.getRankingComics()
-                .observe(getViewLifecycleOwner(), comics -> {
-                    if (comics != null) {
-                        rankingAdapter.setComicList(comics);
-                    }
-                });
-
-        comicRepository.getAllComicsLive()
-                .observe(getViewLifecycleOwner(), comics -> {
-                    if (comics != null) {
-                        allComicsAdapter.setComicList(comics);
-                    }
-                });
-    }
-
-    private void openDetailComic(Comic comic) {
-        if (comic == null) {
-            return;
+        public HomePagerAdapter(@NonNull Fragment fragment) {
+            super(fragment);
         }
 
-        Intent intent = new Intent(requireContext(), DetailComicActivity.class);
-        intent.putExtra("COMIC_ID", comic.getId());
-        intent.putExtra("COMIC_COVER_URL", comic.getCoverUrl());
-        startActivity(intent);
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            switch (position) {
+                case 0:
+                    return ComicGridFragment.newInstance("featured");
+                case 1:
+                    return ComicGridFragment.newInstance("ranking");
+                case 2:
+                default:
+                    return ComicGridFragment.newInstance("all");
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
     }
 }

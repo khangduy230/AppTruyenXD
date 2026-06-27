@@ -57,9 +57,7 @@
         <activity
             android:name=".StoryManagementActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.AllStoryActivity"
-            android:exported="false" />
+
         <activity
             android:name=".activities.ChangePasswordActivity"
             android:exported="false" />
