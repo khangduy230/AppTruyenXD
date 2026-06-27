@@ -19,7 +19,8 @@
             android:layout_height="152dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:title="Quản lý chương"
-            app:titleCollapseMode="fade">
+            app:titleCollapseMode="fade"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"

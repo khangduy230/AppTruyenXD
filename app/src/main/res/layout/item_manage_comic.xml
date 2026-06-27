@@ -6,17 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
     android:paddingVertical="10dp"
     android:gravity="center_vertical">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivComicCover"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardComicCover"
         android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:scaleType="centerCrop"
-        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Small"
-        tools:src="@tools:sample/avatars" />
+        android:layout_height="100dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:strokeColor="#969696"
+        app:strokeWidth="1dp">
+
+        <ImageView
+            android:id="@+id/ivComicCover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/avatars" />
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -33,7 +41,7 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="?attr/colorOnSurface"
             android:textStyle="bold"
-            android:maxLines="1"
+            android:maxLines="3"
             android:ellipsize="end"
             tools:text="Tên truyện" />
 
@@ -44,7 +52,7 @@
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:maxLines="1"
+            android:maxLines="2"
             android:ellipsize="end"
             tools:text="Tác giả" />
 
@@ -59,8 +67,9 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEditInfo"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="152dp"
+            android:layout_width="125dp"
             android:layout_height="36dp"
+            android:paddingHorizontal="10dp"
             android:letterSpacing="0"
             android:text="Sửa thông tin"
             android:textSize="12sp"
@@ -73,9 +82,10 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageChapters"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="152dp"
+            android:layout_width="125dp"
             android:layout_height="36dp"
             android:layout_marginTop="6dp"
+            android:paddingHorizontal="10dp"
             android:letterSpacing="0"
             android:text="Quản lý chương"
             android:textSize="12sp"
