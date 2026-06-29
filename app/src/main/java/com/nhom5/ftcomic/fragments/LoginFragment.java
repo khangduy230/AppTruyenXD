@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -106,8 +108,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Đăng nhập");
             tvSubtitle.setText("Để sử dụng tính năng");
             layoutConfirmPassword.setVisibility(View.GONE);
-            layoutSecurityQuestion.setVisibility(View.GONE); // Ẩn câu hỏi khi đăng nhập
-            layoutSecurityAnswer.setVisibility(View.GONE);   // Ẩn câu trả lời khi đăng nhập
+            layoutSecurityQuestion.setVisibility(View.GONE);
+            layoutSecurityAnswer.setVisibility(View.GONE);
             tvForgotPassword.setVisibility(View.VISIBLE);
             btnSubmit.setText("Đăng nhập");
             tvSwitchPrompt.setText("Chưa có tài khoản?");
@@ -116,8 +118,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Tạo tài khoản");
             tvSubtitle.setText("Đăng ký tài khoản mới");
             layoutConfirmPassword.setVisibility(View.VISIBLE);
-            layoutSecurityQuestion.setVisibility(View.VISIBLE); // Hiện câu hỏi khi đăng ký
-            layoutSecurityAnswer.setVisibility(View.VISIBLE);   // Hiện câu trả lời khi đăng ký
+            layoutSecurityQuestion.setVisibility(View.VISIBLE);
+            layoutSecurityAnswer.setVisibility(View.VISIBLE);
             tvForgotPassword.setVisibility(View.GONE);
             btnSubmit.setText("Đăng ký");
             tvSwitchPrompt.setText("Đã có tài khoản?");
@@ -187,6 +189,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
                 });
     }
 
+    // ĐÃ CẬP NHẬT: Đóng gói Metadata theo chuẩn để bẻ khóa lỗi ngầm của Supabase Auth
     private void registerWithSupabase() {
         String email = getText(edtEmail);
         String password = getText(edtPassword);
@@ -208,7 +211,6 @@ public class LoginFragment extends BottomSheetDialogFragment {
             return;
         }
 
-        // KIỂM TRA RÀNG BUỘC CÂU HỎI BẢO MẬT
         if (TextUtils.isEmpty(securityQuestion)) {
             edtSecurityQuestion.setError("Vui lòng nhập câu hỏi bảo mật");
             return;
@@ -221,7 +223,13 @@ public class LoginFragment extends BottomSheetDialogFragment {
 
         setLoading(true);
 
-        AuthRequest request = new AuthRequest(email, password, securityQuestion, securityAnswer.toLowerCase());
+        // Khởi tạo Map và đóng gói dữ liệu an toàn
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("security_question", securityQuestion);
+        metadata.put("security_answer", securityAnswer.toLowerCase());
+
+        // Sử dụng Constructor mới truyền Map thay vì truyền chuỗi rời rạc
+        AuthRequest request = new AuthRequest(email, password, metadata);
 
         SupabaseAuthClient.getApi()
                 .register(request)

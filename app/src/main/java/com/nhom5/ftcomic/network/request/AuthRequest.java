@@ -1,12 +1,21 @@
 package com.nhom5.ftcomic.network.request;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AuthRequest {
 
+    @SerializedName("email")
     private String email;
+
+    @SerializedName("password")
     private String password;
+
+    @SerializedName("data")
+    private Map<String, String> data;
+
+    @SerializedName("options")
     private SignUpOptions options;
 
     public AuthRequest(String email, String password) {
@@ -14,19 +23,19 @@ public class AuthRequest {
         this.password = password;
     }
 
-    public AuthRequest(String email, String password, String securityQuestion, String securityAnswer) {
+    public AuthRequest(String email, String password, Map<String, String> metadata) {
         this.email = email;
         this.password = password;
-        this.options = new SignUpOptions(securityQuestion, securityAnswer);
+        this.data = metadata;
+        this.options = new SignUpOptions(metadata);
     }
 
     public static class SignUpOptions {
+        @SerializedName("data")
         private Map<String, String> data;
 
-        public SignUpOptions(String securityQuestion, String securityAnswer) {
-            this.data = new HashMap<>();
-            this.data.put("security_question", securityQuestion);
-            this.data.put("security_answer", securityAnswer);
+        public SignUpOptions(Map<String, String> data) {
+            this.data = data;
         }
     }
 }
