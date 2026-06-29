@@ -9,26 +9,33 @@ public class Comic {
 
     @PrimaryKey
     private int id;
-
     private int image;
     private String coverUrl;
-
     private String name;
     private String author;
     private String description;
     private String status;
     private String section;
-
     private int likeCount;
     private float rating;
     private int ratingCount;
     private int commentCount;
     private int viewCount;
 
+    @Ignore
+    private String uploaderName;
+
     public Comic() {
     }
-    public int getRatingCount() { return ratingCount; }
-    public void setRatingCount(int ratingCount) { this.ratingCount = ratingCount; }
+
+    public int getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(int ratingCount) {
+        this.ratingCount = ratingCount;
+    }
+
     @Ignore
     public Comic(int image, String name) {
         this.image = image;
@@ -107,6 +114,13 @@ public class Comic {
         return viewCount;
     }
 
+    public String getUploaderName() {
+        if (uploaderName == null || uploaderName.trim().isEmpty()) {
+            return "FTComic";
+        }
+        return uploaderName;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -153,5 +167,9 @@ public class Comic {
 
     public void setViewCount(int viewCount) {
         this.viewCount = viewCount;
+    }
+
+    public void setUploaderName(String uploaderName) {
+        this.uploaderName = uploaderName;
     }
 }

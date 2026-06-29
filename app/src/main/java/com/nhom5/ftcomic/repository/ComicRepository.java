@@ -44,22 +44,13 @@ public class ComicRepository {
         this.appDatabase = AppDatabase.getInstance(this.context);
     }
 
-    // =========================
-    // Kiểm tra mạng trước khi sync
-    // =========================
-
     private boolean canSyncFromSupabase(String taskName) {
         if (!NetworkUtils.isOnline(context)) {
             Log.w(TAG, taskName + ": Không có mạng, dùng cache Room");
             return false;
         }
-
         return true;
     }
-
-    // =========================
-    // Lấy dữ liệu từ Room
-    // =========================
 
     public LiveData<List<Comic>> getComicsBySection(String section) {
         return appDatabase.comicDao().getComicsBySection(section);
@@ -93,15 +84,10 @@ public class ComicRepository {
         return appDatabase.categoryDao().getAllCategories();
     }
 
-    // =========================
-    // Sync truyện trang chủ
-    // =========================
-
     public void syncAllHomeComics() {
         if (!canSyncFromSupabase("syncAllHomeComics")) {
             return;
         }
-
         syncComicsBySection("featured");
         syncAllComicsFromSupabase();
         syncAllCategories();
@@ -111,23 +97,15 @@ public class ComicRepository {
         if (!canSyncFromSupabase("syncComicsBySection")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getComicsBySection("eq." + section, "id.asc")
                 .enqueue(new Callback<List<ComicResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ComicResponse>> call,
-                                           Response<List<ComicResponse>> response) {
-                        Log.d(TAG, "Comics URL: " + call.request().url());
-                        Log.d(TAG, "Comics code: " + response.code());
-
+                    public void onResponse(Call<List<ComicResponse>> call, Response<List<ComicResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Comic> comics = mapComicResponsesToEntities(response.body());
-
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.comicDao().insertComics(comics);
-                                Log.d(TAG, "Đã cache section " + section
-                                        + ", size=" + comics.size());
                             });
                         } else {
                             logErrorBody(response, "syncComicsBySection");
@@ -145,22 +123,15 @@ public class ComicRepository {
         if (!canSyncFromSupabase("syncAllComicsFromSupabase")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getAllComicsRemote("id.asc")
                 .enqueue(new Callback<List<ComicResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ComicResponse>> call,
-                                           Response<List<ComicResponse>> response) {
-                        Log.d(TAG, "All comics URL: " + call.request().url());
-                        Log.d(TAG, "All comics code: " + response.code());
-
+                    public void onResponse(Call<List<ComicResponse>> call, Response<List<ComicResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Comic> comics = mapComicResponsesToEntities(response.body());
-
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.comicDao().insertComics(comics);
-                                Log.d(TAG, "Đã cache tất cả truyện, size=" + comics.size());
                             });
                         } else {
                             logErrorBody(response, "syncAllComicsFromSupabase");
@@ -176,29 +147,18 @@ public class ComicRepository {
 
     public void syncComicById(int comicId) {
         if (comicId <= 0) {
-            Log.e(TAG, "comicId không hợp lệ khi syncComicById: " + comicId);
             return;
         }
-
         if (!canSyncFromSupabase("syncComicById")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getComicById("eq." + comicId)
                 .enqueue(new Callback<List<ComicResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ComicResponse>> call,
-                                           Response<List<ComicResponse>> response) {
-                        Log.d(TAG, "Comic detail URL: " + call.request().url());
-                        Log.d(TAG, "Comic detail code: " + response.code());
-
-                        if (response.isSuccessful()
-                                && response.body() != null
-                                && !response.body().isEmpty()) {
-
+                    public void onResponse(Call<List<ComicResponse>> call, Response<List<ComicResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                             ComicResponse item = response.body().get(0);
-
                             Comic comic = new Comic(
                                     item.getId(),
                                     R.drawable.thientai,
@@ -214,10 +174,9 @@ public class ComicRepository {
                                     item.getCommentCount(),
                                     item.getViewCount()
                             );
-
+                            comic.setUploaderName(item.getUploaderName());
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.comicDao().insertComic(comic);
-                                Log.d(TAG, "Đã sync lại comic id=" + comicId);
                             });
                         } else {
                             logErrorBody(response, "syncComicById");
@@ -231,37 +190,23 @@ public class ComicRepository {
                 });
     }
 
-    // =========================
-    // Sync chương
-    // =========================
-
     public void syncChaptersByComicId(int comicId) {
         if (comicId <= 0) {
-            Log.e(TAG, "comicId không hợp lệ: " + comicId);
             return;
         }
-
         if (!canSyncFromSupabase("syncChaptersByComicId")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getChaptersByComicId("eq." + comicId, "chapter_number.asc")
                 .enqueue(new Callback<List<ChapterResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ChapterResponse>> call,
-                                           Response<List<ChapterResponse>> response) {
-                        Log.d(TAG, "Chapters URL: " + call.request().url());
-                        Log.d(TAG, "Chapters code: " + response.code());
-
+                    public void onResponse(Call<List<ChapterResponse>> call, Response<List<ChapterResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Chapter> chapters = mapChapterResponsesToEntities(response.body());
-
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.chapterDao().deleteChaptersByComicId(comicId);
                                 appDatabase.chapterDao().insertChapters(chapters);
-                                Log.d(TAG, "Đã cache chapters comicId="
-                                        + comicId + ", size=" + chapters.size());
                             });
                         } else {
                             logErrorBody(response, "syncChaptersByComicId");
@@ -275,71 +220,38 @@ public class ComicRepository {
                 });
     }
 
-    // =========================
-    // Sync trang truyện
-    // =========================
-
     public void syncPagesByChapterId(int chapterId) {
         if (chapterId <= 0) {
-            Log.e(TAG, "chapterId không hợp lệ: " + chapterId);
             return;
         }
-
         if (!canSyncFromSupabase("syncPagesByChapterId")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getPagesByChapterId("eq." + chapterId, "page_number.asc")
                 .enqueue(new Callback<List<ChapterPageResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ChapterPageResponse>> call,
-                                           Response<List<ChapterPageResponse>> response) {
-                        Log.d(TAG, "Pages URL: " + call.request().url());
-                        Log.d(TAG, "Pages code: " + response.code());
-
+                    public void onResponse(Call<List<ChapterPageResponse>> call, Response<List<ChapterPageResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<ChapterPage> remotePages =
-                                    mapPageResponsesToEntities(response.body());
-
+                            List<ChapterPage> remotePages = mapPageResponsesToEntities(response.body());
                             AppDatabase.databaseWriteExecutor.execute(() -> {
-                                List<ChapterPage> oldPages =
-                                        appDatabase.chapterPageDao()
-                                                .getPagesByChapterIdSync(chapterId);
-
+                                List<ChapterPage> oldPages = appDatabase.chapterPageDao().getPagesByChapterIdSync(chapterId);
                                 Map<Integer, String> localPathMap = new HashMap<>();
-
                                 if (oldPages != null) {
                                     for (ChapterPage oldPage : oldPages) {
-                                        if (oldPage.getLocalFilePath() != null
-                                                && !oldPage.getLocalFilePath().trim().isEmpty()) {
-                                            localPathMap.put(
-                                                    oldPage.getPageNumber(),
-                                                    oldPage.getLocalFilePath()
-                                            );
+                                        if (oldPage.getLocalFilePath() != null && !oldPage.getLocalFilePath().trim().isEmpty()) {
+                                            localPathMap.put(oldPage.getPageNumber(), oldPage.getLocalFilePath());
                                         }
                                     }
                                 }
-
                                 for (ChapterPage newPage : remotePages) {
-                                    String oldLocalPath =
-                                            localPathMap.get(newPage.getPageNumber());
-
-                                    if (oldLocalPath != null
-                                            && !oldLocalPath.trim().isEmpty()) {
+                                    String oldLocalPath = localPathMap.get(newPage.getPageNumber());
+                                    if (oldLocalPath != null && !oldLocalPath.trim().isEmpty()) {
                                         newPage.setLocalFilePath(oldLocalPath);
                                     }
                                 }
-
-                                /*
-                                  Chỉ xóa page cũ khi API đã thành công.
-                                  Nếu mất mạng / API lỗi thì cache Room cũ vẫn giữ nguyên.
-                                */
                                 appDatabase.chapterPageDao().deletePagesByChapterId(chapterId);
                                 appDatabase.chapterPageDao().insertPages(remotePages);
-
-                                Log.d(TAG, "Đã cache pages chapterId="
-                                        + chapterId + ", size=" + remotePages.size());
                             });
                         } else {
                             logErrorBody(response, "syncPagesByChapterId");
@@ -353,20 +265,13 @@ public class ComicRepository {
                 });
     }
 
-    // =========================
-    // Sync thể loại
-    // =========================
-
     public void syncCategoriesByComicId(int comicId) {
         if (comicId <= 0) {
-            Log.e(TAG, "comicId không hợp lệ khi sync category: " + comicId);
             return;
         }
-
         if (!canSyncFromSupabase("syncCategoriesByComicId")) {
             return;
         }
-
         syncAllCategories();
         syncComicCategoryRefsByComicId(comicId);
     }
@@ -375,23 +280,15 @@ public class ComicRepository {
         if (!canSyncFromSupabase("syncAllCategories")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getAllCategories("name.asc")
                 .enqueue(new Callback<List<CategoryResponse>>() {
                     @Override
-                    public void onResponse(Call<List<CategoryResponse>> call,
-                                           Response<List<CategoryResponse>> response) {
-                        Log.d(TAG, "Categories URL: " + call.request().url());
-                        Log.d(TAG, "Categories code: " + response.code());
-
+                    public void onResponse(Call<List<CategoryResponse>> call, Response<List<CategoryResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<Category> categories =
-                                    mapCategoryResponsesToEntities(response.body());
-
+                            List<Category> categories = mapCategoryResponsesToEntities(response.body());
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.categoryDao().insertCategories(categories);
-                                Log.d(TAG, "Đã cache categories size=" + categories.size());
                             });
                         } else {
                             logErrorBody(response, "syncAllCategories");
@@ -409,24 +306,15 @@ public class ComicRepository {
         if (!canSyncFromSupabase("syncComicCategoryRefsByComicId")) {
             return;
         }
-
         SupabaseClient.getApi()
                 .getComicCategoryRefsByComicId("eq." + comicId)
                 .enqueue(new Callback<List<ComicCategoryResponse>>() {
                     @Override
-                    public void onResponse(Call<List<ComicCategoryResponse>> call,
-                                           Response<List<ComicCategoryResponse>> response) {
-                        Log.d(TAG, "Comic category refs URL: " + call.request().url());
-                        Log.d(TAG, "Comic category refs code: " + response.code());
-
+                    public void onResponse(Call<List<ComicCategoryResponse>> call, Response<List<ComicCategoryResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<ComicCategoryCrossRef> refs =
-                                    mapComicCategoryResponsesToEntities(response.body());
-
+                            List<ComicCategoryCrossRef> refs = mapComicCategoryResponsesToEntities(response.body());
                             AppDatabase.databaseWriteExecutor.execute(() -> {
                                 appDatabase.categoryDao().insertComicCategoryRefs(refs);
-                                Log.d(TAG, "Đã cache category refs comicId="
-                                        + comicId + ", size=" + refs.size());
                             });
                         } else {
                             logErrorBody(response, "syncComicCategoryRefsByComicId");
@@ -440,13 +328,8 @@ public class ComicRepository {
                 });
     }
 
-    // =========================
-    // Mapper
-    // =========================
-
     private List<Comic> mapComicResponsesToEntities(List<ComicResponse> responses) {
         List<Comic> comics = new ArrayList<>();
-
         for (ComicResponse item : responses) {
             Comic comic = new Comic(
                     item.getId(),
@@ -463,16 +346,14 @@ public class ComicRepository {
                     item.getCommentCount(),
                     item.getViewCount()
             );
-
+            comic.setUploaderName(item.getUploaderName());
             comics.add(comic);
         }
-
         return comics;
     }
 
     private List<Chapter> mapChapterResponsesToEntities(List<ChapterResponse> responses) {
         List<Chapter> chapters = new ArrayList<>();
-
         for (ChapterResponse item : responses) {
             Chapter chapter = new Chapter(
                     item.getId(),
@@ -482,16 +363,13 @@ public class ComicRepository {
                     item.getUpdatedAt(),
                     item.isHidden()
             );
-
             chapters.add(chapter);
         }
-
         return chapters;
     }
 
     private List<ChapterPage> mapPageResponsesToEntities(List<ChapterPageResponse> responses) {
         List<ChapterPage> pages = new ArrayList<>();
-
         for (ChapterPageResponse item : responses) {
             ChapterPage page = new ChapterPage(
                     item.getId(),
@@ -501,42 +379,32 @@ public class ComicRepository {
                     item.getImageUrl(),
                     ""
             );
-
             pages.add(page);
         }
-
         return pages;
     }
 
     private List<Category> mapCategoryResponsesToEntities(List<CategoryResponse> responses) {
         List<Category> categories = new ArrayList<>();
-
         for (CategoryResponse item : responses) {
             Category category = new Category(
                     item.getId(),
                     item.getName()
             );
-
             categories.add(category);
         }
-
         return categories;
     }
 
-    private List<ComicCategoryCrossRef> mapComicCategoryResponsesToEntities(
-            List<ComicCategoryResponse> responses
-    ) {
+    private List<ComicCategoryCrossRef> mapComicCategoryResponsesToEntities(List<ComicCategoryResponse> responses) {
         List<ComicCategoryCrossRef> refs = new ArrayList<>();
-
         for (ComicCategoryResponse item : responses) {
             ComicCategoryCrossRef ref = new ComicCategoryCrossRef(
                     item.getComicId(),
                     item.getCategoryId()
             );
-
             refs.add(ref);
         }
-
         return refs;
     }
 
@@ -551,9 +419,9 @@ public class ComicRepository {
             Log.e(TAG, "Không đọc được error body", e);
         }
     }
+
     public void syncCommentsByComicId(int comicId) {
         if (!canSyncFromSupabase("syncCommentsByComicId")) return;
-
         SupabaseClient.getApi()
                 .getCommentsByComicId("eq." + comicId, "created_at.desc")
                 .enqueue(new Callback<List<CommentResponse>>() {
@@ -562,7 +430,6 @@ public class ComicRepository {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Comment> comments = new ArrayList<>();
                             for (CommentResponse res : response.body()) {
-                                // Map dữ liệu từ Cloud Response về Room Entity
                                 Comment comment = new Comment(
                                         res.getComicId(),
                                         res.getParentId(),
@@ -590,7 +457,6 @@ public class ComicRepository {
                 });
     }
 
-
     public void sendCommentToRemote(String userId, Comment comment, Runnable onSuccessCallback) {
         CommentRequest request = new CommentRequest(
                 userId,
@@ -602,7 +468,6 @@ public class ComicRepository {
                 comment.getChapterId(),
                 comment.getChapterName()
         );
-
         SupabaseClient.getApi()
                 .addComment("return=representation", request)
                 .enqueue(new Callback<Void>() {
@@ -611,12 +476,13 @@ public class ComicRepository {
                         if (response.isSuccessful()) {
                             if (onSuccessCallback != null) onSuccessCallback.run();
                         } else {
-                            // Log lỗi để kiểm tra trong Logcat nếu Supabase từ chối
                             try {
                                 if (response.errorBody() != null) {
                                     Log.e("SUPABASE_COMMENT", "Lỗi lưu: " + response.errorBody().string());
                                 }
-                            } catch (Exception e) { e.printStackTrace(); }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
 

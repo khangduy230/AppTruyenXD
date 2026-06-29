@@ -43,6 +43,9 @@ public class ComicResponse {
     @SerializedName("view_count")
     private int viewCount;
 
+    @SerializedName("profiles")
+    private UploaderProfile profiles;
+
     public int getId() {
         return id;
     }
@@ -95,10 +98,22 @@ public class ComicResponse {
         return viewCount;
     }
 
+    public String getUploaderName() {
+        if (profiles != null && profiles.username != null && !profiles.username.trim().isEmpty()) {
+            return profiles.username;
+        }
+        return "FTComic";
+    }
+
     private String safe(String value, String fallback) {
         if (value == null || value.trim().isEmpty()) {
             return fallback;
         }
         return value;
+    }
+
+    public static class UploaderProfile {
+        @SerializedName("username")
+        public String username;
     }
 }

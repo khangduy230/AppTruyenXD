@@ -64,7 +64,7 @@ public class DetailComicActivity extends AppCompatActivity {
     private MaterialCardView cardRating, cardLike;
     private Comic currentComic;
     private TextView tvLikeCount, tvRating, tvRatingCount, tvCommentCount;
-    private TextView tvTitle, tvAuthor, tvDescription, tvStatus;
+    private TextView tvTitle, tvAuthor, tvDescription, tvStatus, tvUploader;
     private ImageView imgCover;
     private ImageView imgBlurredBackground;
     private MaterialButton btnSave;
@@ -129,6 +129,7 @@ public class DetailComicActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         tvAuthor = findViewById(R.id.tvAuthor);
         tvStatus = findViewById(R.id.tvStatus);
+        tvUploader = findViewById(R.id.tvUploader);
         tvDescription = findViewById(R.id.tvDescription);
         tvLikeCount = findViewById(R.id.tvLikeCount);
         tvRating = findViewById(R.id.tvRating);
@@ -286,8 +287,9 @@ public class DetailComicActivity extends AppCompatActivity {
             tvTitle.setText(comic.getName());
             tvAuthor.setText(comic.getAuthor());
             tvStatus.setText(comic.getStatus());
-            tvDescription.setText(comic.getDescription());
+            tvUploader.setText("Người đăng: " + comic.getUploaderName());
 
+            tvDescription.setText(comic.getDescription());
             tvLikeCount.setText(String.valueOf(comic.getLikeCount()));
             tvCommentCount.setText(String.valueOf(comic.getCommentCount()));
 
@@ -696,50 +698,6 @@ public class DetailComicActivity extends AppCompatActivity {
         });
     }
 
-    private void toggleLike() {
-        if (isLikeRequestRunning) {
-            return;
-        }
-
-        if (sessionManager == null || !sessionManager.isLoggedIn()) {
-            openLoginThen(() -> {
-                syncMyLikeFromSupabase();
-                addLikeToSupabase();
-            });
-            return;
-        }
-
-        if (isLiked) {
-            deleteLikeFromSupabase();
-        } else {
-            addLikeToSupabase();
-        }
-    }
-
-    private int getCurrentLikeCountFromUi() {
-        try {
-            return Integer.parseInt(tvLikeCount.getText().toString().trim());
-        } catch (Exception e) {
-            return currentComic != null ? currentComic.getLikeCount() : 0;
-        }
-    }
-
-    private void updateLikeCountImmediately(int delta) {
-        int current = getCurrentLikeCountFromUi();
-        int newCount = Math.max(0, current + delta);
-
-        tvLikeCount.setText(String.valueOf(newCount));
-        updateLikeUi(isLiked);
-
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            if (delta > 0) {
-                appDatabase.comicDao().increaseLikeCount(comicId);
-            } else if (delta < 0) {
-                appDatabase.comicDao().decreaseLikeCount(comicId);
-            }
-        });
-    }
-
     private void syncMyLikeFromSupabase() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             isLiked = false;
@@ -779,6 +737,26 @@ public class DetailComicActivity extends AppCompatActivity {
                 updateLikeUi(false);
             }
         });
+    }
+
+    private void toggleLike() {
+        if (isLikeRequestRunning) {
+            return;
+        }
+
+        if (sessionManager == null || !sessionManager.isLoggedIn()) {
+            openLoginThen(() -> {
+                syncMyLikeFromSupabase();
+                addLikeToSupabase();
+            });
+            return;
+        }
+
+        if (isLiked) {
+            deleteLikeFromSupabase();
+        } else {
+            addLikeToSupabase();
+        }
     }
 
     private void addLikeToSupabase() {
@@ -895,6 +873,30 @@ public class DetailComicActivity extends AppCompatActivity {
                 Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi bỏ thích: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateLikeCountImmediately(int delta) {
+        int current = getCurrentLikeCountFromUi();
+        int newCount = Math.max(0, current + delta);
+
+        tvLikeCount.setText(String.valueOf(newCount));
+        updateLikeUi(isLiked);
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            if (delta > 0) {
+                appDatabase.comicDao().increaseLikeCount(comicId);
+            } else if (delta < 0) {
+                appDatabase.comicDao().decreaseLikeCount(comicId);
+            }
+        });
+    }
+
+    private int getCurrentLikeCountFromUi() {
+        try {
+            return Integer.parseInt(tvLikeCount.getText().toString().trim());
+        } catch (Exception e) {
+            return currentComic != null ? currentComic.getLikeCount() : 0;
+        }
     }
 
     private void refreshComicAfterLikeChanged() {
@@ -1077,7 +1079,7 @@ public class DetailComicActivity extends AppCompatActivity {
                     Toast.makeText(DetailComicActivity.this, "Đã xóa đánh giá", Toast.LENGTH_SHORT).show();
 
                     syncMyRatingFromSupabase();
-                    refreshComicStatsFromServer();
+                    refreshComicAfterLikeChanged();
                 } else {
                     Toast.makeText(DetailComicActivity.this, "Xóa đánh giá thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -1091,16 +1093,7 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void openReaderActivity(int targetChapterId) {
-        if (comicId <= 0) {
-            Toast.makeText(this, "Không tìm thấy COMIC_ID", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (targetChapterId <= 0) {
-            Toast.makeText(this, "Không tìm thấy CHAPTER_ID", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        if (comicId <= 0 || targetChapterId <= 0) return;
         Intent intent = new Intent(this, ReaderActivity.class);
         intent.putExtra("COMIC_ID", comicId);
         intent.putExtra("CHAPTER_ID", targetChapterId);
@@ -1111,30 +1104,19 @@ public class DetailComicActivity extends AppCompatActivity {
     private void openLoginThen(Runnable afterLogin) {
         LoginFragment loginFragment = new LoginFragment();
         loginFragment.show(getSupportFragmentManager(), "LoginFragment");
-
-        getSupportFragmentManager().setFragmentResultListener(
-                "key_dang_nhap",
-                this,
-                (requestKey, result) -> afterLogin.run()
-        );
+        getSupportFragmentManager().setFragmentResultListener("key_dang_nhap", this, (requestKey, result) -> afterLogin.run());
     }
 
     private void shareComic() {
-        if (currentComic == null) {
-            Toast.makeText(this, "Chưa có dữ liệu truyện để chia sẻ", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        if (currentComic == null) return;
         String shareText = "Mình đang đọc truyện: " + currentComic.getName() + "\n"
                 + "Tác giả: " + currentComic.getAuthor() + "\n"
                 + "Trạng thái: " + currentComic.getStatus() + "\n\n"
                 + "Mở app FTComic để đọc truyện này nhé!";
-
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, currentComic.getName());
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-
         try {
             startActivity(Intent.createChooser(shareIntent, "Chia sẻ truyện"));
         } catch (ActivityNotFoundException e) {

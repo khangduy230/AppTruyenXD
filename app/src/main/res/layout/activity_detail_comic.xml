@@ -105,10 +105,24 @@
                     android:layout_marginTop="4dp"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    app:layout_constraintBottom_toTopOf="@+id/tvStatus"
+                    app:layout_constraintBottom_toTopOf="@+id/tvUploader"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/cardCover"
                     app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+                <TextView
+                    android:id="@+id/tvUploader"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    app:layout_constraintBottom_toTopOf="@+id/tvStatus"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/cardCover"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAuthor" />
 
                 <TextView
                     android:id="@+id/tvStatus"
@@ -123,7 +137,7 @@
                     app:layout_constraintBottom_toBottomOf="@+id/cardCover"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/cardCover"
-                    app:layout_constraintTop_toBottomOf="@+id/tvAuthor" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvUploader" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
