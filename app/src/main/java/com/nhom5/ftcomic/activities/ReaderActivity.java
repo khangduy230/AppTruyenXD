@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,8 +20,8 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ReaderPageAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.Chapter;
-import com.nhom5.ftcomic.models.DownloadedChapter;
 import com.nhom5.ftcomic.models.ReadingHistory;
+import com.nhom5.ftcomic.network.SupabaseConfig;
 import com.nhom5.ftcomic.repository.ComicRepository;
 import com.nhom5.ftcomic.utils.OfflineDownloadManager;
 import com.nhom5.ftcomic.utils.SessionManager;
@@ -34,6 +35,16 @@ import android.view.Gravity;
 import androidx.transition.Slide;
 import androidx.transition.TransitionSet;
 
+import org.json.JSONObject;
+import java.io.IOException;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class ReaderActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewPages;
@@ -44,12 +55,11 @@ public class ReaderActivity extends AppCompatActivity {
     private TextView tvDownloadProgress;
     private ProgressBar progressDownload;
 
-    // Nút "X" dùng để huỷ bỏ tiến trình tải chương
     private View btnCancelDownload;
 
     private AppBarLayout appBarLayout;
     private LinearLayout bottomBar;
-    private boolean isUiVisible = true; // Cờ theo dõi trạng thái ẩn/hiện
+    private boolean isUiVisible = true;
 
     private ReaderPageAdapter readerPageAdapter;
 
@@ -63,11 +73,9 @@ public class ReaderActivity extends AppCompatActivity {
 
     private List<Chapter> allChaptersInComic = new ArrayList<>();
     private int currentChapterNumber = 1;
-    // ✅ THÊM BIẾN LƯU TÊN CHƯƠNG ĐỂ CHUYỂN SANG ACTIVITY BÌNH LUẬN
     private String currentChapterName = "";
 
     private boolean isDownloading = false;
-    // Quản lý tải xuống offline
     private OfflineDownloadManager downloadManager;
 
     @Override
@@ -84,9 +92,6 @@ public class ReaderActivity extends AppCompatActivity {
         comicId = getIntent().getIntExtra("COMIC_ID", -1);
         chapterId = getIntent().getIntExtra("CHAPTER_ID", -1);
 
-        Log.d("READER_DEBUG", "comicId = " + comicId);
-        Log.d("READER_DEBUG", "chapterId = " + chapterId);
-
         if (chapterId == -1 || comicId == -1) {
             Toast.makeText(this, "Không lấy được thông tin truyện/chương", Toast.LENGTH_SHORT).show();
             finish();
@@ -102,18 +107,18 @@ public class ReaderActivity extends AppCompatActivity {
 
         observeChapterPages();
         observeDownloadedStatus();
-        saveReadingHistory();
+
+        // Khởi tạo lưu trang 1 khi vừa vào truyện
+        saveReadingHistory(1);
 
         comicRepository.syncPagesByChapterId(chapterId);
 
-        // Lấy tên truyện gắn lên thanh toolbar
         comicRepository.getComicByIdLive(comicId).observe(this, comic -> {
             if (comic != null) {
                 topAppBar.setTitle(comic.getName());
             }
         });
 
-        // Lấy danh sách chương để xử lý logic chuyển chương
         comicRepository.getChaptersByComicId(comicId).observe(this, chapters -> {
             if (chapters != null && !chapters.isEmpty()) {
                 allChaptersInComic = chapters;
@@ -121,7 +126,6 @@ public class ReaderActivity extends AppCompatActivity {
                 for (Chapter ch : chapters) {
                     if (ch.getId() == chapterId) {
                         currentChapterNumber = ch.getChapterNumber();
-                        // ✅ LƯU LẠI TÊN CHƯƠNG HIỆN TẠI TỪ DATABASE
                         currentChapterName = ch.getChapterName();
                         topAppBar.setSubtitle("Chương " + currentChapterNumber);
                         break;
@@ -158,17 +162,14 @@ public class ReaderActivity extends AppCompatActivity {
         tvDownloadProgress = findViewById(R.id.tvDownloadProgress);
         progressDownload = findViewById(R.id.progressDownload);
 
-        // Ánh xạ nút Huỷ tải từ layout
         btnCancelDownload = findViewById(R.id.btnCancelDownload);
 
         appBarLayout.bringToFront();
         bottomBar.bringToFront();
 
-        // Gán sự kiện click cho nút huỷ tải
         if (btnCancelDownload != null) {
             btnCancelDownload.setOnClickListener(v -> {
                 if (downloadManager != null) {
-                    // Gọi lệnh dừng tải trong OfflineDownloadManager
                     downloadManager.cancel();
                 }
             });
@@ -179,12 +180,28 @@ public class ReaderActivity extends AppCompatActivity {
         readerPageAdapter = new ReaderPageAdapter(new ArrayList<>());
         recyclerViewPages.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPages.setAdapter(readerPageAdapter);
+
+        // ĐÃ CẬP NHẬT: Bộ lắng nghe cuộn trang Real-time cập nhật số trang đang đọc lập tức
         recyclerViewPages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int lastSavedPage = -1;
+
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if (Math.abs(dy) > 5) {
                     hideSystemUI();
+                }
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    int firstVisible = layoutManager.findFirstVisibleItemPosition();
+                    if (firstVisible != RecyclerView.NO_POSITION) {
+                        int currentPage = firstVisible + 1; // Vị trí item xuất phát từ 0 nên trang = vị trí + 1
+                        if (currentPage != lastSavedPage) {
+                            lastSavedPage = currentPage;
+                            saveReadingHistory(currentPage); // Gọi hàm lưu trang động liên tục khi vuốt
+                        }
+                    }
                 }
             }
         });
@@ -207,14 +224,12 @@ public class ReaderActivity extends AppCompatActivity {
         btnDownloadChapter.setOnClickListener(v -> downloadCurrentChapter());
         findViewById(R.id.btnChapterList).setOnClickListener(v -> showChapterListBottomSheet());
 
-        // ✅ THÊM SỰ KIỆN CLICK CHO NÚT BÌNH LUẬN TRONG BOTTOM BAR
-        View btnCommentInChap = findViewById(R.id.btnCommentInChap); // Hãy chắc chắn ID này khớp với ID bạn đặt trong file XML activity_reader
+        View btnCommentInChap = findViewById(R.id.btnCommentInChap);
         if (btnCommentInChap != null) {
             btnCommentInChap.setOnClickListener(v -> {
                 android.content.Intent intent = new android.content.Intent(ReaderActivity.this, CommentsActivity.class);
                 intent.putExtra("COMIC_ID", comicId);
                 intent.putExtra("CHAPTER_ID", chapterId);
-                // Gửi text hiển thị dạng "Chương 1" hoặc tên cụ thể để gắn tag
                 intent.putExtra("CHAPTER_NAME", "Chương " + currentChapterNumber);
                 startActivity(intent);
             });
@@ -294,7 +309,6 @@ public class ReaderActivity extends AppCompatActivity {
         comicRepository.getPagesByChapterId(chapterId)
                 .observe(this, pages -> {
                     totalPages = pages == null ? 0 : pages.size();
-                    Log.d("READER_DEBUG", "Total pages observed: " + totalPages);
                     if (pages == null || pages.isEmpty()) {
                         tvEmptyState.setVisibility(View.VISIBLE);
                         recyclerViewPages.setVisibility(View.GONE);
@@ -323,9 +337,6 @@ public class ReaderActivity extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Thực hiện tải chương hiện tại về máy để xem offline
-     */
     private void downloadCurrentChapter() {
         if (comicId == -1 || chapterId == -1) {
             Toast.makeText(this, "Không đủ dữ liệu để tải chương", Toast.LENGTH_SHORT).show();
@@ -347,7 +358,6 @@ public class ReaderActivity extends AppCompatActivity {
                 btnDownloadChapter.setEnabled(false);
                 btnDownloadChapter.setText("Đang tải...");
 
-                // Hiển thị thanh tiến trình tải
                 layoutDownloadProgress.setVisibility(View.VISIBLE);
                 progressDownload.setMax(totalPages);
                 progressDownload.setProgress(0);
@@ -356,7 +366,6 @@ public class ReaderActivity extends AppCompatActivity {
 
             @Override
             public void onProgress(int currentPage, int totalPages) {
-                // Cập nhật số lượng trang đã tải xong
                 progressDownload.setProgress(currentPage);
                 tvDownloadProgress.setText("Đang tải " + currentPage + "/" + totalPages);
             }
@@ -365,7 +374,6 @@ public class ReaderActivity extends AppCompatActivity {
             public void onSuccess(int totalPages) {
                 isDownloading = false;
 
-                // Ẩn thanh tiến trình khi hoàn tất
                 layoutDownloadProgress.setVisibility(View.GONE);
                 btnDownloadChapter.setText("Đã tải");
                 btnDownloadChapter.setEnabled(false);
@@ -386,13 +394,9 @@ public class ReaderActivity extends AppCompatActivity {
                 Toast.makeText(ReaderActivity.this, message, Toast.LENGTH_LONG).show();
             }
 
-            /**
-             * Callback được gọi khi người dùng chủ động nhấn nút huỷ (X)
-             */
             @Override
             public void onCancel() {
                 isDownloading = false;
-                // Ẩn giao diện tải và khôi phục nút Tải chương
                 layoutDownloadProgress.setVisibility(View.GONE);
                 btnDownloadChapter.setText("Tải chương này");
                 btnDownloadChapter.setEnabled(true);
@@ -401,22 +405,82 @@ public class ReaderActivity extends AppCompatActivity {
         });
     }
 
-    private void saveReadingHistory() {
+    private void saveReadingHistory(int pageNumber) {
         String userId = sessionManager.getUserId();
-        if (userId == null || userId.isEmpty()) {
+        if (userId == null || userId.isEmpty() || "guest".equals(userId)) {
             userId = "guest";
+            final String finalGuestId = userId;
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                ReadingHistory history = new ReadingHistory(
+                        finalGuestId,
+                        comicId,
+                        chapterId,
+                        pageNumber,
+                        System.currentTimeMillis()
+                );
+                appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
+            });
+            return;
         }
+
         final String finalUserId = userId;
+        final long currentTime = System.currentTimeMillis();
+
+        // 1. Ghi nhận tức thì vào Room local để đảm bảo hiển thị nhanh tại máy
         AppDatabase.databaseWriteExecutor.execute(() -> {
             ReadingHistory history = new ReadingHistory(
                     finalUserId,
                     comicId,
                     chapterId,
-                    1,
-                    System.currentTimeMillis()
+                    pageNumber,
+                    currentTime
             );
             appDatabase.readingHistoryDao().insertOrUpdateHistory(history);
         });
+
+        // 2. Gửi gói tin đồng bộ ngầm thời gian thực (Real-time Upsert) lên bảng reading_history của Supabase
+        OkHttpClient client = new OkHttpClient();
+        try {
+            JSONObject body = new JSONObject();
+            body.put("user_id", finalUserId);
+            body.put("comic_id", comicId);
+            body.put("chapter_id", chapterId);
+            body.put("page_number", pageNumber);
+            body.put("last_read_at", currentTime);
+
+            RequestBody requestBody = RequestBody.create(
+                    body.toString(),
+                    MediaType.parse("application/json")
+            );
+
+            Request request = new Request.Builder()
+                    .url(SupabaseConfig.PROJECT_URL + "/rest/v1/reading_history")
+                    .post(requestBody)
+                    .addHeader("Authorization", "Bearer " + sessionManager.getAccessToken())
+                    .addHeader("apikey", SupabaseConfig.API_KEY)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Prefer", "resolution=merge-duplicates") // Lệnh gộp đè bản ghi nếu trùng trùng lặp (user_id + comic_id)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.e("HISTORY_SYNC", "Lỗi mạng, không thể đẩy lịch sử lên Cloud: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        Log.d("HISTORY_SYNC", "Đã găm đồng bộ lịch sử lên Cloud thành công!");
+                    } else {
+                        Log.e("HISTORY_SYNC", "Supabase từ chối code: " + response.code() + ", chi tiết: " + response.body().string());
+                    }
+                    response.close();
+                }
+            });
+        } catch (Exception e) {
+            Log.e("HISTORY_SYNC", "Lỗi đóng gói gói tin JSON: " + e.getMessage());
+        }
     }
 
     private void showChapterListBottomSheet() {

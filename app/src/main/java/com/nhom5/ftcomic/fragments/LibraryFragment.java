@@ -1,18 +1,5 @@
 package com.nhom5.ftcomic.fragments;
 
-import com.nhom5.ftcomic.models.Favorite;
-import com.nhom5.ftcomic.network.SupabaseApi;
-import com.nhom5.ftcomic.network.SupabaseClient;
-import com.nhom5.ftcomic.network.response.FavoriteResponse;
-import com.nhom5.ftcomic.utils.SessionManager;
-
-import com.nhom5.ftcomic.models.ReadingHistory;
-import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -28,20 +15,27 @@ import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.chip.ChipGroup;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.Comic;
+import com.nhom5.ftcomic.models.Favorite;
+import com.nhom5.ftcomic.network.SupabaseApi;
+import com.nhom5.ftcomic.network.SupabaseClient;
+import com.nhom5.ftcomic.network.response.FavoriteResponse;
+import com.nhom5.ftcomic.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class LibraryFragment extends Fragment {
 
     private SessionManager sessionManager;
-    private ChipGroup chipGroupFilter;
     private RecyclerView recyclerViewLibrary;
     private TextView tvLibraryEmpty;
 
@@ -64,20 +58,19 @@ public class LibraryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         sessionManager = new SessionManager(requireContext());
-        chipGroupFilter = view.findViewById(R.id.chipGroup_filter);
         recyclerViewLibrary = view.findViewById(R.id.recyclerView_library);
         tvLibraryEmpty = view.findViewById(R.id.tvLibraryEmpty);
 
         appDatabase = AppDatabase.getInstance(requireContext());
 
         setupRecyclerView();
-        setupChipListener();
 
-        observeReadHistory();
+        // ĐÃ CẬP NHẬT: Gọi trực tiếp hàm hiển thị truyện yêu thích ngay khi mở màn hình
+        observeFavorites();
     }
 
     private void setupRecyclerView() {
-        comicAdapter = new ComicAdapter(new ArrayList<>(), comic -> openDetailComic(comic));
+        comicAdapter = new ComicAdapter(new ArrayList<>(), this::openDetailComic);
 
         int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
         float density = getResources().getDisplayMetrics().density;
@@ -90,51 +83,7 @@ public class LibraryFragment extends Fragment {
         recyclerViewLibrary.setAdapter(comicAdapter);
     }
 
-    private void setupChipListener() {
-        chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds == null || checkedIds.isEmpty()) {
-                return;
-            }
-
-            int checkedId = checkedIds.get(0);
-
-            if (checkedId == R.id.chip_read) {
-                observeReadHistory();
-            } else if (checkedId == R.id.chip_later) {
-                observeFavorites();
-            } else if (checkedId == R.id.chip_downloaded) {
-                observeDownloaded();
-            }
-        });
-    }
-
-    private void observeReadHistory() {
-        if (sessionManager == null || !sessionManager.isLoggedIn()) {
-            if (currentLiveData != null) {
-                currentLiveData.removeObservers(getViewLifecycleOwner());
-            }
-
-            comicAdapter.setComicList(new ArrayList<>());
-            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem lịch sử đọc");
-            tvLibraryEmpty.setVisibility(View.VISIBLE);
-            recyclerViewLibrary.setVisibility(View.GONE);
-            return;
-        }
-
-        String userId = sessionManager.getUserId();
-
-        if (userId == null || userId.trim().isEmpty()) {
-            comicAdapter.setComicList(new ArrayList<>());
-            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem lịch sử đọc");
-            tvLibraryEmpty.setVisibility(View.VISIBLE);
-            recyclerViewLibrary.setVisibility(View.GONE);
-            return;
-        }
-
-        syncReadingHistoryFromSupabase(userId);
-        observeComicList(appDatabase.readingHistoryDao().getHistoryComics(userId), "Bạn chưa đọc truyện nào");
-    }
-
+    // ĐÃ SỬA: Hàm xử lý lắng nghe danh sách Favorite cốt lõi duy nhất của màn hình
     private void observeFavorites() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             if (currentLiveData != null) {
@@ -142,7 +91,7 @@ public class LibraryFragment extends Fragment {
             }
 
             comicAdapter.setComicList(new ArrayList<>());
-            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem truyện đã lưu");
+            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem thư viện truyện đã lưu");
             tvLibraryEmpty.setVisibility(View.VISIBLE);
             recyclerViewLibrary.setVisibility(View.GONE);
             return;
@@ -152,18 +101,14 @@ public class LibraryFragment extends Fragment {
 
         if (userId == null || userId.trim().isEmpty()) {
             comicAdapter.setComicList(new ArrayList<>());
-            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem truyện đã lưu");
+            tvLibraryEmpty.setText("Bạn cần đăng nhập để xem thư viện truyện đã lưu");
             tvLibraryEmpty.setVisibility(View.VISIBLE);
             recyclerViewLibrary.setVisibility(View.GONE);
             return;
         }
 
         syncFavoritesFromSupabase(userId);
-        observeComicList(appDatabase.favoriteDao().getFavoriteComics(userId), "Bạn chưa lưu truyện nào");
-    }
-
-    private void observeDownloaded() {
-        observeComicList(appDatabase.downloadedChapterDao().getDownloadedComics(), "Bạn chưa tải truyện nào");
+        observeComicList(appDatabase.favoriteDao().getFavoriteComics(userId), "Thư viện của bạn đang trống");
     }
 
     private void observeComicList(LiveData<List<Comic>> liveData, String emptyMessage) {
@@ -202,19 +147,19 @@ public class LibraryFragment extends Fragment {
         ).enqueue(new Callback<List<FavoriteResponse>>() {
             @Override
             public void onResponse(Call<List<FavoriteResponse>> call, Response<List<FavoriteResponse>> response) {
+                if (!isAdded() || getContext() == null) return;
+
                 if (!response.isSuccessful()) {
                     Toast.makeText(requireContext(), "Không tải được danh sách lưu: " + response.code(), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 List<FavoriteResponse> remoteFavorites = response.body();
-
                 if (remoteFavorites == null) {
                     remoteFavorites = new ArrayList<>();
                 }
 
                 List<Favorite> localFavorites = new ArrayList<>();
-
                 for (FavoriteResponse item : remoteFavorites) {
                     localFavorites.add(
                             new Favorite(
@@ -233,65 +178,8 @@ public class LibraryFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<FavoriteResponse>> call, Throwable t) {
+                if (!isAdded() || getContext() == null) return;
                 Toast.makeText(requireContext(), "Lỗi mạng khi tải truyện đã lưu", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void syncReadingHistoryFromSupabase(String userId) {
-        SupabaseApi api = SupabaseClient.getApi(requireContext());
-
-        api.getMyReadingHistory(
-                "eq." + userId,
-                "last_read_at.desc"
-        ).enqueue(new Callback<List<ReadingHistoryResponse>>() {
-            @Override
-            public void onResponse(
-                    Call<List<ReadingHistoryResponse>> call,
-                    Response<List<ReadingHistoryResponse>> response
-            ) {
-                if (!response.isSuccessful()) {
-                    Toast.makeText(
-                            requireContext(),
-                            "Không tải được lịch sử đọc: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
-
-                List<ReadingHistoryResponse> remoteHistories = response.body();
-
-                if (remoteHistories == null) {
-                    remoteHistories = new ArrayList<>();
-                }
-
-                List<ReadingHistory> localHistories = new ArrayList<>();
-
-                for (ReadingHistoryResponse item : remoteHistories) {
-                    localHistories.add(
-                            new ReadingHistory(
-                                    userId,
-                                    item.getComicId(),
-                                    item.getChapterId(),
-                                    item.getPageNumber(),
-                                    item.getLastReadAtMillis()
-                            )
-                    );
-                }
-
-                AppDatabase.databaseWriteExecutor.execute(() -> {
-                    appDatabase.readingHistoryDao().deleteHistoriesByUser(userId);
-                    appDatabase.readingHistoryDao().insertHistories(localHistories);
-                });
-            }
-
-            @Override
-            public void onFailure(Call<List<ReadingHistoryResponse>> call, Throwable t) {
-                Toast.makeText(
-                        requireContext(),
-                        "Lỗi mạng khi tải lịch sử đọc",
-                        Toast.LENGTH_SHORT
-                ).show();
             }
         });
     }

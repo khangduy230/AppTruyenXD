@@ -116,10 +116,18 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         holder.layoutItemBody.setLayoutParams(params);
         holder.tvReplyAction.setVisibility(View.VISIBLE);
 
-        // Logic ẩn/hiện nút Xóa: Chỉ hiện khi user hiện tại chính là người đăng comment này
-        String currentUsername = sessionManager.getUsername();
-        if (sessionManager.isLoggedIn() && currentUsername != null && currentUsername.equals(comment.getUserName())) {
-            holder.tvDeleteAction.setVisibility(View.VISIBLE);
+        if (sessionManager.isLoggedIn()) {
+            String currentUsername = sessionManager.getUsername();
+            String currentRole = sessionManager.getRole();
+
+            boolean isAdmin = "admin".equals(currentRole);
+            boolean isOwner = currentUsername != null && currentUsername.equals(comment.getUserName());
+
+            if (isAdmin || isOwner) {
+                holder.tvDeleteAction.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvDeleteAction.setVisibility(View.GONE);
+            }
         } else {
             holder.tvDeleteAction.setVisibility(View.GONE);
         }
@@ -140,7 +148,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             }
         });
     }
-
     @Override
     public int getItemCount() {
         return commentList.size();

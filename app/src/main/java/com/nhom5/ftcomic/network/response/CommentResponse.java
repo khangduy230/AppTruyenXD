@@ -1,6 +1,7 @@
 package com.nhom5.ftcomic.network.response;
 
 import com.google.gson.annotations.SerializedName;
+import java.time.Instant;
 
 public class CommentResponse {
 
@@ -19,8 +20,8 @@ public class CommentResponse {
     @SerializedName("content")
     private String content;
 
-    @SerializedName("created_at_millis")
-    private long createdAtMillis;
+    @SerializedName("created_at")
+    private String createdAt;
 
     @SerializedName("username")
     private String username;
@@ -55,7 +56,21 @@ public class CommentResponse {
     }
 
     public long getCreatedAt() {
-        return createdAtMillis;
+        if (createdAt == null || createdAt.isEmpty()) {
+            return System.currentTimeMillis();
+        }
+        try {
+            String target = createdAt.replace(" ", "T");
+            if (target.endsWith("+00")) {
+                target = target.substring(0, target.length() - 3) + "Z";
+            }
+            if (!target.contains("Z") && !target.contains("+") && !target.contains("-")) {
+                target += "Z";
+            }
+            return Instant.parse(target).toEpochMilli();
+        } catch (Exception e) {
+            return System.currentTimeMillis();
+        }
     }
 
     public String getUserName() {

@@ -2,11 +2,12 @@ package com.nhom5.ftcomic.activities;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -26,6 +27,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ChapterAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
@@ -57,26 +60,21 @@ public class DetailComicActivity extends AppCompatActivity {
 
     private SessionManager sessionManager;
     private LiveData<Integer> favoriteLiveData;
-
     private LinearLayout layoutRating;
+    private MaterialCardView cardRating, cardLike;
     private Comic currentComic;
-
     private TextView tvLikeCount, tvRating, tvRatingCount, tvCommentCount;
-    private TextView tvTitle, tvAuthor, tvDescription;
-
+    private TextView tvTitle, tvAuthor, tvDescription, tvStatus;
     private ImageView imgCover;
     private ImageView imgBlurredBackground;
-
-    private Button btnSave, btnReadFirstChapter;
+    private MaterialButton btnSave;
+    private ExtendedFloatingActionButton btnReadFirstChapter;
     private RecyclerView recyclerViewChapters;
     private ChipGroup chipGroupCategories;
-
     private AppDatabase appDatabase;
     private ComicRepository comicRepository;
     private ChapterAdapter chapterAdapter;
-
     private Rating myOldRating = null;
-
     private int comicId = -1;
     private boolean isFavorite = false;
     private boolean isLiked = false;
@@ -125,29 +123,27 @@ public class DetailComicActivity extends AppCompatActivity {
     private void bindViews() {
         imgCover = findViewById(R.id.imgCover);
         imgBlurredBackground = findViewById(R.id.imgBlurredBackground);
-
         layoutRating = findViewById(R.id.layoutRating);
-
+        cardRating = findViewById(R.id.cardRating);
+        cardLike = findViewById(R.id.layoutLikeAction);
         tvTitle = findViewById(R.id.tvTitle);
         tvAuthor = findViewById(R.id.tvAuthor);
+        tvStatus = findViewById(R.id.tvStatus);
         tvDescription = findViewById(R.id.tvDescription);
-
         tvLikeCount = findViewById(R.id.tvLikeCount);
         tvRating = findViewById(R.id.tvRating);
         tvRatingCount = findViewById(R.id.tvRatingCount);
         tvCommentCount = findViewById(R.id.tvCommentCount);
-
         btnSave = findViewById(R.id.btnSave);
         btnReadFirstChapter = findViewById(R.id.btnReadFirstChapter);
-
         recyclerViewChapters = findViewById(R.id.recyclerViewChapters);
         chipGroupCategories = findViewById(R.id.chipGroupCategories);
 
-        com.google.android.material.card.MaterialCardView cardCover = findViewById(R.id.cardCover);
+        MaterialCardView cardCover = findViewById(R.id.cardCover);
         String transitionName = getIntent().getStringExtra("TRANSITION_NAME");
 
         if (transitionName != null) {
-            androidx.core.view.ViewCompat.setTransitionName(cardCover, transitionName);
+            ViewCompat.setTransitionName(cardCover, transitionName);
         }
 
         supportPostponeEnterTransition();
@@ -218,7 +214,7 @@ public class DetailComicActivity extends AppCompatActivity {
             readParams.bottomMargin = insets.bottom + (int) (16 * getResources().getDisplayMetrics().density);
             btnReadFirstChapter.setLayoutParams(readParams);
 
-            View scrollView = findViewById(R.id.NestedView1);
+            View scrollView = findViewById(R.id.nestedView1);
             scrollView.setPadding(0, 0, 0, insets.bottom);
 
             return WindowInsetsCompat.CONSUMED;
@@ -227,15 +223,11 @@ public class DetailComicActivity extends AppCompatActivity {
 
     private void setupBackButton() {
         MaterialButton btnBack = findViewById(R.id.btnBack);
-
-        btnBack.setOnClickListener(v -> {
-            getOnBackPressedDispatcher().onBackPressed();
-        });
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupCommentButton() {
         MaterialCardView cardComments = findViewById(R.id.cardComments);
-
         cardComments.setOnClickListener(v -> {
             Intent intent = new Intent(this, CommentsActivity.class);
             intent.putExtra("COMIC_ID", comicId);
@@ -244,10 +236,7 @@ public class DetailComicActivity extends AppCompatActivity {
     }
 
     private void setupChapterRecyclerView() {
-        chapterAdapter = new ChapterAdapter(new ArrayList<>(), chapter -> {
-            openReaderActivity(chapter.getId());
-        });
-
+        chapterAdapter = new ChapterAdapter(new ArrayList<>(), chapter -> openReaderActivity(chapter.getId()));
         recyclerViewChapters.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewChapters.setNestedScrollingEnabled(false);
         recyclerViewChapters.setAdapter(chapterAdapter);
@@ -256,22 +245,9 @@ public class DetailComicActivity extends AppCompatActivity {
     private void setupButtons() {
         btnSave.setOnClickListener(v -> toggleFavorite());
 
-        if (tvLikeCount != null) {
-            tvLikeCount.setClickable(true);
-            tvLikeCount.setOnClickListener(v -> toggleLike());
-        }
-
-        View layoutLikeAction = findViewById(R.id.layoutLikeAction);
-
-        if (layoutLikeAction != null) {
-            layoutLikeAction.setClickable(true);
-            layoutLikeAction.setOnClickListener(v -> toggleLike());
-        }
-
-        View btnShare = findViewById(R.id.btnShare);
-
-        if (btnShare != null) {
-            btnShare.setOnClickListener(v -> shareComic());
+        if (cardLike != null) {
+            cardLike.setClickable(true);
+            cardLike.setOnClickListener(v -> toggleLike());
         }
 
         layoutRating.setOnClickListener(v -> {
@@ -309,6 +285,7 @@ public class DetailComicActivity extends AppCompatActivity {
 
             tvTitle.setText(comic.getName());
             tvAuthor.setText(comic.getAuthor());
+            tvStatus.setText(comic.getStatus());
             tvDescription.setText(comic.getDescription());
 
             tvLikeCount.setText(String.valueOf(comic.getLikeCount()));
@@ -364,38 +341,78 @@ public class DetailComicActivity extends AppCompatActivity {
         });
     }
 
+    private void updateLikeUi(boolean liked) {
+        if (cardLike == null || tvLikeCount == null) return;
+
+        int idSurfaceContainer = getResources().getIdentifier("colorSurfaceContainer", "attr", getPackageName());
+        int idOnSurface = getResources().getIdentifier("colorOnSurface", "attr", getPackageName());
+
+        int clrSurfaceContainer = MaterialColors.getColor(this, idSurfaceContainer, Color.LTGRAY);
+        int clrOnSurface = MaterialColors.getColor(this, idOnSurface, Color.BLACK);
+
+        if (liked) {
+            int clrLikedPink = Color.parseColor("#FF2D55");
+            int clrLikedBg = Color.parseColor("#FFEBF0");
+            cardLike.setCardBackgroundColor(ColorStateList.valueOf(clrLikedBg));
+            tvLikeCount.setTextColor(clrLikedPink);
+            tvLikeCount.setCompoundDrawableTintList(ColorStateList.valueOf(clrLikedPink));
+        } else {
+            cardLike.setCardBackgroundColor(ColorStateList.valueOf(clrSurfaceContainer));
+            tvLikeCount.setTextColor(clrOnSurface);
+            tvLikeCount.setCompoundDrawableTintList(ColorStateList.valueOf(clrOnSurface));
+        }
+    }
+
     private void observeFavoriteStatus() {
         if (favoriteLiveData != null) {
             favoriteLiveData.removeObservers(this);
         }
 
+        int idPrimary = getResources().getIdentifier("colorPrimary", "attr", getPackageName());
+        int idOnPrimary = getResources().getIdentifier("colorOnPrimary", "attr", getPackageName());
+        int idSurfaceVariant = getResources().getIdentifier("colorSurfaceVariant", "attr", getPackageName());
+        int idOnSurfaceVariant = getResources().getIdentifier("colorOnSurfaceVariant", "attr", getPackageName());
+
+        int clrPrimary = MaterialColors.getColor(this, idPrimary, Color.BLUE);
+        int clrOnPrimary = MaterialColors.getColor(this, idOnPrimary, Color.WHITE);
+        int clrSurfaceVariant = MaterialColors.getColor(this, idSurfaceVariant, Color.LTGRAY);
+        int clrOnSurfaceVariant = MaterialColors.getColor(this, idOnSurfaceVariant, Color.DKGRAY);
+
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             isFavorite = false;
             btnSave.setText("Lưu vào thư viện");
+            btnSave.setBackgroundTintList(ColorStateList.valueOf(clrSurfaceVariant));
+            btnSave.setTextColor(clrOnSurfaceVariant);
+            btnSave.setIconTint(ColorStateList.valueOf(clrOnSurfaceVariant));
             btnSave.setEnabled(true);
             return;
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             isFavorite = false;
             btnSave.setText("Lưu vào thư viện");
+            btnSave.setBackgroundTintList(ColorStateList.valueOf(clrSurfaceVariant));
+            btnSave.setTextColor(clrOnSurfaceVariant);
+            btnSave.setIconTint(ColorStateList.valueOf(clrOnSurfaceVariant));
             btnSave.setEnabled(true);
             return;
         }
 
         favoriteLiveData = appDatabase.favoriteDao().isFavoriteLive(userId, comicId);
-
         favoriteLiveData.observe(this, count -> {
             isFavorite = count != null && count > 0;
-
             if (isFavorite) {
                 btnSave.setText("Đã lưu");
+                btnSave.setBackgroundTintList(ColorStateList.valueOf(clrPrimary));
+                btnSave.setTextColor(clrOnPrimary);
+                btnSave.setIconTint(ColorStateList.valueOf(clrOnPrimary));
             } else {
                 btnSave.setText("Lưu vào thư viện");
+                btnSave.setBackgroundTintList(ColorStateList.valueOf(clrSurfaceVariant));
+                btnSave.setTextColor(clrOnSurfaceVariant);
+                btnSave.setIconTint(ColorStateList.valueOf(clrOnSurfaceVariant));
             }
-
             btnSave.setEnabled(true);
         });
     }
@@ -407,7 +424,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             myOldRating = null;
             return;
@@ -415,7 +431,35 @@ public class DetailComicActivity extends AppCompatActivity {
 
         appDatabase.ratingDao()
                 .getUserRatingLive(userId, comicId)
-                .observe(this, rating -> myOldRating = rating);
+                .observe(this, rating -> {
+                    myOldRating = rating;
+
+                    int idPrimaryContainer = getResources().getIdentifier("colorPrimaryContainer", "attr", getPackageName());
+                    int idOnPrimaryContainer = getResources().getIdentifier("colorOnPrimaryContainer", "attr", getPackageName());
+                    int idSurfaceContainer = getResources().getIdentifier("colorSurfaceContainer", "attr", getPackageName());
+                    int idOnSurface = getResources().getIdentifier("colorOnSurface", "attr", getPackageName());
+                    int idOnSurfaceVariant = getResources().getIdentifier("colorOnSurfaceVariant", "attr", getPackageName());
+
+                    int clrPrimaryContainer = MaterialColors.getColor(this, idPrimaryContainer, Color.CYAN);
+                    int clrOnPrimaryContainer = MaterialColors.getColor(this, idOnPrimaryContainer, Color.BLUE);
+                    int clrSurfaceContainer = MaterialColors.getColor(this, idSurfaceContainer, Color.LTGRAY);
+                    int clrOnSurface = MaterialColors.getColor(this, idOnSurface, Color.BLACK);
+                    int clrOnSurfaceVariant = MaterialColors.getColor(this, idOnSurfaceVariant, Color.GRAY);
+
+                    if (cardRating != null) {
+                        if (rating != null) {
+                            cardRating.setCardBackgroundColor(ColorStateList.valueOf(clrPrimaryContainer));
+                            tvRating.setTextColor(clrOnPrimaryContainer);
+                            tvRating.setCompoundDrawableTintList(ColorStateList.valueOf(clrOnPrimaryContainer));
+                            tvRatingCount.setTextColor(clrOnPrimaryContainer);
+                        } else {
+                            cardRating.setCardBackgroundColor(ColorStateList.valueOf(clrSurfaceContainer));
+                            tvRating.setTextColor(clrOnSurface);
+                            tvRating.setCompoundDrawableTintList(ColorStateList.valueOf(clrOnSurface));
+                            tvRatingCount.setTextColor(clrOnSurfaceVariant);
+                        }
+                    }
+                });
 
         syncMyRatingFromSupabase();
     }
@@ -433,26 +477,38 @@ public class DetailComicActivity extends AppCompatActivity {
         } else {
             isFavorite = false;
             isLiked = false;
+            myOldRating = null;
+
+            int idSurfaceContainer = getResources().getIdentifier("colorSurfaceContainer", "attr", getPackageName());
+            int idOnSurface = getResources().getIdentifier("colorOnSurface", "attr", getPackageName());
+            int idOnSurfaceVariant = getResources().getIdentifier("colorOnSurfaceVariant", "attr", getPackageName());
+            int idSurfaceVariant = getResources().getIdentifier("colorSurfaceVariant", "attr", getPackageName());
+
+            int clrSurfaceContainer = MaterialColors.getColor(this, idSurfaceContainer, Color.LTGRAY);
+            int clrOnSurface = MaterialColors.getColor(this, idOnSurface, Color.BLACK);
+            int clrOnSurfaceVariant = MaterialColors.getColor(this, idOnSurfaceVariant, Color.GRAY);
+            int clrSurfaceVariant = MaterialColors.getColor(this, idSurfaceVariant, Color.LTGRAY);
 
             if (btnSave != null) {
                 btnSave.setText("Lưu vào thư viện");
+                btnSave.setBackgroundTintList(ColorStateList.valueOf(clrSurfaceVariant));
+                btnSave.setTextColor(clrOnSurfaceVariant);
+                btnSave.setIconTint(ColorStateList.valueOf(clrSurfaceVariant));
                 btnSave.setEnabled(true);
             }
+            if (cardRating != null) {
+                cardRating.setCardBackgroundColor(ColorStateList.valueOf(clrSurfaceContainer));
+                tvRating.setTextColor(clrOnSurface);
+                tvRating.setCompoundDrawableTintList(ColorStateList.valueOf(clrOnSurface));
+                tvRatingCount.setTextColor(clrOnSurfaceVariant);
+            }
+            updateLikeUi(false);
         }
 
-    /*
-      Quan trọng:
-      Khi quay về từ CommentsActivity hoặc sau khi đánh giá,
-      phải sync lại comic để lấy rating_avg, rating_count, comment_count mới nhất.
-    */
         if (comicRepository != null) {
             comicRepository.syncComicById(comicId);
         }
     }
-
-    // =========================
-    // FAVORITE: Lưu vào thư viện
-    // =========================
 
     private void toggleFavorite() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
@@ -477,7 +533,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -503,49 +558,35 @@ public class DetailComicActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnSave.setEnabled(true);
 
-                android.util.Log.d("FAVORITE_SUPABASE", "ADD URL = " + call.request().url());
-                android.util.Log.d("FAVORITE_SUPABASE", "ADD CODE = " + response.code());
-
                 if (response.isSuccessful() || response.code() == 409) {
-                    AppDatabase.databaseWriteExecutor.execute(() -> {
-                        appDatabase.favoriteDao().insertFavorite(
-                                new Favorite(userId, comicId, System.currentTimeMillis())
-                        );
-                    });
+                    AppDatabase.databaseWriteExecutor.execute(() -> appDatabase.favoriteDao().insertFavorite(
+                            new Favorite(userId, comicId, System.currentTimeMillis())
+                    ));
 
                     isFavorite = true;
+                    int idPrimary = getResources().getIdentifier("colorPrimary", "attr", getPackageName());
+                    int idOnPrimary = getResources().getIdentifier("colorOnPrimary", "attr", getPackageName());
+                    int clrPrimary = MaterialColors.getColor(DetailComicActivity.this, idPrimary, Color.BLUE);
+                    int clrOnPrimary = MaterialColors.getColor(DetailComicActivity.this, idOnPrimary, Color.WHITE);
 
-                    runOnUiThread(() -> btnSave.setText("Đã lưu"));
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã lưu vào thư viện",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    runOnUiThread(() -> {
+                        btnSave.setText("Đã lưu");
+                        btnSave.setBackgroundTintList(ColorStateList.valueOf(clrPrimary));
+                        btnSave.setTextColor(clrOnPrimary);
+                        btnSave.setIconTint(ColorStateList.valueOf(clrOnPrimary));
+                    });
+                    Toast.makeText(DetailComicActivity.this, "Đã lưu vào thư viện", Toast.LENGTH_SHORT).show();
                     syncFavoritesFromSupabase();
                 } else {
                     logFavoriteError(response, "ADD");
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Lưu truyện thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Lưu truyện thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 btnSave.setEnabled(true);
-
-                android.util.Log.e("FAVORITE_SUPABASE", "ADD FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi lưu truyện: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi lưu truyện: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -557,7 +598,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -576,56 +616,38 @@ public class DetailComicActivity extends AppCompatActivity {
         btnSave.setEnabled(false);
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.deleteFavorite(
-                "eq." + userId,
-                "eq." + comicId
-        ).enqueue(new Callback<Void>() {
+        api.deleteFavorite("eq." + userId, "eq." + comicId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 btnSave.setEnabled(true);
 
-                android.util.Log.d("FAVORITE_SUPABASE", "DELETE URL = " + call.request().url());
-                android.util.Log.d("FAVORITE_SUPABASE", "DELETE CODE = " + response.code());
-
                 if (response.isSuccessful()) {
-                    AppDatabase.databaseWriteExecutor.execute(() -> {
-                        appDatabase.favoriteDao().deleteFavoriteByComicId(userId, comicId);
-                    });
+                    AppDatabase.databaseWriteExecutor.execute(() -> appDatabase.favoriteDao().deleteFavoriteByComicId(userId, comicId));
 
                     isFavorite = false;
+                    int idSurfaceVariant = getResources().getIdentifier("colorSurfaceVariant", "attr", getPackageName());
+                    int idOnSurfaceVariant = getResources().getIdentifier("colorOnSurfaceVariant", "attr", getPackageName());
+                    int clrSurfaceVariant = MaterialColors.getColor(DetailComicActivity.this, idSurfaceVariant, Color.LTGRAY);
+                    int clrOnSurfaceVariant = MaterialColors.getColor(DetailComicActivity.this, idOnSurfaceVariant, Color.DKGRAY);
 
-                    runOnUiThread(() -> btnSave.setText("Lưu vào thư viện"));
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã bỏ lưu khỏi thư viện",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    runOnUiThread(() -> {
+                        btnSave.setText("Lưu vào thư viện");
+                        btnSave.setBackgroundTintList(ColorStateList.valueOf(clrSurfaceVariant));
+                        btnSave.setTextColor(clrOnSurfaceVariant);
+                        btnSave.setIconTint(ColorStateList.valueOf(clrOnSurfaceVariant));
+                    });
+                    Toast.makeText(DetailComicActivity.this, "Đã bỏ lưu khỏi thư viện", Toast.LENGTH_SHORT).show();
                     syncFavoritesFromSupabase();
                 } else {
                     logFavoriteError(response, "DELETE");
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Bỏ lưu thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Bỏ lưu thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 btnSave.setEnabled(true);
-
-                android.util.Log.e("FAVORITE_SUPABASE", "DELETE FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi bỏ lưu: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi bỏ lưu: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -640,40 +662,26 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             return;
         }
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.getMyFavorites(
-                "eq." + userId,
-                "created_at.desc"
-        ).enqueue(new Callback<List<FavoriteResponse>>() {
+        api.getMyFavorites("eq." + userId, "created_at.desc").enqueue(new Callback<List<FavoriteResponse>>() {
             @Override
-            public void onResponse(Call<List<FavoriteResponse>> call,
-                                   Response<List<FavoriteResponse>> response) {
+            public void onResponse(Call<List<FavoriteResponse>> call, Response<List<FavoriteResponse>> response) {
                 if (!response.isSuccessful()) {
                     return;
                 }
 
                 List<FavoriteResponse> remoteFavorites = response.body();
-
                 if (remoteFavorites == null) {
                     remoteFavorites = new ArrayList<>();
                 }
 
                 List<Favorite> localFavorites = new ArrayList<>();
-
                 for (FavoriteResponse item : remoteFavorites) {
-                    localFavorites.add(
-                            new Favorite(
-                                    userId,
-                                    item.getComicId(),
-                                    item.getCreatedAtMillis()
-                            )
-                    );
+                    localFavorites.add(new Favorite(userId, item.getComicId(), item.getCreatedAtMillis()));
                 }
 
                 AppDatabase.databaseWriteExecutor.execute(() -> {
@@ -684,14 +692,9 @@ public class DetailComicActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<FavoriteResponse>> call, Throwable t) {
-                android.util.Log.e("FAVORITE_SUPABASE", "SYNC FAIL = " + t.getMessage(), t);
             }
         });
     }
-
-    // =========================
-    // LIKE: Lượt thích
-    // =========================
 
     private void toggleLike() {
         if (isLikeRequestRunning) {
@@ -726,6 +729,7 @@ public class DetailComicActivity extends AppCompatActivity {
         int newCount = Math.max(0, current + delta);
 
         tvLikeCount.setText(String.valueOf(newCount));
+        updateLikeUi(isLiked);
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
             if (delta > 0) {
@@ -739,6 +743,7 @@ public class DetailComicActivity extends AppCompatActivity {
     private void syncMyLikeFromSupabase() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             isLiked = false;
+            updateLikeUi(false);
             return;
         }
 
@@ -747,30 +752,23 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             isLiked = false;
+            updateLikeUi(false);
             return;
         }
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.getMyLike(
-                "eq." + userId,
-                "eq." + comicId,
-                1
-        ).enqueue(new Callback<List<LikeResponse>>() {
+        api.getMyLike("eq." + userId, "eq." + comicId, 1).enqueue(new Callback<List<LikeResponse>>() {
             @Override
-            public void onResponse(Call<List<LikeResponse>> call,
-                                   Response<List<LikeResponse>> response) {
-                android.util.Log.d("LIKE_SUPABASE", "GET URL = " + call.request().url());
-                android.util.Log.d("LIKE_SUPABASE", "GET CODE = " + response.code());
-
+            public void onResponse(Call<List<LikeResponse>> call, Response<List<LikeResponse>> response) {
                 if (response.isSuccessful()) {
                     List<LikeResponse> likes = response.body();
                     isLiked = likes != null && !likes.isEmpty();
+                    updateLikeUi(isLiked);
                 } else {
                     isLiked = false;
+                    updateLikeUi(false);
                     logLikeError(response, "GET");
                 }
             }
@@ -778,7 +776,7 @@ public class DetailComicActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<LikeResponse>> call, Throwable t) {
                 isLiked = false;
-                android.util.Log.e("LIKE_SUPABASE", "GET FAIL = " + t.getMessage(), t);
+                updateLikeUi(false);
             }
         });
     }
@@ -790,7 +788,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -807,7 +804,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         isLikeRequestRunning = true;
-
         isLiked = true;
         updateLikeCountImmediately(1);
 
@@ -819,60 +815,30 @@ public class DetailComicActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 isLikeRequestRunning = false;
 
-                android.util.Log.d("LIKE_SUPABASE", "ADD URL = " + call.request().url());
-                android.util.Log.d("LIKE_SUPABASE", "ADD CODE = " + response.code());
-
                 if (response.isSuccessful()) {
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã thích truyện",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Toast.makeText(DetailComicActivity.this, "Đã thích truyện", Toast.LENGTH_SHORT).show();
                     syncMyLikeFromSupabase();
                     refreshComicAfterLikeChanged();
-
                 } else if (response.code() == 409) {
                     updateLikeCountImmediately(-1);
                     isLiked = true;
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Bạn đã thích truyện này rồi",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Toast.makeText(DetailComicActivity.this, "Bạn đã thích truyện này rồi", Toast.LENGTH_SHORT).show();
                     syncMyLikeFromSupabase();
                     refreshComicAfterLikeChanged();
-
                 } else {
                     updateLikeCountImmediately(-1);
                     isLiked = false;
-
                     logLikeError(response, "ADD");
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Thích truyện thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Thích truyện thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 isLikeRequestRunning = false;
-
                 updateLikeCountImmediately(-1);
                 isLiked = false;
-
-                android.util.Log.e("LIKE_SUPABASE", "ADD FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi thích truyện: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi thích truyện: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -884,7 +850,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -901,61 +866,33 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         isLikeRequestRunning = true;
-
         isLiked = false;
         updateLikeCountImmediately(-1);
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.deleteLike(
-                "eq." + userId,
-                "eq." + comicId
-        ).enqueue(new Callback<Void>() {
+        api.deleteLike("eq." + userId, "eq." + comicId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 isLikeRequestRunning = false;
 
-                android.util.Log.d("LIKE_SUPABASE", "DELETE URL = " + call.request().url());
-                android.util.Log.d("LIKE_SUPABASE", "DELETE CODE = " + response.code());
-
                 if (response.isSuccessful()) {
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã bỏ thích truyện",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Toast.makeText(DetailComicActivity.this, "Đã bỏ thích truyện", Toast.LENGTH_SHORT).show();
                     syncMyLikeFromSupabase();
                     refreshComicAfterLikeChanged();
-
                 } else {
                     updateLikeCountImmediately(1);
                     isLiked = true;
-
                     logLikeError(response, "DELETE");
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Bỏ thích thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Bỏ thích thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 isLikeRequestRunning = false;
-
                 updateLikeCountImmediately(1);
                 isLiked = true;
-
-                android.util.Log.e("LIKE_SUPABASE", "DELETE FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi bỏ thích: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi bỏ thích: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -968,10 +905,6 @@ public class DetailComicActivity extends AppCompatActivity {
             }
         }, 700);
     }
-
-    // =========================
-    // RATING: Đánh giá
-    // =========================
 
     private void showRatingDialog() {
         if (currentComic == null) {
@@ -987,14 +920,11 @@ public class DetailComicActivity extends AppCompatActivity {
             return;
         }
 
-        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
-
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_rating, null);
         RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
 
         ratingBar.setStepSize(1.0f);
-
         if (myOldRating != null) {
             ratingBar.setRating(myOldRating.getUserStars());
         } else {
@@ -1002,22 +932,17 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         builder.setView(dialogView);
-
         builder.setPositiveButton("Gửi", (dialog, which) -> {
             int newStars = Math.round(ratingBar.getRating());
-
             if (newStars <= 0) {
                 Toast.makeText(this, "Vui lòng chọn ít nhất 1 sao!", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             submitRatingToSupabase(newStars);
         });
 
         if (myOldRating != null) {
-            builder.setNeutralButton("Xóa đánh giá", (dialog, which) -> {
-                deleteRatingFromSupabase();
-            });
+            builder.setNeutralButton("Xóa đánh giá", (dialog, which) -> deleteRatingFromSupabase());
         }
 
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
@@ -1034,47 +959,31 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             return;
         }
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.getMyRating(
-                "eq." + userId,
-                "eq." + comicId,
-                1
-        ).enqueue(new Callback<List<RatingResponse>>() {
+        api.getMyRating("eq." + userId, "eq." + comicId, 1).enqueue(new Callback<List<RatingResponse>>() {
             @Override
-            public void onResponse(Call<List<RatingResponse>> call,
-                                   Response<List<RatingResponse>> response) {
+            public void onResponse(Call<List<RatingResponse>> call, Response<List<RatingResponse>> response) {
                 if (!response.isSuccessful()) {
                     return;
                 }
 
                 List<RatingResponse> remoteRatings = response.body();
-
                 AppDatabase.databaseWriteExecutor.execute(() -> {
                     if (remoteRatings == null || remoteRatings.isEmpty()) {
                         appDatabase.ratingDao().deleteRatingByComicId(userId, comicId);
                     } else {
                         RatingResponse item = remoteRatings.get(0);
-
-                        appDatabase.ratingDao().insertOrUpdateRating(
-                                new Rating(
-                                        userId,
-                                        item.getComicId(),
-                                        item.getRating()
-                                )
-                        );
+                        appDatabase.ratingDao().insertOrUpdateRating(new Rating(userId, item.getComicId(), item.getRating()));
                     }
                 });
             }
 
             @Override
             public void onFailure(Call<List<RatingResponse>> call, Throwable t) {
-                android.util.Log.e("RATING_SUPABASE", "SYNC FAIL = " + t.getMessage(), t);
             }
         });
     }
@@ -1086,7 +995,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -1105,100 +1013,33 @@ public class DetailComicActivity extends AppCompatActivity {
         SupabaseApi api = SupabaseClient.getApi(this);
         RatingRequest request = new RatingRequest(userId, comicId, stars);
 
-        api.upsertRating(
-                "resolution=merge-duplicates,return=representation",
-                "user_id,comic_id",
-                request
-        ).enqueue(new Callback<List<RatingResponse>>() {
+        api.upsertRating("resolution=merge-duplicates,return=representation", "user_id,comic_id", request).enqueue(new Callback<List<RatingResponse>>() {
             @Override
-            public void onResponse(Call<List<RatingResponse>> call,
-                                   Response<List<RatingResponse>> response) {
-
-                android.util.Log.d("RATING_SUPABASE", "UPSERT URL = " + call.request().url());
-                android.util.Log.d("RATING_SUPABASE", "UPSERT CODE = " + response.code());
-
+            public void onResponse(Call<List<RatingResponse>> call, Response<List<RatingResponse>> response) {
                 if (response.isSuccessful()) {
                     List<RatingResponse> result = response.body();
 
                     if (result == null || result.isEmpty()) {
-                        android.util.Log.e("RATING_SUPABASE", "Supabase success nhưng không trả row rating");
-
-                        Toast.makeText(
-                                DetailComicActivity.this,
-                                "Supabase chưa trả dữ liệu đánh giá",
-                                Toast.LENGTH_SHORT
-                        ).show();
-
                         refreshComicStatsFromServer();
                         return;
                     }
 
                     RatingResponse savedRating = result.get(0);
+                    AppDatabase.databaseWriteExecutor.execute(() -> appDatabase.ratingDao().insertOrUpdateRating(new Rating(userId, savedRating.getComicId(), savedRating.getRating())));
 
-                    AppDatabase.databaseWriteExecutor.execute(() -> {
-                        appDatabase.ratingDao().insertOrUpdateRating(
-                                new Rating(
-                                        userId,
-                                        savedRating.getComicId(),
-                                        savedRating.getRating()
-                                )
-                        );
-                    });
+                    myOldRating = new Rating(userId, savedRating.getComicId(), savedRating.getRating());
+                    Toast.makeText(DetailComicActivity.this, "Đã đánh giá " + savedRating.getRating() + " sao", Toast.LENGTH_SHORT).show();
 
-                    myOldRating = new Rating(
-                            userId,
-                            savedRating.getComicId(),
-                            savedRating.getRating()
-                    );
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã đánh giá " + savedRating.getRating() + " sao",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-                /*
-                  Cái này chỉ sync đánh giá của user hiện tại
-                  để lần sau mở dialog biết user đã đánh giá mấy sao.
-                */
                     syncMyRatingFromSupabase();
-
-                /*
-                  Cái này mới quan trọng:
-                  Sync lại bảng comics để lấy rating_avg + rating_count tổng của tất cả user.
-                */
                     refreshComicStatsFromServer();
-
                 } else {
-                    try {
-                        String error = response.errorBody() != null
-                                ? response.errorBody().string()
-                                : "Không có errorBody";
-
-                        android.util.Log.e("RATING_SUPABASE", "UPSERT ERROR CODE = " + response.code());
-                        android.util.Log.e("RATING_SUPABASE", "UPSERT ERROR BODY = " + error);
-
-                    } catch (Exception e) {
-                        android.util.Log.e("RATING_SUPABASE", "Không đọc được errorBody", e);
-                    }
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Gửi đánh giá thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Gửi đánh giá thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<RatingResponse>> call, Throwable t) {
-                android.util.Log.e("RATING_SUPABASE", "UPSERT FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi gửi đánh giá: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi gửi đánh giá: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -1210,7 +1051,6 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         String userId = sessionManager.getUserId();
-
         if (userId == null || userId.trim().isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
@@ -1227,78 +1067,28 @@ public class DetailComicActivity extends AppCompatActivity {
         }
 
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.deleteRating(
-                "eq." + userId,
-                "eq." + comicId
-        ).enqueue(new Callback<Void>() {
+        api.deleteRating("eq." + userId, "eq." + comicId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                android.util.Log.d("RATING_SUPABASE", "DELETE URL = " + call.request().url());
-                android.util.Log.d("RATING_SUPABASE", "DELETE CODE = " + response.code());
-
                 if (response.isSuccessful()) {
-                    AppDatabase.databaseWriteExecutor.execute(() -> {
-                        appDatabase.ratingDao().deleteRatingByComicId(userId, comicId);
-                    });
+                    AppDatabase.databaseWriteExecutor.execute(() -> appDatabase.ratingDao().deleteRatingByComicId(userId, comicId));
 
                     myOldRating = null;
+                    Toast.makeText(DetailComicActivity.this, "Đã xóa đánh giá", Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Đã xóa đánh giá",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-                /*
-                  Sync lại rating của user hiện tại:
-                  sau khi xóa thì local rating của user phải về null.
-                */
                     syncMyRatingFromSupabase();
-
-                /*
-                  Sync lại bảng comics để lấy rating_avg + rating_count mới
-                  sau khi trigger Supabase cập nhật xong.
-                */
                     refreshComicStatsFromServer();
-
                 } else {
-                    try {
-                        String error = response.errorBody() != null
-                                ? response.errorBody().string()
-                                : "Không có errorBody";
-
-                        android.util.Log.e("RATING_SUPABASE", "DELETE ERROR CODE = " + response.code());
-                        android.util.Log.e("RATING_SUPABASE", "DELETE ERROR BODY = " + error);
-
-                    } catch (Exception e) {
-                        android.util.Log.e("RATING_SUPABASE", "Không đọc được errorBody", e);
-                    }
-
-                    Toast.makeText(
-                            DetailComicActivity.this,
-                            "Xóa đánh giá thất bại: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(DetailComicActivity.this, "Xóa đánh giá thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                android.util.Log.e("RATING_SUPABASE", "DELETE FAIL = " + t.getMessage(), t);
-
-                Toast.makeText(
-                        DetailComicActivity.this,
-                        "Lỗi mạng khi xóa đánh giá: " + t.getMessage(),
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(DetailComicActivity.this, "Lỗi mạng khi xóa đánh giá: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-    // =========================
-    // READER / SHARE / LOGIN
-    // =========================
 
     private void openReaderActivity(int targetChapterId) {
         if (comicId <= 0) {
@@ -1335,11 +1125,10 @@ public class DetailComicActivity extends AppCompatActivity {
             return;
         }
 
-        String shareText =
-                "Mình đang đọc truyện: " + currentComic.getName() + "\n"
-                        + "Tác giả: " + currentComic.getAuthor() + "\n"
-                        + "Trạng thái: " + currentComic.getStatus() + "\n\n"
-                        + "Mở app FTComic để đọc truyện này nhé!";
+        String shareText = "Mình đang đọc truyện: " + currentComic.getName() + "\n"
+                + "Tác giả: " + currentComic.getAuthor() + "\n"
+                + "Trạng thái: " + currentComic.getStatus() + "\n\n"
+                + "Mở app FTComic để đọc truyện này nhé!";
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
@@ -1353,35 +1142,26 @@ public class DetailComicActivity extends AppCompatActivity {
         }
     }
 
-    // =========================
-    // LOG ERROR
-    // =========================
-
     private void logFavoriteError(Response<?> response, String action) {
         try {
-            String error = response.errorBody() != null
-                    ? response.errorBody().string()
-                    : "Không có errorBody";
-
-            android.util.Log.e("FAVORITE_SUPABASE", action + " ERROR CODE = " + response.code());
-            android.util.Log.e("FAVORITE_SUPABASE", action + " ERROR BODY = " + error);
+            if (response.errorBody() != null) {
+                android.util.Log.e("FAVORITE_SUPABASE", action + " ERROR BODY = " + response.errorBody().string());
+            }
         } catch (Exception e) {
-            android.util.Log.e("FAVORITE_SUPABASE", "Không đọc được errorBody", e);
+            e.printStackTrace();
         }
     }
 
     private void logLikeError(Response<?> response, String action) {
         try {
-            String error = response.errorBody() != null
-                    ? response.errorBody().string()
-                    : "Không có errorBody";
-
-            android.util.Log.e("LIKE_SUPABASE", action + " ERROR CODE = " + response.code());
-            android.util.Log.e("LIKE_SUPABASE", action + " ERROR BODY = " + error);
+            if (response.errorBody() != null) {
+                android.util.Log.e("LIKE_SUPABASE", action + " ERROR BODY = " + response.errorBody().string());
+            }
         } catch (Exception e) {
-            android.util.Log.e("LIKE_SUPABASE", "Không đọc được errorBody", e);
+            e.printStackTrace();
         }
     }
+
     private void refreshComicStatsFromServer() {
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             if (comicRepository != null) {

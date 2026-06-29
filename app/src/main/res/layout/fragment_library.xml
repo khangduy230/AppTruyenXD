@@ -45,39 +45,6 @@
             android:paddingTop="16dp"
             android:paddingBottom="80dp">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroup_filter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_read"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="Đã đọc" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_later"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Để sau" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_downloaded"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tải xuống" />
-
-            </com.google.android.material.chip.ChipGroup>
-
             <TextView
                 android:id="@+id/tvLibraryEmpty"
                 android:layout_width="match_parent"
@@ -85,7 +52,7 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Chưa có truyện nào"
+                android:text="Chưa có truyện nào trong thư viện"
                 android:textColor="#777777"
                 android:textSize="16sp"
                 android:visibility="gone" />

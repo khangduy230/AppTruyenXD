@@ -19,6 +19,7 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ComicAdapter;
 import com.nhom5.ftcomic.database.AppDatabase;
 import com.nhom5.ftcomic.models.Comic;
+import com.nhom5.ftcomic.models.Chapter;
 import com.nhom5.ftcomic.models.ReadingHistory;
 import com.nhom5.ftcomic.network.SupabaseApi;
 import com.nhom5.ftcomic.network.SupabaseClient;
@@ -42,7 +43,6 @@ public class ReadingHistoryActivity extends AppCompatActivity {
     private ComicAdapter comicAdapter;
     private AppDatabase appDatabase;
     private SessionManager sessionManager;
-
     private String currentUserId = "";
 
     @Override
@@ -75,40 +75,26 @@ public class ReadingHistoryActivity extends AppCompatActivity {
     private void setupToolbar() {
         if (toolbarHistory != null) {
             setSupportActionBar(toolbarHistory);
-            toolbarHistory.setNavigationOnClickListener(v -> {
-                getOnBackPressedDispatcher().onBackPressed();
-            });
+            toolbarHistory.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         }
     }
 
     private void setupRecyclerView() {
         rcvHistory.setLayoutManager(new GridLayoutManager(this, 3));
-
-        comicAdapter = new ComicAdapter(new ArrayList<Comic>(), comic -> {
+        comicAdapter = new ComicAdapter(new ArrayList<>(), comic -> {
             if (!sessionManager.isLoggedIn()) {
-                Toast.makeText(
-                        ReadingHistoryActivity.this,
-                        "Bạn cần đăng nhập để xem lịch sử đọc",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(ReadingHistoryActivity.this, "Bạn cần đăng nhập để xem lịch sử đọc", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String userId = sessionManager.getUserId();
-
             if (userId == null || userId.trim().isEmpty()) {
-                Toast.makeText(
-                        ReadingHistoryActivity.this,
-                        "Không tìm thấy thông tin người dùng",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(ReadingHistoryActivity.this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             AppDatabase.databaseWriteExecutor.execute(() -> {
-                ReadingHistory historyRecord =
-                        appDatabase.readingHistoryDao().getHistoryByComicIdSync(userId, comic.getId());
-
+                ReadingHistory historyRecord = appDatabase.readingHistoryDao().getHistoryByComicIdSync(userId, comic.getId());
                 runOnUiThread(() -> {
                     if (historyRecord != null && historyRecord.getChapterId() > 0) {
                         Intent intent = new Intent(ReadingHistoryActivity.this, ReaderActivity.class);
@@ -117,12 +103,7 @@ public class ReadingHistoryActivity extends AppCompatActivity {
                         intent.putExtra("PAGE_NUMBER", historyRecord.getPageNumber());
                         startActivity(intent);
                     } else {
-                        Toast.makeText(
-                                ReadingHistoryActivity.this,
-                                "Không tìm thấy chương đọc dở, đang mở trang chi tiết!",
-                                Toast.LENGTH_SHORT
-                        ).show();
-
+                        Toast.makeText(ReadingHistoryActivity.this, "Không tìm thấy chương đọc dở, đang mở trang chi tiết!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(ReadingHistoryActivity.this, DetailComicActivity.class);
                         intent.putExtra("COMIC_ID", comic.getId());
                         startActivity(intent);
@@ -130,11 +111,9 @@ public class ReadingHistoryActivity extends AppCompatActivity {
                 });
             });
         });
-
         rcvHistory.setAdapter(comicAdapter);
     }
 
-    // ĐÃ CẬP NHẬT: Xử lý ánh xạ chương đọc dở qua luồng Executor chạy ngầm
     private void observeReadingHistory() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             showEmpty("Bạn cần đăng nhập để xem lịch sử đọc");
@@ -142,7 +121,6 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         }
 
         currentUserId = sessionManager.getUserId();
-
         if (currentUserId == null || currentUserId.trim().isEmpty()) {
             showEmpty("Không tìm thấy thông tin người dùng");
             return;
@@ -156,26 +134,26 @@ public class ReadingHistoryActivity extends AppCompatActivity {
                         rcvHistory.setVisibility(View.VISIBLE);
                         tvEmptyHistory.setVisibility(View.GONE);
 
-                        // Khởi chạy luồng background quét thông tin tập truyện tương ứng
                         AppDatabase.databaseWriteExecutor.execute(() -> {
                             Map<Integer, String> temporaryChapterMap = new HashMap<>();
 
                             for (Comic comic : listComics) {
-                                ReadingHistory historyRecord =
-                                        appDatabase.readingHistoryDao().getHistoryByComicIdSync(currentUserId, comic.getId());
+                                ReadingHistory historyRecord = appDatabase.readingHistoryDao().getHistoryByComicIdSync(currentUserId, comic.getId());
                                 if (historyRecord != null) {
-                                    // Tạo chuỗi nhãn hiển thị trực quan dưới ảnh bìa lưới
-                                    temporaryChapterMap.put(comic.getId(), "Đang đọc: Tập " + historyRecord.getChapterId());
+                                    Chapter chapter = appDatabase.chapterDao().getChapterById((int) historyRecord.getChapterId());
+                                    if (chapter != null) {
+                                        temporaryChapterMap.put(comic.getId(), "Đang đọc: Tập " + chapter.getChapterNumber());
+                                    } else {
+                                        temporaryChapterMap.put(comic.getId(), "Đang đọc: Tập " + historyRecord.getChapterId());
+                                    }
                                 }
                             }
 
-                            // Trả kết quả map dữ liệu về main thread để Adapter render UI
                             runOnUiThread(() -> {
                                 comicAdapter.setHistoryChapterMap(temporaryChapterMap);
                                 comicAdapter.setComicList(listComics);
                             });
                         });
-
                     } else {
                         comicAdapter.setComicList(new ArrayList<>());
                         showEmpty("Bạn chưa đọc truyện nào");
@@ -185,43 +163,22 @@ public class ReadingHistoryActivity extends AppCompatActivity {
 
     private void syncReadingHistoryFromSupabase(String userId) {
         SupabaseApi api = SupabaseClient.getApi(this);
-
-        api.getMyReadingHistory(
-                "eq." + userId,
-                "last_read_at.desc"
-        ).enqueue(new Callback<List<ReadingHistoryResponse>>() {
+        api.getMyReadingHistory("eq." + userId, "last_read_at.desc").enqueue(new Callback<List<ReadingHistoryResponse>>() {
             @Override
-            public void onResponse(
-                    Call<List<ReadingHistoryResponse>> call,
-                    Response<List<ReadingHistoryResponse>> response
-            ) {
+            public void onResponse(Call<List<ReadingHistoryResponse>> call, Response<List<ReadingHistoryResponse>> response) {
                 if (!response.isSuccessful()) {
-                    Toast.makeText(
-                            ReadingHistoryActivity.this,
-                            "Không tải được lịch sử đọc: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(ReadingHistoryActivity.this, "Không tải được lịch sử đọc: " + response.code(), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 List<ReadingHistoryResponse> remoteHistories = response.body();
-
                 if (remoteHistories == null) {
                     remoteHistories = new ArrayList<>();
                 }
 
                 List<ReadingHistory> localHistories = new ArrayList<>();
-
                 for (ReadingHistoryResponse item : remoteHistories) {
-                    localHistories.add(
-                            new ReadingHistory(
-                                    userId,
-                                    item.getComicId(),
-                                    item.getChapterId(),
-                                    item.getPageNumber(),
-                                    item.getLastReadAtMillis()
-                            )
-                    );
+                    localHistories.add(new ReadingHistory(userId, item.getComicId(), item.getChapterId(), item.getPageNumber(), item.getLastReadAtMillis()));
                 }
 
                 AppDatabase.databaseWriteExecutor.execute(() -> {
@@ -232,11 +189,7 @@ public class ReadingHistoryActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<ReadingHistoryResponse>> call, Throwable t) {
-                Toast.makeText(
-                        ReadingHistoryActivity.this,
-                        "Lỗi mạng khi tải lịch sử đọc",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(ReadingHistoryActivity.this, "Lỗi mạng khi tải lịch sử đọc", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -245,11 +198,9 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         if (comicAdapter != null) {
             comicAdapter.setComicList(new ArrayList<>());
         }
-
         if (rcvHistory != null) {
             rcvHistory.setVisibility(View.GONE);
         }
-
         if (tvEmptyHistory != null) {
             tvEmptyHistory.setText(message);
             tvEmptyHistory.setVisibility(View.VISIBLE);

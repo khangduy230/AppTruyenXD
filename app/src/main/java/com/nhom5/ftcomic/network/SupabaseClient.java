@@ -20,7 +20,6 @@ public class SupabaseClient {
         return getRetrofit().create(SupabaseApi.class);
     }
 
-    // Giữ lại hàm cũ để những chỗ lấy dữ liệu public vẫn không lỗi
     public static SupabaseApi getApi() {
         return getRetrofit().create(SupabaseApi.class);
     }
@@ -45,9 +44,9 @@ public class SupabaseClient {
                         }
 
                         Request request = chain.request().newBuilder()
-                                .addHeader("apikey", SupabaseConfig.API_KEY)
-                                .addHeader("Authorization", "Bearer " + bearerToken)
-                                .addHeader("Content-Type", "application/json")
+                                .header("apikey", SupabaseConfig.API_KEY)
+                                .header("Authorization", "Bearer " + bearerToken)
+                                .header("Content-Type", "application/json")
                                 .build();
 
                         return chain.proceed(request);
