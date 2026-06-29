@@ -40,8 +40,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
     private boolean isLoginMode = true;
 
     private TextView tvTitle, tvSubtitle, tvSwitchPrompt, tvSwitchAction, tvForgotPassword;
-    private TextInputLayout layoutConfirmPassword;
-    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword;
+    private TextInputLayout layoutConfirmPassword, layoutSecurityQuestion, layoutSecurityAnswer;
+    private TextInputEditText edtEmail, edtPassword, edtConfirmPassword, edtSecurityQuestion, edtSecurityAnswer;
     private MaterialButton btnSubmit;
 
     private SessionManager sessionManager;
@@ -56,9 +56,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
         setupSwitchMode();
         setupSubmit();
 
-        // XỬ LÝ SỰ KIỆN CLICK QUÊN MẬT KHẨU
         tvForgotPassword.setOnClickListener(v -> {
-            dismiss(); // Đóng BottomSheet đăng nhập hiện tại
+            dismiss();
             startActivity(new Intent(requireContext(), ForgotPasswordActivity.class));
         });
 
@@ -77,6 +76,11 @@ public class LoginFragment extends BottomSheetDialogFragment {
         edtEmail = view.findViewById(R.id.edtEmail);
         edtPassword = view.findViewById(R.id.edtPassword);
         edtConfirmPassword = view.findViewById(R.id.edtConfirmPassword);
+
+        layoutSecurityQuestion = view.findViewById(R.id.layout_SecurityQuestion);
+        layoutSecurityAnswer = view.findViewById(R.id.layout_SecurityAnswer);
+        edtSecurityQuestion = view.findViewById(R.id.edtSecurityQuestion);
+        edtSecurityAnswer = view.findViewById(R.id.edtSecurityAnswer);
     }
 
     private void setupKeyboard() {
@@ -102,7 +106,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Đăng nhập");
             tvSubtitle.setText("Để sử dụng tính năng");
             layoutConfirmPassword.setVisibility(View.GONE);
-            tvForgotPassword.setVisibility(View.VISIBLE); // Hiện nút quên mật khẩu
+            layoutSecurityQuestion.setVisibility(View.GONE); // Ẩn câu hỏi khi đăng nhập
+            layoutSecurityAnswer.setVisibility(View.GONE);   // Ẩn câu trả lời khi đăng nhập
+            tvForgotPassword.setVisibility(View.VISIBLE);
             btnSubmit.setText("Đăng nhập");
             tvSwitchPrompt.setText("Chưa có tài khoản?");
             tvSwitchAction.setText("Đăng ký ngay");
@@ -110,7 +116,9 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Tạo tài khoản");
             tvSubtitle.setText("Đăng ký tài khoản mới");
             layoutConfirmPassword.setVisibility(View.VISIBLE);
-            tvForgotPassword.setVisibility(View.GONE); // Ẩn nút quên mật khẩu khi đăng ký
+            layoutSecurityQuestion.setVisibility(View.VISIBLE); // Hiện câu hỏi khi đăng ký
+            layoutSecurityAnswer.setVisibility(View.VISIBLE);   // Hiện câu trả lời khi đăng ký
+            tvForgotPassword.setVisibility(View.GONE);
             btnSubmit.setText("Đăng ký");
             tvSwitchPrompt.setText("Đã có tài khoản?");
             tvSwitchAction.setText("Đăng nhập");
@@ -144,6 +152,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
                     @Override
                     public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                         setLoading(false);
+                        if (!isAdded() || getContext() == null) return;
 
                         if (response.isSuccessful() && response.body() != null) {
                             AuthResponse authResponse = response.body();
@@ -172,6 +181,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
                         setLoading(false);
+                        if (!isAdded() || getContext() == null) return;
                         Toast.makeText(getContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
@@ -181,6 +191,8 @@ public class LoginFragment extends BottomSheetDialogFragment {
         String email = getText(edtEmail);
         String password = getText(edtPassword);
         String confirmPassword = getText(edtConfirmPassword);
+        String securityQuestion = getText(edtSecurityQuestion);
+        String securityAnswer = getText(edtSecurityAnswer);
 
         if (!validateEmailPassword(email, password)) {
             return;
@@ -196,8 +208,20 @@ public class LoginFragment extends BottomSheetDialogFragment {
             return;
         }
 
+        // KIỂM TRA RÀNG BUỘC CÂU HỎI BẢO MẬT
+        if (TextUtils.isEmpty(securityQuestion)) {
+            edtSecurityQuestion.setError("Vui lòng nhập câu hỏi bảo mật");
+            return;
+        }
+
+        if (TextUtils.isEmpty(securityAnswer)) {
+            edtSecurityAnswer.setError("Vui lòng điền câu trả lời bảo mật");
+            return;
+        }
+
         setLoading(true);
-        AuthRequest request = new AuthRequest(email, password);
+
+        AuthRequest request = new AuthRequest(email, password, securityQuestion, securityAnswer.toLowerCase());
 
         SupabaseAuthClient.getApi()
                 .register(request)
@@ -205,6 +229,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
                     @Override
                     public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                         setLoading(false);
+                        if (!isAdded() || getContext() == null) return;
 
                         if (response.isSuccessful() && response.body() != null) {
                             AuthResponse authResponse = response.body();
@@ -235,6 +260,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
                         setLoading(false);
+                        if (!isAdded() || getContext() == null) return;
                         Toast.makeText(getContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });

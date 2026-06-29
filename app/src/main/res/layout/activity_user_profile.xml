@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
@@ -203,12 +204,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginBottom="24dp"
+                app:endIconMode="password_toggle"
                 android:hint="Câu trả lời bảo mật">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_security_answer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
+                    android:inputType="textPassword"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceBodyLarge" />
             </com.google.android.material.textfield.TextInputLayout>

@@ -22,6 +22,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.utils.SessionManager;
 import com.nhom5.ftcomic.network.SupabaseConfig;
+import com.nhom5.ftcomic.network.SupabaseAuthClient;
+import com.nhom5.ftcomic.network.request.AuthRequest;
+import com.nhom5.ftcomic.network.response.AuthResponse;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +61,11 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private String targetUserId = null;
     private boolean isAdminMode = false;
+
+    // ĐÃ THÊM: Các biến theo dõi trạng thái thay đổi và xác thực bảo mật
+    private String loadedQuestion = "";
+    private String loadedAnswer = "";
+    private boolean isPasswordVerified = false;
 
     private final OkHttpClient client = new OkHttpClient();
     private Toast mToast;
@@ -96,7 +104,6 @@ public class UserProfileActivity extends AppCompatActivity {
         tvEmailSub   = findViewById(R.id.tv_email_sub);
         ivAvatar     = findViewById(R.id.iv_avatar);
 
-        // ÁNH XẠ CÁC TRƯỜNG CÂU HỎI BẢO MẬT MỚI
         tilSecurityQuestion = findViewById(R.id.til_security_question);
         tilSecurityAnswer   = findViewById(R.id.til_security_answer);
         etSecurityQuestion  = findViewById(R.id.et_security_question);
@@ -129,6 +136,91 @@ public class UserProfileActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_change_avatar).setOnClickListener(v -> launchImagePicker());
         ivAvatar.setOnClickListener(v -> launchImagePicker());
+
+        // ĐÃ THÊM: Bắt sự kiện click vào icon con mắt để check mật khẩu trước khi xem câu trả lời
+        tilSecurityAnswer.setEndIconOnClickListener(v -> {
+            if (isPasswordVerified) {
+                toggleAnswerVisibility();
+            } else {
+                showPasswordVerificationDialog(this::toggleAnswerVisibility);
+            }
+        });
+    }
+
+    // Hàm thực hiện chuyển đổi qua lại giữa ẩn và hiện chữ câu trả lời bảo mật
+    private void toggleAnswerVisibility() {
+        int inputType = etSecurityAnswer.getInputType();
+        if (inputType == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+            etSecurityAnswer.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+        } else {
+            etSecurityAnswer.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }
+        // Đẩy con trỏ văn bản về cuối dòng tránh lỗi vị trí nhập
+        if (etSecurityAnswer.getText() != null) {
+            etSecurityAnswer.setSelection(etSecurityAnswer.getText().length());
+        }
+    }
+
+    // ĐÃ THÊM: Hộp thoại Dialog bắt nhập mật khẩu xác thực danh tính
+    private void showPasswordVerificationDialog(Runnable onSuccessAction) {
+        android.widget.EditText etPassword = new android.widget.EditText(this);
+        etPassword.setHint("Nhập mật khẩu tài khoản");
+        etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        container.addView(etPassword);
+        container.setPadding(padding, padding / 2, padding, 0);
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Xác thực bảo mật")
+                .setMessage("Vui lòng xác nhận mật khẩu hiện tại để thực hiện thao tác này.")
+                .setView(container)
+                .setPositiveButton("Xác nhận", (dialog, which) -> {
+                    String password = etPassword.getText().toString().trim();
+                    if (password.isEmpty()) {
+                        showToast("Mật khẩu không được để trống!");
+                        return;
+                    }
+                    verifyPasswordRemote(password, onSuccessAction);
+                })
+                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    // ĐÃ THÊM: Gửi chuỗi xác thực mật khẩu qua API Login của Supabase Auth
+    private void verifyPasswordRemote(String password, Runnable onSuccessAction) {
+        setLoadingState(true);
+        String email = sessionManager.getEmail();
+
+        if (email == null || email.isEmpty()) {
+            setLoadingState(false);
+            showToast("Không tìm thấy thông tin phiên đăng nhập email!");
+            return;
+        }
+
+        AuthRequest authRequest = new AuthRequest(email, password);
+
+        SupabaseAuthClient.getApi()
+                .login(authRequest)
+                .enqueue(new retrofit2.Callback<AuthResponse>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<AuthResponse> call, retrofit2.Response<AuthResponse> response) {
+                        setLoadingState(false);
+                        if (response.isSuccessful() && response.body() != null) {
+                            isPasswordVerified = true;
+                            runOnUiThread(onSuccessAction);
+                        } else {
+                            showToast("Mật khẩu không chính xác! Vui lòng thử lại.");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<AuthResponse> call, Throwable t) {
+                        setLoadingState(false);
+                        showToast("Lỗi kết nối hệ thống: " + t.getMessage());
+                    }
+                });
     }
 
     private void launchImagePicker() {
@@ -146,19 +238,28 @@ public class UserProfileActivity extends AppCompatActivity {
         }
         tilUsername.setError(null);
 
-        // Kiểm tra logic ràng buộc câu hỏi bảo mật
         if (!question.isEmpty() && answer.isEmpty()) {
             tilSecurityAnswer.setError("Vui lòng nhập câu trả lời cho câu hỏi bảo mật!");
             return;
         }
         tilSecurityAnswer.setError(null);
 
-        setLoadingState(true);
+        // ĐÃ SỬA: Kiểm tra nếu có thay đổi thông tin bảo mật và chưa nhập pass
+        boolean isSecurityInfoChanged = !question.equals(loadedQuestion) || !answer.equals(loadedAnswer);
 
-        if (selectedImageUri != null) {
-            uploadAvatarAndSaveProfile(selectedImageUri, newUsername, question, answer);
+        if (isSecurityInfoChanged && !isPasswordVerified) {
+            showPasswordVerificationDialog(() -> proceedToSaveProfile(newUsername, question, answer));
         } else {
-            saveProfileData(newUsername, null, question, answer);
+            proceedToSaveProfile(newUsername, question, answer);
+        }
+    }
+
+    private void proceedToSaveProfile(String username, String question, String answer) {
+        setLoadingState(true);
+        if (selectedImageUri != null) {
+            uploadAvatarAndSaveProfile(selectedImageUri, username, question, answer);
+        } else {
+            saveProfileData(username, null, question, answer);
         }
     }
 
@@ -229,11 +330,8 @@ public class UserProfileActivity extends AppCompatActivity {
             if (avatarUrl != null) {
                 body.put("avatar_url", avatarUrl);
             }
-            // BỔ SUNG GỬI CÂU HỎI VÀ CÂU TRẢ LỜI SANG DB
-            if (!question.isEmpty()) {
-                body.put("security_question", question);
-                body.put("security_answer", answer.toLowerCase()); // Chuẩn hóa chữ thường khi lưu
-            }
+            body.put("security_question", question);
+            body.put("security_answer", answer.toLowerCase());
         } catch (JSONException e) {
             setLoadingState(false);
             showToast("Lỗi tạo dữ liệu: " + e.getMessage());
@@ -275,7 +373,11 @@ public class UserProfileActivity extends AppCompatActivity {
                             loadAvatarFromUrl(avatarUrl);
                         }
                         selectedImageUri = null;
-                        etSecurityAnswer.setText(""); // Xóa trống ô trả lời sau khi lưu thành công để bảo mật
+
+                        // ĐÃ THÊM: Đồng bộ và reset lại chốt chặn kiểm tra bảo mật
+                        loadedQuestion = question;
+                        loadedAnswer = answer;
+                        isPasswordVerified = false;
                     });
 
                     showToast("Cập nhật thành công!");
@@ -286,13 +388,14 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
+    // ĐÃ SỬA: Tải đồng thời cả Câu hỏi và Câu trả lời bảo mật cũ từ server về máy ảo
     private void fetchSecurityQuestionFromDb() {
         String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
         if (userId == null) return;
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=security_question")
+                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=security_question,security_answer")
                 .get()
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
@@ -308,10 +411,18 @@ public class UserProfileActivity extends AppCompatActivity {
                     try {
                         JSONArray array = new JSONArray(response.body().string());
                         if (array.length() > 0) {
-                            String savedQuestion = array.getJSONObject(0).optString("security_question", "");
+                            JSONObject jsonObject = array.getJSONObject(0);
+                            String savedQuestion = jsonObject.optString("security_question", "");
+                            String savedAnswer = jsonObject.optString("security_answer", "");
+
                             runOnUiThread(() -> {
                                 if (!savedQuestion.equals("null") && !savedQuestion.isEmpty()) {
                                     etSecurityQuestion.setText(savedQuestion);
+                                    loadedQuestion = savedQuestion;
+                                }
+                                if (!savedAnswer.equals("null") && !savedAnswer.isEmpty()) {
+                                    etSecurityAnswer.setText(savedAnswer);
+                                    loadedAnswer = savedAnswer;
                                 }
                             });
                         }
@@ -476,7 +587,7 @@ public class UserProfileActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                setLoadingState(true); // Giữ nguyên trạng thái để đồng bộ UI gốc
+                setLoadingState(true);
                 showToast("Lỗi kết nối server: " + e.getMessage());
             }
 
