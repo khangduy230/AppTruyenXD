@@ -23,6 +23,7 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.utils.SessionManager;
 import com.nhom5.ftcomic.network.SupabaseConfig;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,9 +48,9 @@ public class UserProfileActivity extends AppCompatActivity {
     private static final int      BUFFER_SIZE       = 16384;
 
     private SessionManager         sessionManager;
-    private TextInputEditText      etUsername, etEmail;
+    private TextInputEditText      etUsername, etEmail, etSecurityQuestion, etSecurityAnswer;
     private MaterialButton         btnSave;
-    private TextInputLayout        tilUsername;
+    private TextInputLayout        tilUsername, tilSecurityQuestion, tilSecurityAnswer;
     private TextView               tvDisplayName, tvEmailSub;
     private ShapeableImageView     ivAvatar;
     private ActivityResultLauncher<String> pickImageLauncher;
@@ -78,6 +79,8 @@ public class UserProfileActivity extends AppCompatActivity {
         loadSavedAvatar();
         registerImagePicker();
         setupClickListeners();
+
+        fetchSecurityQuestionFromDb();
     }
 
     private void initViews() {
@@ -92,6 +95,12 @@ public class UserProfileActivity extends AppCompatActivity {
         tvDisplayName = findViewById(R.id.tv_display_name);
         tvEmailSub   = findViewById(R.id.tv_email_sub);
         ivAvatar     = findViewById(R.id.iv_avatar);
+
+        // ÁNH XẠ CÁC TRƯỜNG CÂU HỎI BẢO MẬT MỚI
+        tilSecurityQuestion = findViewById(R.id.til_security_question);
+        tilSecurityAnswer   = findViewById(R.id.til_security_answer);
+        etSecurityQuestion  = findViewById(R.id.et_security_question);
+        etSecurityAnswer    = findViewById(R.id.et_security_answer);
     }
 
     private void registerImagePicker() {
@@ -127,27 +136,34 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void onSaveClicked() {
-        String newUsername = etUsername.getText() != null
-                ? etUsername.getText().toString().trim()
-                : "";
+        String newUsername = etUsername.getText() != null ? etUsername.getText().toString().trim() : "";
+        String question = etSecurityQuestion.getText() != null ? etSecurityQuestion.getText().toString().trim() : "";
+        String answer = etSecurityAnswer.getText() != null ? etSecurityAnswer.getText().toString().trim() : "";
 
         if (newUsername.isEmpty()) {
             tilUsername.setError("Tên hiển thị không được để trống!");
             return;
         }
         tilUsername.setError(null);
+
+        // Kiểm tra logic ràng buộc câu hỏi bảo mật
+        if (!question.isEmpty() && answer.isEmpty()) {
+            tilSecurityAnswer.setError("Vui lòng nhập câu trả lời cho câu hỏi bảo mật!");
+            return;
+        }
+        tilSecurityAnswer.setError(null);
+
         setLoadingState(true);
 
         if (selectedImageUri != null) {
-            uploadAvatarAndSaveProfile(selectedImageUri, newUsername);
+            uploadAvatarAndSaveProfile(selectedImageUri, newUsername, question, answer);
         } else {
-            saveProfileData(newUsername, null);
+            saveProfileData(newUsername, null, question, answer);
         }
     }
 
-    private void uploadAvatarAndSaveProfile(Uri imageUri, String username) {
+    private void uploadAvatarAndSaveProfile(Uri imageUri, String username, String question, String answer) {
         byte[] imageBytes;
-
         try {
             imageBytes = readBytes(imageUri);
         } catch (IOException e) {
@@ -159,8 +175,7 @@ public class UserProfileActivity extends AppCompatActivity {
         String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
 
-        if (userId == null || userId.trim().isEmpty()
-                || accessToken == null || accessToken.trim().isEmpty()) {
+        if (userId == null || userId.trim().isEmpty() || accessToken == null || accessToken.trim().isEmpty()) {
             setLoadingState(false);
             showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
             return;
@@ -169,11 +184,7 @@ public class UserProfileActivity extends AppCompatActivity {
         String fileName = userId + ".jpg";
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL
-                        + "/storage/v1/object/"
-                        + SupabaseConfig.AVATARS_BUCKET
-                        + "/"
-                        + fileName)
+                .url(SupabaseConfig.PROJECT_URL + "/storage/v1/object/" + SupabaseConfig.AVATARS_BUCKET + "/" + fileName)
                 .post(RequestBody.create(imageBytes, MEDIA_TYPE_IMAGE))
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
@@ -191,10 +202,9 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) {
                 String body = readBody(response);
-
                 if (response.isSuccessful()) {
                     String avatarUrl = SupabaseConfig.getAvatarPublicUrl(fileName);
-                    saveProfileData(username, avatarUrl);
+                    saveProfileData(username, avatarUrl, question, answer);
                 } else {
                     setLoadingState(false);
                     showToast("Upload ảnh thất bại (" + response.code() + "): " + body);
@@ -203,24 +213,26 @@ public class UserProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void saveProfileData(String username, String avatarUrl) {
+    private void saveProfileData(String username, String avatarUrl, String question, String answer) {
         String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
         String accessToken = sessionManager.getAccessToken();
 
-        if (userId == null || userId.trim().isEmpty()
-                || accessToken == null || accessToken.trim().isEmpty()) {
+        if (userId == null || userId.trim().isEmpty() || accessToken == null || accessToken.trim().isEmpty()) {
             setLoadingState(false);
             showToast("Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại!");
             return;
         }
 
         JSONObject body = new JSONObject();
-
         try {
             body.put("username", username);
-
             if (avatarUrl != null) {
                 body.put("avatar_url", avatarUrl);
+            }
+            // BỔ SUNG GỬI CÂU HỎI VÀ CÂU TRẢ LỜI SANG DB
+            if (!question.isEmpty()) {
+                body.put("security_question", question);
+                body.put("security_answer", answer.toLowerCase()); // Chuẩn hóa chữ thường khi lưu
             }
         } catch (JSONException e) {
             setLoadingState(false);
@@ -229,9 +241,7 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
         Request request = new Request.Builder()
-                .url(SupabaseConfig.PROJECT_URL
-                        + "/rest/v1/profiles?id=eq."
-                        + userId)
+                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId)
                 .patch(RequestBody.create(body.toString(), MEDIA_TYPE_JSON))
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("apikey", SupabaseConfig.API_KEY)
@@ -249,13 +259,11 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) {
                 String respBody = readBody(response);
-
                 setLoadingState(false);
 
                 if (response.isSuccessful()) {
                     if (!isAdminMode) {
                         sessionManager.saveUsername(username);
-
                         if (avatarUrl != null) {
                             sessionManager.saveAvatarUri(avatarUrl);
                         }
@@ -263,17 +271,51 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     runOnUiThread(() -> {
                         if (tvDisplayName != null) tvDisplayName.setText(username);
-
                         if (avatarUrl != null) {
                             loadAvatarFromUrl(avatarUrl);
                         }
-
                         selectedImageUri = null;
+                        etSecurityAnswer.setText(""); // Xóa trống ô trả lời sau khi lưu thành công để bảo mật
                     });
 
                     showToast("Cập nhật thành công!");
                 } else {
                     showToast("Lỗi cập nhật dữ liệu (" + response.code() + "): " + respBody);
+                }
+            }
+        });
+    }
+
+    private void fetchSecurityQuestionFromDb() {
+        String userId = isAdminMode ? targetUserId : sessionManager.getUserId();
+        String accessToken = sessionManager.getAccessToken();
+        if (userId == null) return;
+
+        Request request = new Request.Builder()
+                .url(SupabaseConfig.PROJECT_URL + "/rest/v1/profiles?id=eq." + userId + "&select=security_question")
+                .get()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .addHeader("apikey", SupabaseConfig.API_KEY)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {}
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        JSONArray array = new JSONArray(response.body().string());
+                        if (array.length() > 0) {
+                            String savedQuestion = array.getJSONObject(0).optString("security_question", "");
+                            runOnUiThread(() -> {
+                                if (!savedQuestion.equals("null") && !savedQuestion.isEmpty()) {
+                                    etSecurityQuestion.setText(savedQuestion);
+                                }
+                            });
+                        }
+                    } catch (Exception ignored) {}
                 }
             }
         });
@@ -434,7 +476,7 @@ public class UserProfileActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                setLoadingState(false);
+                setLoadingState(true); // Giữ nguyên trạng thái để đồng bộ UI gốc
                 showToast("Lỗi kết nối server: " + e.getMessage());
             }
 

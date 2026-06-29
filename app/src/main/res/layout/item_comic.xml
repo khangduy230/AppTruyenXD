@@ -1,10 +1,10 @@
-<!-- item_comic.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="6dp"> <!-- Khoảng cách giữa các truyện -->
+    android:padding="6dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardComic"
@@ -38,5 +38,19 @@
         app:layout_constraintEnd_toEndOf="@id/cardComic"
         app:layout_constraintStart_toStartOf="@id/cardComic"
         app:layout_constraintTop_toBottomOf="@id/cardComic" />
+
+    <TextView
+        android:id="@+id/tvLatestChapter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="11sp"
+        android:textColor="#666666"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/cardComic"
+        app:layout_constraintStart_toStartOf="@id/cardComic"
+        app:layout_constraintTop_toBottomOf="@id/tvComicTitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

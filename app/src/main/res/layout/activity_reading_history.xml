@@ -9,25 +9,33 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.ReadingHistoryActivity">
 
-    <com.google.android.material.appbar.CollapsingToolbarLayout
-        android:id="@+id/appBarLayout2"
-        style="?attr/collapsingToolbarLayoutLargeStyle"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="152dp"
-        app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
-        app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-        app:titleCollapseMode="fade">
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        android:fitsSystemWindows="true">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbarHistory"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/appBarLayout2"
+            style="?attr/collapsingToolbarLayoutLargeStyle"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_collapseMode="pin"
-            app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="?attr/colorOnSurface"
-            app:title="Lịch sử đọc" />
+            android:layout_height="152dp"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleCollapseMode="fade">
 
-    </com.google.android.material.appbar.CollapsingToolbarLayout>
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbarHistory"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="?attr/colorOnSurface"
+                app:title="Lịch sử đọc" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/frameLayout"
@@ -51,12 +59,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcv_history"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingHorizontal="12dp"
         android:paddingTop="16dp"
         android:paddingBottom="24dp"
-        app:layout_anchor="@+id/frameLayout"
-        app:layout_anchorGravity="center" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

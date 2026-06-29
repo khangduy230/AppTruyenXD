@@ -16,12 +16,16 @@ import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.activities.DetailComicActivity;
 import com.nhom5.ftcomic.models.Comic;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHolder> {
 
     private List<Comic> comicList;
     private OnComicClickListener listener;
+
+    private Map<Integer, String> historyChapterMap = new HashMap<>();
 
     public interface OnComicClickListener {
         void onComicClick(Comic comic);
@@ -32,13 +36,19 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         this.listener = listener;
     }
 
+    // Setter để Activity truyền dữ liệu chương đọc dở vào
+    public void setHistoryChapterMap(Map<Integer, String> map) {
+        if (map != null) {
+            this.historyChapterMap = map;
+        }
+    }
+
     @NonNull
     @Override
     public ComicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_comic, parent, false);
 
-        // Ép RecyclerView cho Home
         if (parent instanceof RecyclerView) {
             RecyclerView.LayoutManager lm = ((RecyclerView) parent).getLayoutManager();
             if (lm instanceof LinearLayoutManager &&
@@ -53,7 +63,6 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         return new ComicViewHolder(view);
     }
 
-
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
         Comic comic = comicList.get(position);
@@ -63,6 +72,13 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         }
 
         holder.tvComicTitle.setText(comic.getName());
+
+        if (historyChapterMap != null && historyChapterMap.containsKey(comic.getId())) {
+            holder.tvLatestChapter.setVisibility(View.VISIBLE);
+            holder.tvLatestChapter.setText(historyChapterMap.get(comic.getId()));
+        } else {
+            holder.tvLatestChapter.setVisibility(View.GONE);
+        }
 
         if (comic.getCoverUrl() != null && !comic.getCoverUrl().isEmpty()) {
             com.bumptech.glide.Glide.with(holder.itemView.getContext())
@@ -82,7 +98,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
             intent.putExtra("TRANSITION_NAME", uniqueTransitionName);
             intent.putExtra("COMIC_ID", comic.getId());
-            intent.putExtra("COMIC_COVER_URL", comic.getCoverUrl());// (Giữ nguyên logic cũ của bạn)
+            intent.putExtra("COMIC_COVER_URL", comic.getCoverUrl());
 
             androidx.core.app.ActivityOptionsCompat options =
                     androidx.core.app.ActivityOptionsCompat.makeSceneTransitionAnimation(
@@ -93,7 +109,6 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
             mContext.startActivity(intent, options.toBundle());
         });
-
     }
 
     @Override
@@ -111,7 +126,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
     public static class ComicViewHolder extends RecyclerView.ViewHolder {
         ImageView imgComic;
-        TextView tvComicTitle;
+        TextView tvComicTitle, tvLatestChapter;
         MaterialCardView cardComic;
 
         public ComicViewHolder(@NonNull View itemView) {
@@ -119,6 +134,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
             imgComic = itemView.findViewById(R.id.imgComic);
             cardComic = itemView.findViewById(R.id.cardComic);
             tvComicTitle = itemView.findViewById(R.id.tvComicTitle);
+            tvLatestChapter = itemView.findViewById(R.id.tvLatestChapter);
         }
     }
 }

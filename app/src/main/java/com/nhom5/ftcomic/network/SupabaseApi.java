@@ -203,4 +203,14 @@ public interface SupabaseApi {
             @Query("user_id") String userIdFilter,
             @Query("comic_id") String comicIdFilter
     );
+
+    @POST("rpc/get_user_security_question")
+    Call<List<Map<String, String>>> getUserSecurityQuestion(
+            @Body Map<String, String> body
+    );
+
+    @POST("rpc/reset_password_via_question")
+    Call<List<Map<String, Boolean>>> resetPasswordViaQuestion(
+            @Body Map<String, Object> body
+    );
 }

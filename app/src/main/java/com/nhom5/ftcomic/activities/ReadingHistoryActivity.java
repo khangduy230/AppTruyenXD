@@ -26,7 +26,9 @@ import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
 import com.nhom5.ftcomic.utils.SessionManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -132,6 +134,7 @@ public class ReadingHistoryActivity extends AppCompatActivity {
         rcvHistory.setAdapter(comicAdapter);
     }
 
+    // ĐÃ CẬP NHẬT: Xử lý ánh xạ chương đọc dở qua luồng Executor chạy ngầm
     private void observeReadingHistory() {
         if (sessionManager == null || !sessionManager.isLoggedIn()) {
             showEmpty("Bạn cần đăng nhập để xem lịch sử đọc");
@@ -152,7 +155,27 @@ public class ReadingHistoryActivity extends AppCompatActivity {
                     if (listComics != null && !listComics.isEmpty()) {
                         rcvHistory.setVisibility(View.VISIBLE);
                         tvEmptyHistory.setVisibility(View.GONE);
-                        comicAdapter.setComicList(listComics);
+
+                        // Khởi chạy luồng background quét thông tin tập truyện tương ứng
+                        AppDatabase.databaseWriteExecutor.execute(() -> {
+                            Map<Integer, String> temporaryChapterMap = new HashMap<>();
+
+                            for (Comic comic : listComics) {
+                                ReadingHistory historyRecord =
+                                        appDatabase.readingHistoryDao().getHistoryByComicIdSync(currentUserId, comic.getId());
+                                if (historyRecord != null) {
+                                    // Tạo chuỗi nhãn hiển thị trực quan dưới ảnh bìa lưới
+                                    temporaryChapterMap.put(comic.getId(), "Đang đọc: Tập " + historyRecord.getChapterId());
+                                }
+                            }
+
+                            // Trả kết quả map dữ liệu về main thread để Adapter render UI
+                            runOnUiThread(() -> {
+                                comicAdapter.setHistoryChapterMap(temporaryChapterMap);
+                                comicAdapter.setComicList(listComics);
+                            });
+                        });
+
                     } else {
                         comicAdapter.setComicList(new ArrayList<>());
                         showEmpty("Bạn chưa đọc truyện nào");

@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!-- ===== TOP APP BAR (M3 Large) ===== -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +33,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ===== SCROLLABLE CONTENT ===== -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -48,7 +46,6 @@
             android:paddingTop="24dp"
             android:paddingBottom="80dp">
 
-            <!-- ===== AVATAR SECTION ===== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,13 +54,11 @@
                 android:paddingHorizontal="24dp"
                 android:paddingBottom="32dp">
 
-                <!-- Avatar container với badge chỉnh sửa -->
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp">
 
-                    <!-- Avatar -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_avatar"
                         android:layout_width="96dp"
@@ -92,7 +87,6 @@
 
                 </FrameLayout>
 
-                <!-- Display name lớn dưới avatar -->
                 <TextView
                     android:id="@+id/tv_display_name"
                     android:layout_width="wrap_content"
@@ -110,15 +104,12 @@
 
             </LinearLayout>
 
-            <!-- ===== DIVIDER ===== -->
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 app:dividerColor="?attr/colorSurfaceVariant" />
 
-            <!-- ===== FORM SECTION ===== -->
-            <!-- Section header -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,7 +119,6 @@
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorPrimary" />
 
-            <!-- Tên hiển thị -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_username"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -169,26 +159,66 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Helper text cho email -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="36dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="24dp"
                 android:drawablePadding="6dp"
                 android:gravity="center_vertical"
                 android:text="Email không thể thay đổi"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="?attr/colorOnSurfaceVariant"/>
 
-            <!-- ===== DIVIDER ===== -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="16dp"
+                android:text="Sử dụng câu hỏi để khôi phục tài khoản của bạn"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="?attr/colorPrimary" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_security_question"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="16dp"
+                android:hint="Câu hỏi bảo mật (Ví dụ: Tên thú cưng đầu tiên?)">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_security_question"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_security_answer"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="24dp"
+                android:hint="Câu trả lời bảo mật">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_security_answer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 app:dividerColor="?attr/colorSurfaceVariant" />
 
-            <!-- ===== PASSWORD SECTION ===== -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -198,7 +228,6 @@
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="?attr/colorPrimary" />
 
-            <!-- Đổi mật khẩu (dạng list item M3) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_change_password"
                 style="@style/Widget.Material3.CardView.Outlined"
@@ -239,7 +268,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"
                 style="@style/Widget.Material3.Button"
@@ -250,9 +278,7 @@
                 android:text="Lưu thay đổi"
                 android:textAppearance="?attr/textAppearanceLabelLarge" />
 
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

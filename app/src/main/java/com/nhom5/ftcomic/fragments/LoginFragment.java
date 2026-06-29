@@ -1,6 +1,7 @@
 package com.nhom5.ftcomic.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.nhom5.ftcomic.R;
+import com.nhom5.ftcomic.activities.ForgotPasswordActivity;
 import com.nhom5.ftcomic.network.SupabaseAuthClient;
 import com.nhom5.ftcomic.network.request.AuthRequest;
 import com.nhom5.ftcomic.network.response.AuthResponse;
@@ -37,7 +39,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
 
     private boolean isLoginMode = true;
 
-    private TextView tvTitle, tvSubtitle, tvSwitchPrompt, tvSwitchAction;
+    private TextView tvTitle, tvSubtitle, tvSwitchPrompt, tvSwitchAction, tvForgotPassword;
     private TextInputLayout layoutConfirmPassword;
     private TextInputEditText edtEmail, edtPassword, edtConfirmPassword;
     private MaterialButton btnSubmit;
@@ -54,6 +56,12 @@ public class LoginFragment extends BottomSheetDialogFragment {
         setupSwitchMode();
         setupSubmit();
 
+        // XỬ LÝ SỰ KIỆN CLICK QUÊN MẬT KHẨU
+        tvForgotPassword.setOnClickListener(v -> {
+            dismiss(); // Đóng BottomSheet đăng nhập hiện tại
+            startActivity(new Intent(requireContext(), ForgotPasswordActivity.class));
+        });
+
         return view;
     }
 
@@ -64,6 +72,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
         btnSubmit = view.findViewById(R.id.btnSubmit);
         tvSwitchPrompt = view.findViewById(R.id.tvSwitchPrompt);
         tvSwitchAction = view.findViewById(R.id.tvSwitchAction);
+        tvForgotPassword = view.findViewById(R.id.tvForgotPassword);
 
         edtEmail = view.findViewById(R.id.edtEmail);
         edtPassword = view.findViewById(R.id.edtPassword);
@@ -93,6 +102,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Đăng nhập");
             tvSubtitle.setText("Để sử dụng tính năng");
             layoutConfirmPassword.setVisibility(View.GONE);
+            tvForgotPassword.setVisibility(View.VISIBLE); // Hiện nút quên mật khẩu
             btnSubmit.setText("Đăng nhập");
             tvSwitchPrompt.setText("Chưa có tài khoản?");
             tvSwitchAction.setText("Đăng ký ngay");
@@ -100,6 +110,7 @@ public class LoginFragment extends BottomSheetDialogFragment {
             tvTitle.setText("Tạo tài khoản");
             tvSubtitle.setText("Đăng ký tài khoản mới");
             layoutConfirmPassword.setVisibility(View.VISIBLE);
+            tvForgotPassword.setVisibility(View.GONE); // Ẩn nút quên mật khẩu khi đăng ký
             btnSubmit.setText("Đăng ký");
             tvSwitchPrompt.setText("Đã có tài khoản?");
             tvSwitchAction.setText("Đăng nhập");
@@ -127,7 +138,6 @@ public class LoginFragment extends BottomSheetDialogFragment {
         setLoading(true);
         AuthRequest request = new AuthRequest(email, password);
 
-        //@SuppressWarnings("deprecation")
         SupabaseAuthClient.getApi()
                 .login(request)
                 .enqueue(new Callback<AuthResponse>() {
@@ -282,10 +292,12 @@ public class LoginFragment extends BottomSheetDialogFragment {
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                    notifyLoginSuccess();
-                });
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                        notifyLoginSuccess();
+                    });
+                }
             }
 
             @Override
@@ -312,10 +324,12 @@ public class LoginFragment extends BottomSheetDialogFragment {
                         e.printStackTrace();
                     }
                 }
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                    notifyLoginSuccess();
-                });
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                        notifyLoginSuccess();
+                    });
+                }
             }
         });
     }
