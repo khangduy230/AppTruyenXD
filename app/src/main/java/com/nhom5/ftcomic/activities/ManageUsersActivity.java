@@ -20,7 +20,9 @@ import com.nhom5.ftcomic.models.User;
 import com.nhom5.ftcomic.network.SupabaseClient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -106,7 +108,8 @@ public class ManageUsersActivity extends AppCompatActivity {
     }
 
     private void fetchUsersFromSupabase() {
-        SupabaseClient.getApi(this).getAllProfiles("username.asc").enqueue(new Callback<List<User>>() {
+        // ĐÃ SỬA: Chỉ lấy các tài khoản có cột is_deleted bằng false
+        SupabaseClient.getApi(this).getAllProfiles("username.asc", "eq.false").enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -163,18 +166,24 @@ public class ManageUsersActivity extends AppCompatActivity {
 
     private void showDeleteConfirmationDialog(User user, int position) {
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Xoá người dùng")
-                .setMessage("Bạn có chắc chắn muốn xoá vĩnh viễn người dùng này?")
-                .setPositiveButton("Xoá", (dialog, which) -> {
-                    SupabaseClient.getApi(this).deleteProfile("eq." + user.getId()).enqueue(new Callback<Void>() {
+                .setTitle("Vô hiệu hóa tài khoản")
+                .setMessage("Bạn có chắc chắn muốn xóa mềm (vô hiệu hóa) người dùng này?")
+                .setPositiveButton("Xóa", (dialog, which) -> {
+
+
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("is_deleted", true);
+
+
+                    SupabaseClient.getApi(this).softDeleteProfile("eq." + user.getId(), body).enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             if (response.isSuccessful()) {
                                 fullUserList.remove(user);
                                 applyFilter();
-                                Toast.makeText(ManageUsersActivity.this, "Đã xoá người dùng", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ManageUsersActivity.this, "Đã vô hiệu hóa tài khoản", Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(ManageUsersActivity.this, "Xóa thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ManageUsersActivity.this, "Thao tác thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
                             }
                         }
 

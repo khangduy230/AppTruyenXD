@@ -410,11 +410,9 @@ public class EditInformationActivity extends AppCompatActivity {
             return;
         }
 
-        // ĐỒNG BỘ LOGIC: Tên file dạng comic_cover_[id].jpg
         String fileName = "comic_cover_" + comicId + ".jpg";
         String accessToken = sessionManager.getAccessToken();
 
-        // ĐỒNG BỘ LOGIC: Đẩy trực tiếp vào gốc của COMICS_BUCKET thay vì AVATARS_BUCKET
         Request request = new Request.Builder()
                 .url(SupabaseConfig.PROJECT_URL + "/storage/v1/object/" + SupabaseConfig.COMICS_BUCKET + "/" + fileName)
                 .post(RequestBody.create(imageBytes, MEDIA_TYPE_IMAGE))
@@ -435,7 +433,6 @@ public class EditInformationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    // ĐỒNG BỘ LOGIC: Tạo URL trỏ trực tiếp đến file trong bucket comics-storage
                     String newCoverUrl = SupabaseConfig.STORAGE_PUBLIC_URL + SupabaseConfig.COMICS_BUCKET + "/" + fileName;
                     updateComicProfile(title, desc, author, status, newCoverUrl);
                 } else {

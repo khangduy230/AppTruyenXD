@@ -31,9 +31,11 @@ import retrofit2.http.Query;
 
 public interface SupabaseApi {
 
+
     @GET("profiles")
     Call<List<User>> getAllProfiles(
-            @Query("order") String order
+            @Query("order") String order,
+            @Query("is_deleted") String isDeletedFilter
     );
 
     @PATCH("profiles")
@@ -42,9 +44,11 @@ public interface SupabaseApi {
             @Body Map<String, Object> body
     );
 
-    @DELETE("profiles")
-    Call<Void> deleteProfile(
-            @Query("id") String idFilter
+
+    @PATCH("profiles")
+    Call<Void> softDeleteProfile(
+            @Query("id") String idFilter,
+            @Body Map<String, Object> body
     );
 
     @GET("comics")
