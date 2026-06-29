@@ -258,6 +258,7 @@ public class ComicRepository {
                             List<Chapter> chapters = mapChapterResponsesToEntities(response.body());
 
                             AppDatabase.databaseWriteExecutor.execute(() -> {
+                                appDatabase.chapterDao().deleteChaptersByComicId(comicId);
                                 appDatabase.chapterDao().insertChapters(chapters);
                                 Log.d(TAG, "Đã cache chapters comicId="
                                         + comicId + ", size=" + chapters.size());
@@ -478,7 +479,8 @@ public class ComicRepository {
                     item.getComicId(),
                     item.getChapterNumber(),
                     item.getChapterName(),
-                    item.getUpdatedAt()
+                    item.getUpdatedAt(),
+                    item.isHidden()
             );
 
             chapters.add(chapter);

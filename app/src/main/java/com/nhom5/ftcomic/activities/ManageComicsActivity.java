@@ -105,6 +105,13 @@ public class ManageComicsActivity extends AppCompatActivity {
             return;
         }
 
+        if (!"admin".equals(role) && !"translator".equals(role)) {
+            tvEmptyState.setVisibility(View.VISIBLE);
+            tvEmptyState.setText("Tài khoản của bạn không có quyền quản lý truyện.");
+            rvManageComics.setVisibility(View.GONE);
+            return;
+        }
+
         Call<List<ComicResponse>> call;
         if ("admin".equals(role)) {
             call = SupabaseClient.getApi(this).getAllComicsRemote("created_at.desc");

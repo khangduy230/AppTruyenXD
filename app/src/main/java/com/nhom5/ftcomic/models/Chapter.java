@@ -14,6 +14,7 @@ public class Chapter {
     private int chapterNumber;
     private String chapterName;
     private String updatedAt;
+    private boolean isHidden;
 
     public Chapter() {
         // Room cần constructor rỗng
@@ -21,11 +22,17 @@ public class Chapter {
 
     @Ignore
     public Chapter(int id, int comicId, int chapterNumber, String chapterName, String updatedAt) {
+        this(id, comicId, chapterNumber, chapterName, updatedAt, false);
+    }
+
+    @Ignore
+    public Chapter(int id, int comicId, int chapterNumber, String chapterName, String updatedAt, boolean isHidden) {
         this.id = id;
         this.comicId = comicId;
         this.chapterNumber = chapterNumber;
         this.chapterName = chapterName;
         this.updatedAt = updatedAt;
+        this.isHidden = isHidden;
     }
 
     public int getId() {
@@ -48,6 +55,10 @@ public class Chapter {
         return updatedAt;
     }
 
+    public boolean isHidden() {
+        return isHidden;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -66,5 +77,9 @@ public class Chapter {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setHidden(boolean hidden) {
+        isHidden = hidden;
     }
 }

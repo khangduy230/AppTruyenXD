@@ -24,23 +24,10 @@
             android:name=".activities.ManageUsersActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ItemChapterManageActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.ChapterManageActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ChapterManageActivity2"
-            android:exported="false" />
-        <activity
             android:name=".activities.UpChapterActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".activities.NewChapActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.NewChapterActivity"
             android:exported="false" />
         <activity
             android:name=".activities.EditChapterActivity"
@@ -51,13 +38,6 @@
         <activity
             android:name=".activities.EditInformationActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.StoryManagementActivity"
-            android:exported="false" />
-        <activity
-            android:name=".StoryManagementActivity"
-            android:exported="false" />
-
         <activity
             android:name=".activities.ChangePasswordActivity"
             android:exported="false" />

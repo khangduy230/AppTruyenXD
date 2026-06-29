@@ -19,6 +19,9 @@ public class ChapterResponse {
     @SerializedName("updated_at")
     private String updatedAt;
 
+    @SerializedName("is_hidden")
+    private boolean isHidden;
+
     public int getId() {
         return id;
     }
@@ -37,5 +40,9 @@ public class ChapterResponse {
 
     public String getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isHidden() {
+        return isHidden;
     }
 }
