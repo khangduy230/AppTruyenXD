@@ -83,6 +83,8 @@ public class HomeFragment extends Fragment {
         HomePagerAdapter adapter = new HomePagerAdapter(this);
         viewPager.setAdapter(adapter);
 
+        viewPager.setOffscreenPageLimit(3);
+
         // Liên kết TabLayout và ViewPager2
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
