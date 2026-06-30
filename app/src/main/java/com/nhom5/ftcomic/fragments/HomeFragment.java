@@ -28,6 +28,14 @@ public class HomeFragment extends Fragment {
     private ComicRepository comicRepository;
     private ComicGridFragment allComicsFragment;
 
+    // Biến cờ để chặn gọi API liên tục
+    private static boolean isDataSynced = false;
+
+    // HÀM MỚI: Dùng để gọi từ Activity khác (như NewStoryActivity) ép tải lại dữ liệu
+    public static void resetSyncState() {
+        isDataSynced = false;
+    }
+
     public void setAllComicsFragment(ComicGridFragment fragment) {
         this.allComicsFragment = fragment;
     }
@@ -53,7 +61,7 @@ public class HomeFragment extends Fragment {
 
         MenuItem filterItem = toolbar.getMenu().findItem(R.id.action_filter);
         if (filterItem != null) {
-            filterItem.setVisible(false); // Ẩn mặc định cho đến khi chuyển qua tab "Tất cả"
+            filterItem.setVisible(false);
         }
 
         toolbar.setOnMenuItemClickListener(item -> {
@@ -66,6 +74,10 @@ public class HomeFragment extends Fragment {
             return false;
         });
 
+        HomePagerAdapter adapter = new HomePagerAdapter(this);
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);
+
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -77,15 +89,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        comicRepository = new ComicRepository(requireContext());
-
-        // Thiết lập Adapter cho ViewPager2
-        HomePagerAdapter adapter = new HomePagerAdapter(this);
-        viewPager.setAdapter(adapter);
-
-        viewPager.setOffscreenPageLimit(3);
-
-        // Liên kết TabLayout và ViewPager2
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
@@ -100,20 +103,30 @@ public class HomeFragment extends Fragment {
             }
         }).attach();
 
-        // Đồng bộ dữ liệu truyện từ Supabase về Room khi có mạng
-        if (NetworkUtils.isOnline(requireContext())) {
-            comicRepository.syncAllHomeComics();
-        } else {
-            Toast.makeText(
-                    requireContext(),
-                    "Đang hiển thị dữ liệu đã lưu offline",
-                    Toast.LENGTH_SHORT
-            ).show();
+        comicRepository = new ComicRepository(requireContext());
+
+        // Đã xóa phần if (!isDataSynced) ở đây để dời xuống onResume
+    }
+
+    // DỜI LOGIC GỌI API XUỐNG ĐÂY ĐỂ BẮT ĐƯỢC SỰ KIỆN TỪ NEWSTORYACTIVITY QUAY VỀ
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isDataSynced) {
+            if (NetworkUtils.isOnline(requireContext())) {
+                comicRepository.syncAllHomeComics();
+            } else {
+                Toast.makeText(
+                        requireContext(),
+                        "Đang hiển thị dữ liệu đã lưu offline",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+            isDataSynced = true; // Khóa lại, không cho load lại liên tục
         }
     }
 
     private static class HomePagerAdapter extends FragmentStateAdapter {
-
         public HomePagerAdapter(@NonNull Fragment fragment) {
             super(fragment);
         }

@@ -66,7 +66,7 @@ public interface ComicDao {
     @Query("SELECT * FROM comics ORDER BY id ASC")
     LiveData<List<Comic>> getAllComicsLive();
 
-    @Query("SELECT * FROM comics WHERE last_update IS NOT NULL ORDER BY last_update DESC")
+    @Query("SELECT * FROM comics WHERE last_update IS NOT NULL AND date(last_update) >= date('now', '-1 month') ORDER BY last_update DESC")
     LiveData<List<Comic>> getLatestComics();
 
 }

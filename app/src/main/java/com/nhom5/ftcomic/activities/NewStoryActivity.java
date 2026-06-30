@@ -25,7 +25,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nhom5.ftcomic.R;
-import com.nhom5.ftcomic.network.SupabaseClient;
 import com.nhom5.ftcomic.network.SupabaseConfig;
 import com.nhom5.ftcomic.utils.SessionManager;
 
@@ -36,6 +35,9 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -269,6 +271,13 @@ public class NewStoryActivity extends AppCompatActivity {
             body.put("uploader_id", sessionManager.getUserId());
             body.put("status", "Đang ra");
             body.put("section", "all");
+
+            // --- QUAN TRỌNG: THÊM THỜI GIAN ĐỂ TRUYỆN HIỂN THỊ LÊN TAB MỚI NHẤT ---
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
+            body.put("created_at", currentTime);
+            body.put("last_update", currentTime);
+            // ----------------------------------------------------------------------
+
         } catch (JSONException e) {
             btnCreateComic.setEnabled(true);
             return;
@@ -326,13 +335,12 @@ public class NewStoryActivity extends AppCompatActivity {
             imageBytes = bos.toByteArray();
         } catch (IOException e) {
             runOnUiThread(() -> Toast.makeText(NewStoryActivity.this, "Lỗi đọc tệp tin hình ảnh", Toast.LENGTH_SHORT).show());
-            saveComicCategories(newComicId); // Dự phòng chuyển tiếp lưu thể loại
+            saveComicCategories(newComicId);
             return;
         }
 
         String fileName = "comic_cover_" + newComicId + ".jpg";
 
-        // Điều chỉnh URL trỏ trực tiếp vào bucket comics-storage và thư mục con /covers/
         Request request = new Request.Builder()
                 .url(SupabaseConfig.PROJECT_URL + "/storage/v1/object/" + SupabaseConfig.COMICS_BUCKET + "/" + fileName)
                 .post(RequestBody.create(imageBytes, MEDIA_TYPE_IMAGE))
@@ -433,6 +441,10 @@ public class NewStoryActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             btnCreateComic.setEnabled(true);
             Toast.makeText(NewStoryActivity.this, "Đăng tải bộ truyện mới thành công!", Toast.LENGTH_SHORT).show();
+
+            // --- GỌI HÀM RESET CỦA HOMEFRAGMENT ĐỂ TẢI LẠI TRUYỆN MỚI ---
+            com.nhom5.ftcomic.fragments.HomeFragment.resetSyncState();
+
             finish();
         });
     }

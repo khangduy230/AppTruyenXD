@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -119,9 +120,48 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         return comicList.size();
     }
 
-    public void setComicList(List<Comic> comicList) {
-        this.comicList = comicList;
-        notifyDataSetChanged();
+    public void setComicList(List<Comic> newComicList) {
+        if (this.comicList == null) {
+            this.comicList = newComicList;
+            notifyItemRangeInserted(0, newComicList.size());
+            return;
+        }
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return comicList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newComicList != null ? newComicList.size() : 0;
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                // Kiểm tra xem 2 item có phải là 1 (dựa vào ID)
+                return comicList.get(oldItemPosition).getId() == newComicList.get(newItemPosition).getId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                // Kiểm tra xem nội dung (Tên, Ảnh cover) có bị thay đổi không
+                Comic oldComic = comicList.get(oldItemPosition);
+                Comic newComic = newComicList.get(newItemPosition);
+
+                String oldName = oldComic.getName() != null ? oldComic.getName() : "";
+                String newName = newComic.getName() != null ? newComic.getName() : "";
+
+                String oldCover = oldComic.getCoverUrl() != null ? oldComic.getCoverUrl() : "";
+                String newCover = newComic.getCoverUrl() != null ? newComic.getCoverUrl() : "";
+
+                return oldName.equals(newName) && oldCover.equals(newCover);
+            }
+        });
+
+        this.comicList = newComicList;
+        diffResult.dispatchUpdatesTo(this); // Lệnh này sẽ tự động update UI mượt mà
     }
 
     public static class ComicViewHolder extends RecyclerView.ViewHolder {
