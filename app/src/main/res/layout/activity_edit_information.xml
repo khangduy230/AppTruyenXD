@@ -130,7 +130,8 @@
                 android:layout_marginBottom="24dp"
                 android:text="Ẩn Truyện"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -205,29 +206,63 @@
 
     <LinearLayout
         android:id="@+id/layoutBottomButtons"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_marginEnd="12dp"
-            app:fabSize="normal"
-            app:srcCompat="@drawable/ic_trash"
-            app:tint="?attr/colorError"
-            app:backgroundTint="?attr/colorErrorContainer"
+            android:padding="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:icon="@drawable/ic_trash"
+            app:iconTint="?attr/colorError"
+            android:backgroundTint="?attr/colorErrorContainer"
+            app:iconGravity="textStart"
+            app:iconSize="24dp"
+            app:cornerRadius="16dp"
             android:contentDescription="Delete story" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnHide"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:padding="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            app:icon="@drawable/ic_invisible"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            android:backgroundTint="?attr/colorSurfaceVariant"
+            app:iconGravity="textStart"
+            app:iconSize="24dp"
+            app:cornerRadius="16dp"
+            android:contentDescription="Hide story" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lưu"
+            android:text="Lưu thông tin"
             android:textColor="?attr/colorOnPrimary"
             app:backgroundTint="?attr/colorPrimary"
             app:icon="@drawable/ic_save"

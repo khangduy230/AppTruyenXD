@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nhom5.ftcomic.R;
 import com.nhom5.ftcomic.adapters.ManageComicAdapter;
@@ -78,7 +79,7 @@ public class ManageComicsActivity extends AppCompatActivity {
 
         rvManageComics.setLayoutManager(new LinearLayoutManager(this));
 
-        MaterialButton btnCreateNew = findViewById(R.id.btnCreateNew);
+        ExtendedFloatingActionButton btnCreateNew = findViewById(R.id.btnCreateNew);
         if (btnCreateNew != null) {
             btnCreateNew.setOnClickListener(v -> {
                 Intent intent = new Intent(ManageComicsActivity.this, NewStoryActivity.class);

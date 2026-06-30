@@ -19,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -54,7 +55,7 @@ public class NewStoryActivity extends AppCompatActivity {
     private ChipGroup chipGroupNewGenres;
     private ImageView imgNewCover;
     private TextView tvSelectCoverHint;
-    private MaterialButton btnCreateComic;
+    private ExtendedFloatingActionButton btnCreateComic;
 
     private SessionManager sessionManager;
     private final OkHttpClient client = new OkHttpClient();

@@ -23,7 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
@@ -60,7 +60,7 @@ public class EditInformationActivity extends AppCompatActivity {
     private MaterialSwitch switchHideComic;
     private ChipGroup chipGroupGenres;
     private ImageView imgCover;
-    private FloatingActionButton btnDelete;
+    private MaterialButton btnDelete, btnHide;
     private ExtendedFloatingActionButton btnSave;
 
     private String comicId;
@@ -115,7 +115,21 @@ public class EditInformationActivity extends AppCompatActivity {
         chipGroupGenres = findViewById(R.id.chipGroupGenres);
         imgCover = findViewById(R.id.imgCover);
         btnDelete = findViewById(R.id.btnDelete);
+        btnHide = findViewById(R.id.btnHide);
         btnSave = findViewById(R.id.btnSave);
+        updateHideButtonVisuals(false);
+    }
+
+    private void updateHideButtonVisuals(boolean isHidden) {
+        if (btnHide != null) {
+            if (isHidden) {
+                btnHide.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_errorContainer));
+                btnHide.setIconTint(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_error));
+            } else {
+                btnHide.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_surfaceVariant));
+                btnHide.setIconTint(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_onSurfaceVariant));
+            }
+        }
     }
 
     private void setupToolbar() {
@@ -136,8 +150,17 @@ public class EditInformationActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> onSaveClicked());
         btnDelete.setOnClickListener(v -> showDeleteConfirmation());
 
+        if (btnHide != null) {
+            btnHide.setOnClickListener(v -> {
+                if (switchHideComic != null) {
+                    switchHideComic.setChecked(!switchHideComic.isChecked());
+                }
+            });
+        }
+
         switchHideComic.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isComicHidden = isChecked;
+            updateHideButtonVisuals(isChecked);
             if (isChecked) {
                 Toast.makeText(EditInformationActivity.this, "Truyện sẽ bị ẩn khỏi trang chủ", Toast.LENGTH_SHORT).show();
             } else {

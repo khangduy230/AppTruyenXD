@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nhom5.ftcomic.R;
@@ -52,7 +52,7 @@ public class EditChapterActivity extends AppCompatActivity {
     private MaterialSwitch switchHideChapter;
     private TextView tvPagesSummary;
     private ExtendedFloatingActionButton btnSave;
-    private FloatingActionButton btnDelete, btnHide;
+    private MaterialButton btnDelete, btnHide;
 
     private final OkHttpClient client = new OkHttpClient();
     private final List<Uri> selectedPageUris = new ArrayList<>();
@@ -130,6 +130,19 @@ public class EditChapterActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnDelete = findViewById(R.id.btnDelete);
         btnHide = findViewById(R.id.btnHide);
+        updateHideButtonVisuals(false);
+    }
+
+    private void updateHideButtonVisuals(boolean isHidden) {
+        if (btnHide != null) {
+            if (isHidden) {
+                btnHide.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_errorContainer));
+                btnHide.setIconTint(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_error));
+            } else {
+                btnHide.setBackgroundTintList(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_surfaceVariant));
+                btnHide.setIconTint(androidx.core.content.ContextCompat.getColorStateList(this, R.color.md_theme_onSurfaceVariant));
+            }
+        }
     }
 
     private void setupToolbar() {
@@ -152,7 +165,17 @@ public class EditChapterActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(v -> confirmDeleteChapter());
 
         if (btnHide != null) {
-            btnHide.setOnClickListener(v -> switchHideChapter.setChecked(!switchHideChapter.isChecked()));
+            btnHide.setOnClickListener(v -> {
+                if (switchHideChapter != null) {
+                    switchHideChapter.setChecked(!switchHideChapter.isChecked());
+                }
+            });
+        }
+
+        if (switchHideChapter != null) {
+            switchHideChapter.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                updateHideButtonVisuals(isChecked);
+            });
         }
     }
 
