@@ -43,6 +43,16 @@ public class ComicResponse {
     @SerializedName("view_count")
     private int viewCount;
 
+    @SerializedName("created_at")
+    private String createdAt;
+
+    @SerializedName("updated_at")
+    private String updatedAt;
+
+    // lấy từ View latest_comics
+    @SerializedName("last_update")
+    private String lastUpdate;
+
     @SerializedName("profiles")
     private UploaderProfile profiles;
 
@@ -98,22 +108,43 @@ public class ComicResponse {
         return viewCount;
     }
 
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getLastUpdate() {
+        return lastUpdate;
+    }
+
     public String getUploaderName() {
-        if (profiles != null && profiles.username != null && !profiles.username.trim().isEmpty()) {
+        if (profiles != null &&
+                profiles.username != null &&
+                !profiles.username.trim().isEmpty()) {
+
             return profiles.username;
         }
+
         return "FTComic";
     }
 
     private String safe(String value, String fallback) {
+
         if (value == null || value.trim().isEmpty()) {
             return fallback;
         }
+
         return value;
     }
 
     public static class UploaderProfile {
+
         @SerializedName("username")
         public String username;
+
     }
+
 }

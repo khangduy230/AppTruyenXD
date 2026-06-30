@@ -1,21 +1,21 @@
 package com.nhom5.ftcomic.network;
 
+import com.nhom5.ftcomic.models.User;
 import com.nhom5.ftcomic.network.request.CommentRequest;
-import com.nhom5.ftcomic.network.response.CommentResponse;
 import com.nhom5.ftcomic.network.request.FavoriteRequest;
-import com.nhom5.ftcomic.network.response.FavoriteResponse;
-import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
-import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
-import com.nhom5.ftcomic.network.request.RatingRequest;
-import com.nhom5.ftcomic.network.response.RatingResponse;
 import com.nhom5.ftcomic.network.request.LikeRequest;
-import com.nhom5.ftcomic.network.response.LikeResponse;
+import com.nhom5.ftcomic.network.request.RatingRequest;
+import com.nhom5.ftcomic.network.request.ReadingHistoryRequest;
 import com.nhom5.ftcomic.network.response.CategoryResponse;
 import com.nhom5.ftcomic.network.response.ChapterPageResponse;
 import com.nhom5.ftcomic.network.response.ChapterResponse;
 import com.nhom5.ftcomic.network.response.ComicCategoryResponse;
 import com.nhom5.ftcomic.network.response.ComicResponse;
-import com.nhom5.ftcomic.models.User;
+import com.nhom5.ftcomic.network.response.CommentResponse;
+import com.nhom5.ftcomic.network.response.FavoriteResponse;
+import com.nhom5.ftcomic.network.response.LikeResponse;
+import com.nhom5.ftcomic.network.response.RatingResponse;
+import com.nhom5.ftcomic.network.response.ReadingHistoryResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -23,14 +23,13 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
-import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface SupabaseApi {
-
 
     @GET("profiles")
     Call<List<User>> getAllProfiles(
@@ -43,7 +42,6 @@ public interface SupabaseApi {
             @Query("id") String idFilter,
             @Body Map<String, Object> body
     );
-
 
     @PATCH("profiles")
     Call<Void> softDeleteProfile(
@@ -212,5 +210,23 @@ public interface SupabaseApi {
     @POST("rpc/reset_password_via_question")
     Call<List<Map<String, Boolean>>> resetPasswordViaQuestion(
             @Body Map<String, Object> body
+    );
+
+    // ==========================
+    // Truyện mới cập nhật (View latest_comics)
+    // ==========================
+    @GET("latest_comics")
+    Call<List<ComicResponse>> getLatestComics(
+            @Query("last_update") String lastUpdateFilter, // Thêm dòng này để lọc 1 tháng
+            @Query("order") String order
+    );
+
+    // ==========================
+    // Top 10 bảng xếp hạng
+    // ==========================
+    @GET("comics")
+    Call<List<ComicResponse>> getTop10Comics(
+            @Query("order") String order,
+            @Query("limit") int limit
     );
 }

@@ -121,7 +121,7 @@ public class HomeFragment extends Fragment {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return ComicGridFragment.newInstance("featured");
+                    return ComicGridFragment.newInstance("latest");
                 case 1:
                     return ComicGridFragment.newInstance("ranking");
                 case 2:

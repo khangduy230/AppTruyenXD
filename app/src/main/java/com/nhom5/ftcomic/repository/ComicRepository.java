@@ -85,11 +85,17 @@ public class ComicRepository {
     }
 
     public void syncAllHomeComics() {
+
         if (!canSyncFromSupabase("syncAllHomeComics")) {
             return;
         }
-        syncComicsBySection("featured");
+
+        syncLatestComics();
+
+        syncRankingComics();
+
         syncAllComicsFromSupabase();
+
         syncAllCategories();
     }
 
@@ -172,7 +178,9 @@ public class ComicRepository {
                                     item.getRating(),
                                     item.getRatingCount(),
                                     item.getCommentCount(),
-                                    item.getViewCount()
+                                    item.getViewCount(),
+                                    item.getCreatedAt(),
+                                    item.getLastUpdate()
                             );
                             comic.setUploaderName(item.getUploaderName());
                             AppDatabase.databaseWriteExecutor.execute(() -> {
@@ -344,7 +352,9 @@ public class ComicRepository {
                     item.getRating(),
                     item.getRatingCount(),
                     item.getCommentCount(),
-                    item.getViewCount()
+                    item.getViewCount(),
+                    item.getCreatedAt(),
+                    item.getLastUpdate()
             );
             comic.setUploaderName(item.getUploaderName());
             comics.add(comic);
@@ -516,5 +526,88 @@ public class ComicRepository {
                         Log.e(TAG, "deleteCommentFromRemote thất bại", t);
                     }
                 });
+    }
+
+    public LiveData<List<Comic>> getLatestComics() {
+        return appDatabase.comicDao().getLatestComics();
+    }
+
+    public void syncLatestComics() {
+        if (!canSyncFromSupabase("syncLatestComics")) {
+            return;
+        }
+
+        // Tính thời điểm 1 tháng trước (hoặc 6 tháng nếu bạn muốn test)
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.add(java.util.Calendar.MONTH, -1); // Đổi thành -6 nếu muốn test 6 tháng
+
+        // Dùng format yyyy-MM-dd đơn giản để Supabase (PostgREST) dễ đọc nhất, tránh lỗi URL Encode
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String oneMonthAgoFilter = "gte." + sdf.format(calendar.getTime());
+
+        SupabaseClient.getApi()
+                .getLatestComics(
+                        oneMonthAgoFilter,
+                        "last_update.desc"
+                )
+                .enqueue(new Callback<List<ComicResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<ComicResponse>> call, Response<List<ComicResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<Comic> comics = mapComicResponsesToEntities(response.body());
+                            AppDatabase.databaseWriteExecutor.execute(() ->
+                                    appDatabase.comicDao().insertComics(comics));
+                        } else {
+                            // THÊM LOG ĐỂ BIẾT NẾU API LỖI
+                            Log.e(TAG, "Lỗi API syncLatestComics: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
+                        Log.e(TAG, "syncLatestComics thất bại", t);
+                    }
+                });
+    }
+
+    public void syncRankingComics() {
+
+        if (!canSyncFromSupabase("syncRankingComics")) {
+            return;
+        }
+
+        SupabaseClient.getApi()
+                .getTop10Comics(
+                        "rating_avg.desc,view_count.desc,like_count.desc",
+                        10
+                )
+                .enqueue(new Callback<List<ComicResponse>>() {
+
+                    @Override
+                    public void onResponse(Call<List<ComicResponse>> call,
+                                           Response<List<ComicResponse>> response) {
+
+                        if (response.isSuccessful() && response.body() != null) {
+
+                            List<Comic> comics =
+                                    mapComicResponsesToEntities(response.body());
+
+                            AppDatabase.databaseWriteExecutor.execute(() ->
+                                    appDatabase.comicDao().insertComics(comics));
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ComicResponse>> call,
+                                          Throwable t) {
+
+                        Log.e(TAG, "syncRankingComics", t);
+
+                    }
+
+                });
+
     }
 }

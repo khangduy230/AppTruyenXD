@@ -330,7 +330,9 @@ public class SearchFragment extends Fragment {
                     item.getRating(),
                     item.getRatingCount(),
                     item.getCommentCount(),
-                    item.getViewCount()
+                    item.getViewCount(),
+                    item.getCreatedAt(),
+                    item.getLastUpdate()
             );
 
             comics.add(comic);

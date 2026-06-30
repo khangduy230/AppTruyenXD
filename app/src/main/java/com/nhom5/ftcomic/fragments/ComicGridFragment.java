@@ -2,6 +2,7 @@ package com.nhom5.ftcomic.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,13 +121,18 @@ public class ComicGridFragment extends Fragment {
     }
 
     private void observeComics() {
-        if ("featured".equals(sectionType)) {
-            comicRepository.getComicsBySection("featured")
+
+        if ("latest".equals(sectionType)) {
+
+            comicRepository.getLatestComics()
                     .observe(getViewLifecycleOwner(), comics -> {
-                        if (comics != null) {
+                        if (comics != null && !comics.isEmpty()) {
                             adapter.setComicList(comics);
+                        } else {
+                            Log.d("ComicGridFragment", "Danh sách truyện mới nhất trống");
                         }
                     });
+
         } else if ("ranking".equals(sectionType)) {
             comicRepository.getRankingComics()
                     .observe(getViewLifecycleOwner(), comics -> {
@@ -134,8 +140,8 @@ public class ComicGridFragment extends Fragment {
                             adapter.setComicList(comics);
                         }
                     });
+
         } else {
-            // Tab Tất cả: lưu lại danh sách gốc để thực hiện lọc/sắp xếp cục bộ
             comicRepository.getAllComicsLive()
                     .observe(getViewLifecycleOwner(), comics -> {
                         if (comics != null) {
@@ -303,8 +309,25 @@ public class ComicGridFragment extends Fragment {
     }
 
     private void sortNewestLocal() {
-        displayedList.sort((c1, c2) -> Integer.compare(c2.getId(), c1.getId()));
+
+        displayedList.sort((c1, c2) -> {
+
+            String t1 = c1.getLastUpdate();
+
+            String t2 = c2.getLastUpdate();
+
+            if (t1 == null && t2 == null) return 0;
+
+            if (t1 == null) return 1;
+
+            if (t2 == null) return -1;
+
+            return t2.compareTo(t1);
+
+        });
+
         adapter.setComicList(displayedList);
+
     }
 
     private void sortRatingLocal() {

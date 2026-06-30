@@ -59,9 +59,14 @@ public interface ComicDao {
     @Query("UPDATE comics SET likeCount = CASE WHEN likeCount > 0 THEN likeCount - 1 ELSE 0 END WHERE id = :comicId")
     void decreaseLikeCount(int comicId);
 
-    @Query("SELECT * FROM comics ORDER BY rating DESC, likeCount DESC, viewCount DESC, id ASC")
+    // Top 10 bảng xếp hạng
+    @Query(" SELECT * FROM comics ORDER BY rating DESC, viewCount DESC, likeCount DESC LIMIT 10")
     LiveData<List<Comic>> getRankingComics();
 
     @Query("SELECT * FROM comics ORDER BY id ASC")
     LiveData<List<Comic>> getAllComicsLive();
+
+    @Query("SELECT * FROM comics WHERE last_update IS NOT NULL ORDER BY last_update DESC")
+    LiveData<List<Comic>> getLatestComics();
+
 }
