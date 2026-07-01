@@ -543,16 +543,11 @@ public class ComicRepository {
             return;
         }
 
-        java.util.Calendar calendar = java.util.Calendar.getInstance();
-        calendar.add(java.util.Calendar.MONTH, -1);
-
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-        String oneMonthAgoFilter = "gte." + sdf.format(calendar.getTime());
-
+        // Gọi API lấy thẳng Top 10 truyện mới nhất (sắp xếp theo last_update giảm dần)
         SupabaseClient.getApi()
                 .getLatestComics(
-                        oneMonthAgoFilter,
-                        "last_update.desc"
+                        "last_update.desc", // Sắp xếp mới nhất lên đầu
+                        10                  // Lấy đúng 10 truyện
                 )
                 .enqueue(new Callback<List<ComicResponse>>() {
                     @Override

@@ -217,8 +217,8 @@ public interface SupabaseApi {
     // ==========================
     @GET("latest_comics")
     Call<List<ComicResponse>> getLatestComics(
-            @Query("last_update") String lastUpdateFilter, // Thêm dòng này để lọc 1 tháng
-            @Query("order") String order
+            @Query("order") String order,
+            @Query("limit") int limit
     );
 
     // ==========================

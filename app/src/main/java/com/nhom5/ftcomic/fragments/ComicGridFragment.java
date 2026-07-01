@@ -309,25 +309,12 @@ public class ComicGridFragment extends Fragment {
     }
 
     private void sortNewestLocal() {
-
+        // Xóa toàn bộ ruột cũ đi và dán đoạn này vào
         displayedList.sort((c1, c2) -> {
-
-            String t1 = c1.getLastUpdate();
-
-            String t2 = c2.getLastUpdate();
-
-            if (t1 == null && t2 == null) return 0;
-
-            if (t1 == null) return 1;
-
-            if (t2 == null) return -1;
-
-            return t2.compareTo(t1);
-
+            // So sánh theo ID giảm dần (truyện thêm sau cùng có ID lớn nhất sẽ lên đầu)
+            return Integer.compare(c2.getId(), c1.getId());
         });
-
         adapter.setComicList(displayedList);
-
     }
 
     private void sortRatingLocal() {
