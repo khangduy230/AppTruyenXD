@@ -72,6 +72,14 @@ public class ManageUsersAdapter extends RecyclerView.Adapter<ManageUsersAdapter.
             tvUserName.setText(user.getUsername() + roleText);
             tvUserEmail.setText(user.getEmail());
 
+            // --- ĐOẠN CODE THÊM MỚI ĐỂ ẨN NÚT XÓA ADMIN ---
+            if ("admin".equals(user.getRole())) {
+                btnDelete.setVisibility(View.GONE); // Ẩn nút xóa nếu là admin
+            } else {
+                btnDelete.setVisibility(View.VISIBLE); // Hiển thị lại nút xóa nếu là tài khoản thường
+            }
+            // ----------------------------------------------
+
             if (listener != null) {
                 btnEdit.setOnClickListener(v -> listener.onEdit(user, position));
                 btnDelete.setOnClickListener(v -> listener.onDelete(user, position));
