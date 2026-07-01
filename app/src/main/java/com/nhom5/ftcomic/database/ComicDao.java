@@ -44,6 +44,12 @@ public interface ComicDao {
     @Query("DELETE FROM comics")
     void deleteAllComics();
 
+    @Query("DELETE FROM comics WHERE id NOT IN (:remoteIds)")
+    void deleteComicsNotIn(List<Integer> remoteIds);
+
+    @Query("DELETE FROM comics WHERE id = :comicId")
+    void deleteComicById(int comicId);
+
     @Query("UPDATE comics SET commentCount = :commentCount WHERE id = :comicId")
     void updateCommentCount(int comicId, int commentCount);
 
@@ -59,7 +65,6 @@ public interface ComicDao {
     @Query("UPDATE comics SET likeCount = CASE WHEN likeCount > 0 THEN likeCount - 1 ELSE 0 END WHERE id = :comicId")
     void decreaseLikeCount(int comicId);
 
-    // Top 10 bảng xếp hạng
     @Query(" SELECT * FROM comics ORDER BY rating DESC, viewCount DESC, likeCount DESC LIMIT 10")
     LiveData<List<Comic>> getRankingComics();
 
@@ -68,5 +73,4 @@ public interface ComicDao {
 
     @Query("SELECT * FROM comics WHERE last_update IS NOT NULL AND date(last_update) >= date('now', '-1 month') ORDER BY last_update DESC")
     LiveData<List<Comic>> getLatestComics();
-
 }

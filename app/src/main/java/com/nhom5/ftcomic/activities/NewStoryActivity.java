@@ -272,11 +272,17 @@ public class NewStoryActivity extends AppCompatActivity {
             body.put("status", "Đang ra");
             body.put("section", "all");
 
-            // --- QUAN TRỌNG: THÊM THỜI GIAN ĐỂ TRUYỆN HIỂN THỊ LÊN TAB MỚI NHẤT ---
+            // --- TRUYỀN RÕ RÀNG CÁC SỐ 0 ĐỂ TRÁNH LỖI NOT NULL CỦA SUPABASE ---
+            body.put("like_count", 0);
+            body.put("rating_avg", 0.0);
+            body.put("rating_count", 0);
+            body.put("comment_count", 0);
+            body.put("view_count", 0);
+
+            // --- SỬA LẠI THÀNH ĐÚNG TÊN CỘT TRONG DATABASE LÀ updated_at ---
             String currentTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(new Date());
             body.put("created_at", currentTime);
-            body.put("last_update", currentTime);
-            // ----------------------------------------------------------------------
+            body.put("updated_at", currentTime);
 
         } catch (JSONException e) {
             btnCreateComic.setEnabled(true);
@@ -315,9 +321,12 @@ public class NewStoryActivity extends AppCompatActivity {
                         });
                     }
                 } else {
+                    // Log lỗi ra để nếu còn sai thì biết chính xác sai ở đâu
+                    String err = response.body() != null ? response.body().string() : "No error body";
                     runOnUiThread(() -> {
                         btnCreateComic.setEnabled(true);
                         Toast.makeText(NewStoryActivity.this, "Lỗi khởi tạo hàng bảng comics: " + response.code(), Toast.LENGTH_SHORT).show();
+                        android.util.Log.e("NewStoryActivity", "Chi tiết lỗi: " + err);
                     });
                 }
             }

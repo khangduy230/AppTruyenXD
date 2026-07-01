@@ -46,7 +46,7 @@ public class ComicRepository {
 
     private boolean canSyncFromSupabase(String taskName) {
         if (!NetworkUtils.isOnline(context)) {
-            Log.w(TAG, taskName + ": Không có mạng, dùng cache Room");
+            Log.w(TAG, taskName + ": Offline");
             return false;
         }
         return true;
@@ -85,17 +85,12 @@ public class ComicRepository {
     }
 
     public void syncAllHomeComics() {
-
         if (!canSyncFromSupabase("syncAllHomeComics")) {
             return;
         }
-
         syncLatestComics();
-
         syncRankingComics();
-
         syncAllComicsFromSupabase();
-
         syncAllCategories();
     }
 
@@ -120,7 +115,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncComicsBySection lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncComicsBySection Error", t);
                     }
                 });
     }
@@ -136,7 +131,18 @@ public class ComicRepository {
                     public void onResponse(Call<List<ComicResponse>> call, Response<List<ComicResponse>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Comic> comics = mapComicResponsesToEntities(response.body());
+
+                            List<Integer> remoteIds = new ArrayList<>();
+                            for (Comic c : comics) {
+                                remoteIds.add(c.getId());
+                            }
+
                             AppDatabase.databaseWriteExecutor.execute(() -> {
+                                if (!remoteIds.isEmpty()) {
+                                    appDatabase.comicDao().deleteComicsNotIn(remoteIds);
+                                } else {
+                                    appDatabase.comicDao().deleteAllComics();
+                                }
                                 appDatabase.comicDao().insertComics(comics);
                             });
                         } else {
@@ -146,7 +152,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncAllComicsFromSupabase lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncAllComicsFromSupabase Error", t);
                     }
                 });
     }
@@ -193,7 +199,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncComicById lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncComicById Error", t);
                     }
                 });
     }
@@ -223,7 +229,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ChapterResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncChaptersByComicId lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncChaptersByComicId Error", t);
                     }
                 });
     }
@@ -268,7 +274,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ChapterPageResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncPagesByChapterId lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncPagesByChapterId Error", t);
                     }
                 });
     }
@@ -305,7 +311,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<CategoryResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncAllCategories lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncAllCategories Error", t);
                     }
                 });
     }
@@ -331,7 +337,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<ComicCategoryResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncComicCategoryRefsByComicId lỗi API, giữ cache Room cũ", t);
+                        Log.e(TAG, "syncComicCategoryRefsByComicId Error", t);
                     }
                 });
     }
@@ -426,7 +432,7 @@ public class ComicRepository {
                 Log.e(TAG, tag + " error code: " + response.code());
             }
         } catch (Exception e) {
-            Log.e(TAG, "Không đọc được error body", e);
+            Log.e(TAG, "Error parsing body", e);
         }
     }
 
@@ -462,7 +468,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<List<CommentResponse>> call, Throwable t) {
-                        Log.e("ComicRepository", "Lỗi sync comment", t);
+                        Log.e(TAG, "syncCommentsByComicId Error", t);
                     }
                 });
     }
@@ -488,7 +494,7 @@ public class ComicRepository {
                         } else {
                             try {
                                 if (response.errorBody() != null) {
-                                    Log.e("SUPABASE_COMMENT", "Lỗi lưu: " + response.errorBody().string());
+                                    Log.e(TAG, "Error: " + response.errorBody().string());
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -498,7 +504,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        Log.e("ComicRepository", "Không thể gửi bình luận lên Cloud", t);
+                        Log.e(TAG, "sendCommentToRemote Error", t);
                     }
                 });
     }
@@ -523,7 +529,7 @@ public class ComicRepository {
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        Log.e(TAG, "deleteCommentFromRemote thất bại", t);
+                        Log.e(TAG, "deleteCommentFromRemote Error", t);
                     }
                 });
     }
@@ -537,11 +543,9 @@ public class ComicRepository {
             return;
         }
 
-        // Tính thời điểm 1 tháng trước (hoặc 6 tháng nếu bạn muốn test)
         java.util.Calendar calendar = java.util.Calendar.getInstance();
-        calendar.add(java.util.Calendar.MONTH, -1); // Đổi thành -6 nếu muốn test 6 tháng
+        calendar.add(java.util.Calendar.MONTH, -1);
 
-        // Dùng format yyyy-MM-dd đơn giản để Supabase (PostgREST) dễ đọc nhất, tránh lỗi URL Encode
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
         String oneMonthAgoFilter = "gte." + sdf.format(calendar.getTime());
 
@@ -558,20 +562,18 @@ public class ComicRepository {
                             AppDatabase.databaseWriteExecutor.execute(() ->
                                     appDatabase.comicDao().insertComics(comics));
                         } else {
-                            // THÊM LOG ĐỂ BIẾT NẾU API LỖI
-                            Log.e(TAG, "Lỗi API syncLatestComics: " + response.code());
+                            Log.e(TAG, "API Error: " + response.code());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<ComicResponse>> call, Throwable t) {
-                        Log.e(TAG, "syncLatestComics thất bại", t);
+                        Log.e(TAG, "syncLatestComics Error", t);
                     }
                 });
     }
 
     public void syncRankingComics() {
-
         if (!canSyncFromSupabase("syncRankingComics")) {
             return;
         }
@@ -588,26 +590,17 @@ public class ComicRepository {
                                            Response<List<ComicResponse>> response) {
 
                         if (response.isSuccessful() && response.body() != null) {
-
-                            List<Comic> comics =
-                                    mapComicResponsesToEntities(response.body());
-
+                            List<Comic> comics = mapComicResponsesToEntities(response.body());
                             AppDatabase.databaseWriteExecutor.execute(() ->
                                     appDatabase.comicDao().insertComics(comics));
-
                         }
-
                     }
 
                     @Override
                     public void onFailure(Call<List<ComicResponse>> call,
                                           Throwable t) {
-
-                        Log.e(TAG, "syncRankingComics", t);
-
+                        Log.e(TAG, "syncRankingComics Error", t);
                     }
-
                 });
-
     }
 }
