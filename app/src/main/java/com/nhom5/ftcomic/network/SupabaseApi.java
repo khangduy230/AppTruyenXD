@@ -213,7 +213,7 @@ public interface SupabaseApi {
     );
 
     // ==========================
-    // Truyện mới cập nhật (View latest_comics)
+    // Truyện mới cập nhật
     // ==========================
     @GET("latest_comics")
     Call<List<ComicResponse>> getLatestComics(

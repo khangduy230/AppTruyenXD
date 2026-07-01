@@ -1,5 +1,6 @@
 package com.nhom5.ftcomic.activities;
 
+import com.nhom5.ftcomic.database.AppDatabase;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -606,16 +607,39 @@ public class EditInformationActivity extends AppCompatActivity {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {}
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() ->
+                        Toast.makeText(EditInformationActivity.this, "Lỗi kết nối máy chủ khi xóa truyện", Toast.LENGTH_SHORT).show());
+            }
 
             @Override
             public void onResponse(Call call, Response response) {
-                runOnUiThread(() -> {
-                    if (response.isSuccessful()) {
+                if (response.isSuccessful()) {
+                    // Xóa luôn bản ghi khỏi Room local -> LiveData tự phát tín hiệu -> UI trang chủ tự cập nhật
+                    int idInt;
+                    try {
+                        idInt = Integer.parseInt(comicId);
+                    } catch (NumberFormatException e) {
+                        idInt = -1;
+                    }
+                    final int finalId = idInt;
+
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                        if (finalId > 0) {
+                            AppDatabase.getInstance(getApplicationContext())
+                                    .comicDao()
+                                    .deleteComicById(finalId);
+                        }
+                    });
+
+                    runOnUiThread(() -> {
                         Toast.makeText(EditInformationActivity.this, "Đã xóa truyện thành công", Toast.LENGTH_SHORT).show();
                         finish();
-                    }
-                });
+                    });
+                } else {
+                    runOnUiThread(() ->
+                            Toast.makeText(EditInformationActivity.this, "Lỗi xóa truyện: " + response.code(), Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
